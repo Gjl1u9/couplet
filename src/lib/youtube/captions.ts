@@ -38,6 +38,8 @@ interface Json3Event {
 }
 
 const ASR_PAUSE_MS = 500;
+/** 字幕只有每個字的開始時間，所以用字數估計念完這個字要多久。 */
+const ASR_SPEECH_MS_PER_CHAR = 80;
 const ASR_MIN_WORDS_BEFORE_PAUSE = 4;
 const ASR_MAX_WORDS = 14;
 
@@ -116,6 +118,12 @@ function joinWords(words: readonly Word[]): string {
   return text.trim();
 }
 
+/** 長的字本身就念比較久，不能把念字的時間當成停頓。 */
+function isPauseBetween(previous: Word, next: Word): boolean {
+  const spoken = previous.text.trim().length * ASR_SPEECH_MS_PER_CHAR;
+  return next.startMs - previous.startMs >= spoken + ASR_PAUSE_MS;
+}
+
 /** 自動字幕是逐字的，也沒有標點，所以依停頓和長度重新斷句，翻譯才有完整的語意。 */
 function parseAsr(events: readonly Json3Event[]): Cue[] {
   const cues: Cue[] = [];
@@ -141,7 +149,7 @@ function parseAsr(events: readonly Json3Event[]): Cue[] {
     const previous = current.at(-1);
     if (
       previous &&
-      word.startMs - previous.startMs >= ASR_PAUSE_MS &&
+      isPauseBetween(previous, word) &&
       current.length >= ASR_MIN_WORDS_BEFORE_PAUSE
     ) {
       close(word);

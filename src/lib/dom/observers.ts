@@ -26,26 +26,3 @@ export function observeClass(
     { once: true },
   );
 }
-
-/** 監聽某個子元素是否被移除，用來重新掛載 overlay 或按鈕。只看直接子節點。 */
-export function observeChildRemoval(
-  parent: Node,
-  child: Node,
-  signal: AbortSignal,
-  onRemoved: () => void,
-): void {
-  if (signal.aborted) return;
-  const observer = new MutationObserver(() => {
-    if (child.parentNode === parent) return;
-    observer.disconnect();
-    onRemoved();
-  });
-  observer.observe(parent, { childList: true });
-  signal.addEventListener(
-    'abort',
-    () => {
-      observer.disconnect();
-    },
-    { once: true },
-  );
-}

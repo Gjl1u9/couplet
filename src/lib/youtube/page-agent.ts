@@ -2,14 +2,18 @@ import { observeClass } from '../dom/observers';
 import type { ControllerEvent } from '../subtitles/controller';
 import { toBridgeMessage } from './bridge';
 import { selectSourceTrack, type CaptionTracklist } from './captions';
-import { createTrackRequester, type CaptionPlayer } from './track-requester';
+import {
+  createTrackRequester,
+  type CaptionPlayer,
+  type TrackRequester,
+} from './track-requester';
 
 /**
  * 在頁面環境執行：回報播放器狀態、讀取字幕，並要求播放器載入選定的字幕軌。
  * 字幕網址需要播放器產生的 token，所以直接攔截播放器自己的請求。
  */
 
-interface YouTubePlayer extends Element, CaptionPlayer {
+export interface YouTubePlayer extends Element, CaptionPlayer {
   getVideoData?: () => { video_id?: string } | undefined;
   getPlayerResponse?: () =>
     | {
@@ -19,7 +23,7 @@ interface YouTubePlayer extends Element, CaptionPlayer {
     | undefined;
 }
 
-interface CapturedCaptions {
+export interface CapturedCaptions {
   readonly videoId: string;
   readonly lang: string | null;
   readonly kind: string | null;
@@ -27,37 +31,35 @@ interface CapturedCaptions {
   readonly body: string;
 }
 
-const NAVIGATION_EVENTS = [
-  'yt-navigate-start',
-  'yt-navigate-finish',
-  'yt-player-updated',
-  'yt-page-data-updated',
-];
-const VIDEO_EVENTS = ['loadstart', 'loadedmetadata', 'playing', 'emptied'];
-const MAX_CAPTURED = 8;
+export interface PageAgentDeps {
+  readonly getPlayer: () => YouTubePlayer | null;
+  readonly post: (event: ControllerEvent) => void;
+  readonly requester: TrackRequester;
+  /** 播放器元素換掉時呼叫，用來重新監聽它的 class。 */
+  readonly watchPlayer: (player: YouTubePlayer | null) => void;
+}
+
+export interface PageAgent {
+  report: () => void;
+  onCaptured: (captions: CapturedCaptions) => void;
+}
+
+/**
+ * 字幕可能比播放器回報的影片 ID 更早抵達，所以要暫存，但一份長影片字幕可以超過 2 MB，
+ * 廣告和首頁預覽的字幕也會進來，所以只留最新的幾份，選好字幕軌後就全部釋放。
+ */
+const MAX_PENDING_CAPTIONS = 2;
 
 const captureKey = (lang: string | null, kind: string | null) =>
   `${String(lang)}|${String(kind)}`;
 
-export function startPageAgent(): void {
+export function createPageAgent(deps: PageAgentDeps): PageAgent {
+  const { post, requester } = deps;
   let player: YouTubePlayer | null = null;
-  let playerWatcher: AbortController | null = null;
   let lastReport = '';
   let selected: { videoId: string; key: string | null } | null = null;
   let forwarded = false;
-  const captured = new Map<string, CapturedCaptions>();
-
-  const post = (event: ControllerEvent) => {
-    window.postMessage(toBridgeMessage(event), location.origin);
-  };
-
-  const requester = createTrackRequester({
-    getPlayer: () => player,
-    canRequest: () => !player?.classList.contains('ad-showing'),
-    onGiveUp: (track) => {
-      console.warn('[dual-subtitles] 無法載入字幕軌', track.languageCode);
-    },
-  });
+  const pendingCaptions = new Map<string, CapturedCaptions>();
 
   const forward = (captions: CapturedCaptions) => {
     requester.finish();
@@ -67,21 +69,22 @@ export function startPageAgent(): void {
   };
 
   const onCaptured = (captions: CapturedCaptions) => {
-    captured.set(
-      `${captions.videoId}|${captureKey(captions.lang, captions.kind)}`,
-      captions,
-    );
-    if (captured.size > MAX_CAPTURED) {
-      const oldest = captured.keys().next();
-      if (!oldest.done) captured.delete(oldest.value);
+    if (captions.status !== 200 || captions.body === '') return;
+
+    if (selected?.videoId === captions.videoId) {
+      if (selected.key === captureKey(captions.lang, captions.kind)) {
+        forward(captions);
+      }
+      // 同一支影片的其他字幕軌用不到，例如還原使用者原本的 CC 語言。
+      return;
     }
-    if (
-      selected?.videoId === captions.videoId &&
-      selected.key === captureKey(captions.lang, captions.kind) &&
-      captions.status === 200 &&
-      captions.body !== ''
-    ) {
-      forward(captions);
+
+    const key = `${captions.videoId}|${captureKey(captions.lang, captions.kind)}`;
+    pendingCaptions.delete(key);
+    pendingCaptions.set(key, captions);
+    if (pendingCaptions.size > MAX_PENDING_CAPTIONS) {
+      const oldest = pendingCaptions.keys().next();
+      if (!oldest.done) pendingCaptions.delete(oldest.value);
     }
   };
 
@@ -96,32 +99,24 @@ export function startPageAgent(): void {
     );
     forwarded = false;
     requester.finish();
-    if (!track) {
-      selected = { videoId, key: null };
-      return;
-    }
-    const key = captureKey(track.languageCode, track.kind ?? null);
+    const key = track
+      ? captureKey(track.languageCode, track.kind ?? null)
+      : null;
     selected = { videoId, key };
 
-    const existing = captured.get(`${videoId}|${key}`);
-    if (existing?.status === 200 && existing.body !== '') {
-      forward(existing);
-    } else {
-      requester.request(track);
-    }
+    const existing = pendingCaptions.get(`${videoId}|${String(key)}`);
+    pendingCaptions.clear();
+    if (!track) return;
+    if (existing) forward(existing);
+    else requester.request(track);
   };
 
   const report = () => {
     try {
-      const current = document.querySelector<YouTubePlayer>('#movie_player');
+      const current = deps.getPlayer();
       if (current !== player) {
         player = current;
-        playerWatcher?.abort();
-        playerWatcher = null;
-        if (current) {
-          playerWatcher = new AbortController();
-          observeClass(current, playerWatcher.signal, report);
-        }
+        deps.watchPlayer(current);
       }
       if (!current) return;
 
@@ -139,26 +134,24 @@ export function startPageAgent(): void {
     }
   };
 
-  patchXhr(onCaptured);
-
-  for (const type of NAVIGATION_EVENTS) window.addEventListener(type, report);
-  for (const type of VIDEO_EVENTS) {
-    document.addEventListener(type, report, { capture: true });
-  }
-  report();
+  return { report, onCaptured };
 }
 
-function patchXhr(onCaptured: (captions: CapturedCaptions) => void): void {
-  const proto = XMLHttpRequest.prototype;
+/** 攔截字幕請求。只讀取回應，不影響播放器。 */
+export function patchXhr(
+  proto: Pick<typeof XMLHttpRequest.prototype, 'open'>,
+  baseUrl: () => string,
+  onCaptured: (captions: CapturedCaptions) => void,
+): void {
   // 會在下面用 apply 帶回原本的 this。
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+
   const originalOpen = proto.open;
 
   proto.open = function patchedOpen(
     this: XMLHttpRequest,
     ...args: Parameters<typeof originalOpen>
   ) {
-    const url = captionRequestUrl(args[1]);
+    const url = captionRequestUrl(args[1], baseUrl());
     if (url) {
       this.addEventListener('load', () => {
         const videoId = url.searchParams.get('v');
@@ -177,11 +170,73 @@ function patchXhr(onCaptured: (captions: CapturedCaptions) => void): void {
   } as typeof originalOpen;
 }
 
-function captionRequestUrl(raw: string | URL): URL | null {
+function captionRequestUrl(raw: string | URL, base: string): URL | null {
   try {
-    const url = new URL(raw, location.href);
+    const url = new URL(raw, base);
     return url.pathname === '/api/timedtext' ? url : null;
   } catch {
     return null;
   }
+}
+
+const NAVIGATION_EVENTS = [
+  'yt-navigate-start',
+  'yt-navigate-finish',
+  'yt-player-updated',
+  'yt-page-data-updated',
+];
+const VIDEO_EVENTS = ['loadstart', 'loadedmetadata', 'playing', 'emptied'];
+
+export function startPageAgent(): void {
+  const getPlayer = () =>
+    document.querySelector<YouTubePlayer>('#movie_player');
+  let playerWatcher: AbortController | null = null;
+
+  const agent: PageAgent = createPageAgent({
+    getPlayer,
+    post: (event) => {
+      window.postMessage(toBridgeMessage(event), location.origin);
+    },
+    requester: createTrackRequester({
+      getPlayer,
+      canRequest: () => !getPlayer()?.classList.contains('ad-showing'),
+      onGiveUp: (track) => {
+        console.warn('[dual-subtitles] 無法載入字幕軌', track.languageCode);
+      },
+    }),
+    watchPlayer: (player) => {
+      playerWatcher?.abort();
+      playerWatcher = null;
+      if (player) {
+        playerWatcher = new AbortController();
+        observeClass(player, playerWatcher.signal, () => {
+          agent.report();
+        });
+      }
+    },
+  });
+
+  patchXhr(
+    XMLHttpRequest.prototype,
+    () => location.href,
+    (captions) => {
+      agent.onCaptured(captions);
+    },
+  );
+
+  for (const type of NAVIGATION_EVENTS) {
+    window.addEventListener(type, () => {
+      agent.report();
+    });
+  }
+  for (const type of VIDEO_EVENTS) {
+    document.addEventListener(
+      type,
+      () => {
+        agent.report();
+      },
+      { capture: true },
+    );
+  }
+  agent.report();
 }

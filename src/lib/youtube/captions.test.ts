@@ -145,6 +145,35 @@ describe('parseCaptions：自動字幕', () => {
     expect(cues[1]?.end).toBe(3);
   });
 
+  it('念比較久的長字不算停頓', () => {
+    const cues = parse([
+      asr(0, 5000, [
+        ['a', 0],
+        [' b', 100],
+        [' c', 200],
+        [' internationalization', 300],
+        [' now', 1500],
+      ]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual(['a b c internationalization now']);
+  });
+
+  it('長字念完後還有明顯空檔才斷句', () => {
+    const cues = parse([
+      asr(0, 5000, [
+        ['a', 0],
+        [' b', 100],
+        [' c', 200],
+        [' internationalization', 300],
+        [' now', 2800],
+      ]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual([
+      'a b c internationalization',
+      'now',
+    ]);
+  });
+
   it('字數太少時，停頓也不斷句', () => {
     const cues = parse([
       asr(0, 3000, [
