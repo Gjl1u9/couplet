@@ -1,18 +1,15 @@
 import { observeClass } from '../dom/observers';
 import type { ControllerEvent } from '../subtitles/controller';
 import { toBridgeMessage } from './bridge';
-import {
-  selectSourceTrack,
-  type CaptionTrack,
-  type CaptionTracklist,
-} from './captions';
+import { selectSourceTrack, type CaptionTracklist } from './captions';
+import { createTrackRequester, type CaptionPlayer } from './track-requester';
 
 /**
  * 在頁面環境執行：回報播放器狀態、讀取字幕，並要求播放器載入選定的字幕軌。
  * 字幕網址需要播放器產生的 token，所以直接攔截播放器自己的請求。
  */
 
-interface YouTubePlayer extends Element {
+interface YouTubePlayer extends Element, CaptionPlayer {
   getVideoData?: () => { video_id?: string } | undefined;
   getPlayerResponse?: () =>
     | {
@@ -20,8 +17,6 @@ interface YouTubePlayer extends Element {
         captions?: { playerCaptionsTracklistRenderer?: CaptionTracklist };
       }
     | undefined;
-  loadModule?: (name: string) => void;
-  setOption?: (module: string, option: string, value: unknown) => void;
 }
 
 interface CapturedCaptions {
@@ -56,7 +51,16 @@ export function startPageAgent(): void {
     window.postMessage(toBridgeMessage(event), location.origin);
   };
 
+  const requester = createTrackRequester({
+    getPlayer: () => player,
+    canRequest: () => !player?.classList.contains('ad-showing'),
+    onGiveUp: (track) => {
+      console.warn('[dual-subtitles] 無法載入字幕軌', track.languageCode);
+    },
+  });
+
   const forward = (captions: CapturedCaptions) => {
+    requester.cancel();
     if (forwarded) return;
     forwarded = true;
     post({ type: 'captions', ...captions });
@@ -81,16 +85,6 @@ export function startPageAgent(): void {
     }
   };
 
-  const requestTrack = (target: YouTubePlayer, track: CaptionTrack) => {
-    target.loadModule?.('captions');
-    target.setOption?.('captions', 'track', {
-      languageCode: track.languageCode,
-      ...(track.kind ? { kind: track.kind } : {}),
-    });
-    // 同一條字幕軌已經選好時，上面不會發出請求。
-    target.setOption?.('captions', 'reload', true);
-  };
-
   const selectTrack = (target: YouTubePlayer, videoId: string) => {
     if (selected?.videoId === videoId) return;
     const response = target.getPlayerResponse?.();
@@ -101,6 +95,7 @@ export function startPageAgent(): void {
       response.captions?.playerCaptionsTracklistRenderer,
     );
     forwarded = false;
+    requester.cancel();
     if (!track) {
       selected = { videoId, key: null };
       return;
@@ -112,7 +107,7 @@ export function startPageAgent(): void {
     if (existing?.status === 200 && existing.body !== '') {
       forward(existing);
     } else {
-      requestTrack(target, track);
+      requester.request(track);
     }
   };
 

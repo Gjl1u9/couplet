@@ -39,6 +39,7 @@ export default defineContentScript({
       );
     const overlay = createOverlay();
     let boundaryTimer: ReturnType<typeof setTimeout> | null = null;
+    let stopped = false;
 
     const controller = createSubtitleController({
       targetLanguage: TARGET_LANGUAGE,
@@ -52,10 +53,26 @@ export default defineContentScript({
       },
     });
 
+    /**
+     * 擴充功能更新或重新載入後，頁面上的舊腳本會和它斷線，也沒辦法再翻譯。
+     * 這時要自己收尾，把字幕交還給 YouTube。
+     */
+    const stopIfDisconnected = (): boolean => {
+      if (stopped) return true;
+      if (browser.runtime.id) return false;
+      stopped = true;
+      if (boundaryTimer !== null) clearTimeout(boundaryTimer);
+      boundaryTimer = null;
+      controller.dispose();
+      overlay.dispose();
+      return true;
+    };
+
     /** timeupdate 每秒只有約 4 次，所以另外對準下一句的時間。 */
     const refresh = () => {
       if (boundaryTimer !== null) clearTimeout(boundaryTimer);
       boundaryTimer = null;
+      if (stopIfDisconnected()) return;
       const next = controller.update();
       const video = mainVideo();
       if (next === null || !video || video.paused) return;
@@ -76,7 +93,7 @@ export default defineContentScript({
     document.addEventListener(
       'seeking',
       (event) => {
-        if (isMainVideo(event)) controller.seek();
+        if (isMainVideo(event) && !stopIfDisconnected()) controller.seek();
       },
       { capture: true },
     );
@@ -93,7 +110,7 @@ export default defineContentScript({
         }
       }
       const event = parseBridgeMessage(message.data);
-      if (!event) return;
+      if (!event || stopIfDisconnected()) return;
       controller.handle(event);
       refresh();
     });
