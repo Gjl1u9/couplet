@@ -60,7 +60,7 @@ export function startPageAgent(): void {
   });
 
   const forward = (captions: CapturedCaptions) => {
-    requester.cancel();
+    requester.finish();
     if (forwarded) return;
     forwarded = true;
     post({ type: 'captions', ...captions });
@@ -95,7 +95,7 @@ export function startPageAgent(): void {
       response.captions?.playerCaptionsTracklistRenderer,
     );
     forwarded = false;
-    requester.cancel();
+    requester.finish();
     if (!track) {
       selected = { videoId, key: null };
       return;

@@ -166,6 +166,49 @@ describe('parseCaptions：自動字幕', () => {
     expect(cues[1]?.text).toBe('w14');
   });
 
+  it('中文和日文不會被插入空格', () => {
+    const cues = parse([
+      asr(0, 3000, [
+        ['今日は', 0],
+        ['天気が', 100],
+      ]),
+      asr(3000, 3000, [['いいです', 0]]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual(['今日は天気がいいです']);
+  });
+
+  it('英文跨事件時補上空格，已有的空格不會重複', () => {
+    const cues = parse([
+      asr(0, 1000, [
+        ['hi', 0],
+        [' there', 100],
+      ]),
+      asr(1000, 1000, [
+        ['big', 0],
+        [' world', 100],
+      ]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual(['hi there big world']);
+  });
+
+  it('韓文保留空格', () => {
+    const cues = parse([
+      asr(0, 1000, [['안녕하세요', 0]]),
+      asr(1000, 1000, [['여러분', 0]]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual(['안녕하세요 여러분']);
+  });
+
+  it('句尾標點後面有空白也算', () => {
+    const cues = parse([
+      asr(0, 3000, [
+        ['Yes. ', 0],
+        ['Next', 100],
+      ]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual(['Yes.', 'Next']);
+  });
+
   it('遇到句尾標點時斷句', () => {
     const cues = parse([
       asr(0, 3000, [

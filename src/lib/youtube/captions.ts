@@ -85,8 +85,8 @@ function collectWords(events: readonly Json3Event[]): Word[] {
     if (event.aAppend || event.tStartMs === undefined) continue;
     const eventEndMs = event.tStartMs + (event.dDurationMs ?? 0);
     for (const seg of event.segs ?? []) {
-      const text = (seg.utf8 ?? '').trim();
-      if (text === '') continue;
+      const text = seg.utf8 ?? '';
+      if (text.trim() === '') continue;
       words.push({
         text,
         startMs: event.tStartMs + (seg.tOffsetMs ?? 0),
@@ -95,6 +95,25 @@ function collectWords(events: readonly Json3Event[]): Word[] {
     }
   }
   return words;
+}
+
+/** 中文、日文和泰文不用空格分詞。 */
+const NO_SPACE_SCRIPT =
+  /[\u0e00-\u0e7f\u3000-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef]/;
+
+/** 保留原始片段的間隔，只有字幕事件交界這種沒有間隔的地方才補空格。 */
+function joinWords(words: readonly Word[]): string {
+  let text = '';
+  for (const { text: next } of words) {
+    const needsSpace =
+      text !== '' &&
+      !/\s$/.test(text) &&
+      !/^\s/.test(next) &&
+      !NO_SPACE_SCRIPT.test(text.slice(-1)) &&
+      !NO_SPACE_SCRIPT.test(next.charAt(0));
+    text += needsSpace ? ` ${next}` : next;
+  }
+  return text.trim();
 }
 
 /** 自動字幕是逐字的，也沒有標點，所以依停頓和長度重新斷句，翻譯才有完整的語意。 */
@@ -112,7 +131,7 @@ function parseAsr(events: readonly Json3Event[]): Cue[] {
       end:
         (next ? Math.min(next.startMs, last.eventEndMs) : last.eventEndMs) /
         1000,
-      text: current.map((word) => word.text).join(' '),
+      text: joinWords(current),
     });
     current = [];
   };
@@ -129,7 +148,10 @@ function parseAsr(events: readonly Json3Event[]): Cue[] {
     }
     current.push(word);
     const next = words[index + 1];
-    if (current.length >= ASR_MAX_WORDS || /[.?!。？！]$/.test(word.text)) {
+    if (
+      current.length >= ASR_MAX_WORDS ||
+      /[.?!。？！]$/.test(word.text.trimEnd())
+    ) {
       close(next);
     }
   });

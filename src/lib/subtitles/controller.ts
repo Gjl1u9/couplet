@@ -55,8 +55,16 @@ export interface SubtitleController {
 
 const ASR_MAX_CUES_PER_BATCH = 60;
 
+/** 地區差異通常不用翻譯，但簡體和繁體要分開。 */
+function languageIdentity(code: string): string {
+  const lower = code.toLowerCase();
+  const base = lower.split('-')[0] ?? lower;
+  if (base !== 'zh') return base;
+  return /-(hant|tw|hk|mo)\b/.test(lower) ? 'zh-hant' : 'zh-hans';
+}
+
 function sameLanguage(a: string, b: string): boolean {
-  return a.split('-')[0]?.toLowerCase() === b.split('-')[0]?.toLowerCase();
+  return languageIdentity(a) === languageIdentity(b);
 }
 
 export function createSubtitleController(

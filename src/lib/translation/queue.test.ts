@@ -51,6 +51,8 @@ function setup(overrides: Partial<QueueOptions> = {}) {
     requestTimeoutMs: 10_000,
     maxAttempts: 3,
     backoffMs: 1000,
+    maxRecoveryRounds: 0,
+    recoveryCooldownMs: 60_000,
     ...overrides,
   });
   return { ...translator, queue, onTranslated, onBatchFailed, onComplete };
@@ -310,6 +312,7 @@ describe('失敗處理', () => {
       onBatchFailed,
       onComplete: vi.fn(),
       maxAttempts: 1,
+      maxRecoveryRounds: 0,
     });
     queue.start(0);
     await flush();
@@ -379,6 +382,137 @@ describe('失敗處理', () => {
     answer(calls[0]);
     await flush();
     expect(calls).toHaveLength(2);
+  });
+});
+
+describe('暫時失敗後恢復', () => {
+  const failThreeTimes = async (calls: Call[], from: number) => {
+    for (let i = from; i < from + 3; i += 1) {
+      calls[i]?.reject(new Error('429'));
+      await vi.advanceTimersByTimeAsync(4000);
+    }
+  };
+
+  it('用完重試次數時先擱置，不算失敗，也不擋住其他批次', async () => {
+    const { calls, queue, onBatchFailed, onComplete } = setup({
+      cues: cues(4),
+      maxRecoveryRounds: 1,
+    });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    expect(onBatchFailed).not.toHaveBeenCalled();
+    expect(calls[3]?.texts[0]).toBe('line 2');
+
+    answer(calls[3]);
+    await flush();
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('冷卻結束後自動重試，成功就完成', async () => {
+    const { calls, queue, onTranslated, onComplete } = setup({
+      cues: cues(2),
+      maxRecoveryRounds: 1,
+    });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    expect(calls).toHaveLength(3);
+
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(calls).toHaveLength(4);
+    answer(calls[3]);
+    await flush();
+    expect(onTranslated).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith({ translated: 2, failed: 0 });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('跳轉到被擱置的那段時立刻重試，不用等冷卻', async () => {
+    const { calls, queue } = setup({ cues: cues(2), maxRecoveryRounds: 1 });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    expect(calls).toHaveLength(3);
+
+    queue.seek(5);
+    await flush();
+    expect(calls).toHaveLength(4);
+    expect(calls[3]?.texts[0]).toBe('line 0');
+  });
+
+  it('跳到其他位置不會觸發重試', async () => {
+    const { calls, queue } = setup({ cues: cues(2), maxRecoveryRounds: 1 });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    queue.seek(500);
+    await flush();
+    expect(calls).toHaveLength(3);
+  });
+
+  it('輪數用完才算失敗，連續跳轉也不會無限重送', async () => {
+    const { calls, queue, onBatchFailed, onComplete } = setup({
+      cues: cues(2),
+      maxRecoveryRounds: 1,
+    });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    queue.seek(5);
+    await flush();
+    await failThreeTimes(calls, 3);
+    expect(calls).toHaveLength(6);
+    expect(onBatchFailed).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith({ translated: 0, failed: 2 });
+
+    queue.seek(5);
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(calls).toHaveLength(6);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('回到佇列時保持時間順序', async () => {
+    const { calls, queue } = setup({ cues: cues(6), maxRecoveryRounds: 1 });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    expect(calls[3]?.texts[0]).toBe('line 2');
+    queue.seek(0);
+    answer(calls[3]);
+    await flush();
+    expect(calls[4]?.texts[0]).toBe('line 0');
+  });
+
+  it('dispose 會清掉冷卻計時器', async () => {
+    const { calls, queue } = setup({ cues: cues(2), maxRecoveryRounds: 1 });
+    queue.start(0);
+    await flush();
+    await failThreeTimes(calls, 0);
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    queue.dispose();
+    expect(vi.getTimerCount()).toBe(0);
+    queue.seek(5);
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(calls).toHaveLength(3);
+  });
+
+  it('全部空白的批次同樣會擱置後恢復', async () => {
+    const { calls, queue, onBatchFailed, onTranslated } = setup({
+      cues: cues(2),
+      maxRecoveryRounds: 1,
+    });
+    queue.start(0);
+    for (let i = 0; i < 3; i += 1) {
+      await flush();
+      calls[i]?.resolve(['', '']);
+    }
+    await flush();
+    expect(onBatchFailed).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(60_000);
+    answer(calls[3]);
+    await flush();
+    expect(onTranslated).toHaveBeenCalledTimes(1);
   });
 });
 

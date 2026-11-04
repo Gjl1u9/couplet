@@ -1,35 +1,22 @@
 import { createGoogleTranslate } from '../lib/translation/google';
-import {
-  isTranslateRequest,
-  type TranslateResponse,
-} from '../lib/translation/messages';
+import { TRANSLATE_PORT } from '../lib/translation/messages';
+import { servePortTranslate } from '../lib/translation/port';
 
 export default defineBackground(() => {
-  browser.runtime.onMessage.addListener(
-    (message: unknown, sender, sendResponse) => {
-      if (sender.id !== browser.runtime.id) return false;
+  browser.runtime.onConnect.addListener((port) => {
+    if (port.name !== TRANSLATE_PORT) return;
+    if (port.sender?.id !== browser.runtime.id) return;
+    servePortTranslate(port, (languages) => createGoogleTranslate(languages));
+  });
 
-      if (import.meta.env.MODE === 'development') {
-        if ((message as { type?: string } | null)?.type === 'dev-reload') {
-          browser.runtime.reload();
-          return false;
-        }
+  if (import.meta.env.MODE === 'development') {
+    browser.runtime.onMessage.addListener((message: unknown, sender) => {
+      if (
+        sender.id === browser.runtime.id &&
+        (message as { type?: string } | null)?.type === 'dev-reload'
+      ) {
+        browser.runtime.reload();
       }
-
-      if (!isTranslateRequest(message)) return false;
-      const respond = sendResponse as (response: TranslateResponse) => void;
-      createGoogleTranslate(message.languages)(
-        message.texts,
-        new AbortController().signal,
-      ).then(
-        (translations) => {
-          respond({ ok: true, translations });
-        },
-        (error: unknown) => {
-          respond({ ok: false, error: String(error) });
-        },
-      );
-      return true;
-    },
-  );
+    });
+  }
 });

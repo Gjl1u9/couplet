@@ -38,6 +38,10 @@ export interface QueueOptions {
   readonly maxAttempts?: number;
   /** 第一次失敗後的等待時間，之後逐次加倍。 */
   readonly backoffMs?: number;
+  /** 用完重試次數的批次可以再回來幾輪。限流或斷線通常是暫時的，不應該永久放棄。 */
+  readonly maxRecoveryRounds?: number;
+  /** 批次用完重試次數後，要等多久才再試一輪。跳轉到該批次時會提早重試。 */
+  readonly recoveryCooldownMs?: number;
 }
 
 export interface TranslationQueue {
@@ -48,6 +52,12 @@ export interface TranslationQueue {
 
 interface PendingBatch extends Batch {
   attempts: number;
+  recoveryRounds: number;
+}
+
+interface ParkedBatch extends PendingBatch {
+  readyAt: number;
+  error: unknown;
 }
 
 class LineCountMismatchError extends Error {
@@ -72,12 +82,15 @@ export function createTranslationQueue(
     requestTimeoutMs = 10_000,
     maxAttempts = 3,
     backoffMs = 1000,
+    maxRecoveryRounds = 2,
+    recoveryCooldownMs = 60_000,
   } = options;
 
   const pending: PendingBatch[] = createBatches(options.cues, {
     maxCues: maxCuesPerBatch,
     maxChars: maxCharsPerBatch,
-  }).map((batch) => ({ ...batch, attempts: 0 }));
+  }).map((batch) => ({ ...batch, attempts: 0, recoveryRounds: 0 }));
+  const parked: ParkedBatch[] = [];
 
   let started = false;
   let disposed = false;
@@ -113,12 +126,34 @@ export function createTranslationQueue(
     }
   };
 
+  /** 放回佇列並保持時間順序。 */
+  const unpark = (batch: ParkedBatch) => {
+    parked.splice(parked.indexOf(batch), 1);
+    const index = pending.findIndex((other) => other.start > batch.start);
+    pending.splice(index === -1 ? pending.length : index, 0, {
+      start: batch.start,
+      end: batch.end,
+      items: batch.items,
+      attempts: 0,
+      recoveryRounds: batch.recoveryRounds,
+    });
+  };
+
   const pump = () => {
     if (disposed) return;
     if (active !== null || wakeTimer !== null) return;
 
+    for (const batch of [...parked]) {
+      if (batch.readyAt <= Date.now()) unpark(batch);
+    }
+
     const batch = pickNext();
     if (!batch) {
+      if (parked.length > 0) {
+        const now = Date.now();
+        wakeAt(Math.min(...parked.map((b) => b.readyAt)), now);
+        return;
+      }
       notify(() => {
         onComplete({ translated, failed });
       });
@@ -145,6 +180,27 @@ export function createTranslationQueue(
     pending.splice(pending.indexOf(batch), 1);
   };
 
+  /** 用完重試次數：還有輪數就先擱置，否則才算失敗。 */
+  const giveUp = (batch: PendingBatch, error: unknown) => {
+    remove(batch);
+    if (batch.recoveryRounds < maxRecoveryRounds) {
+      parked.push({
+        ...batch,
+        recoveryRounds: batch.recoveryRounds + 1,
+        readyAt: Date.now() + recoveryCooldownMs,
+        error,
+      });
+      return;
+    }
+    failed += batch.items.length;
+    notify(() => {
+      onBatchFailed(
+        batch.items.map((item) => item.id),
+        error,
+      );
+    });
+  };
+
   const handleSuccess = (
     batch: PendingBatch,
     translations: readonly string[],
@@ -165,25 +221,18 @@ export function createTranslationQueue(
     }
 
     // Google 偶爾對部分句子回傳空字串，這些句子單獨重送。
-    const attempts = batch.attempts + 1;
     if (blank.length === 0) {
       remove(batch);
-    } else if (attempts < maxAttempts) {
-      pending.splice(pending.indexOf(batch), 1, {
-        start: batch.start,
-        end: batch.end,
-        items: blank,
-        attempts,
-      });
-    } else {
-      remove(batch);
-      failed += blank.length;
-      notify(() => {
-        onBatchFailed(
-          blank.map((item) => item.id),
-          new Error('翻譯服務回傳空白結果'),
-        );
-      });
+      return;
+    }
+    const retry: PendingBatch = {
+      ...batch,
+      items: blank,
+      attempts: batch.attempts + 1,
+    };
+    pending.splice(pending.indexOf(batch), 1, retry);
+    if (retry.attempts >= maxAttempts) {
+      giveUp(retry, new Error('翻譯服務回傳空白結果'));
     }
   };
 
@@ -195,6 +244,7 @@ export function createTranslationQueue(
       end: batch.end,
       items,
       attempts: 0,
+      recoveryRounds: batch.recoveryRounds,
     });
     pending.splice(
       pending.indexOf(batch),
@@ -207,16 +257,7 @@ export function createTranslationQueue(
   const handleFailure = (batch: PendingBatch, error: unknown) => {
     batch.attempts += 1;
     blockedUntil = Date.now() + backoffMs * 2 ** (batch.attempts - 1);
-    if (batch.attempts < maxAttempts) return;
-
-    remove(batch);
-    failed += batch.items.length;
-    notify(() => {
-      onBatchFailed(
-        batch.items.map((item) => item.id),
-        error,
-      );
-    });
+    if (batch.attempts >= maxAttempts) giveUp(batch, error);
   };
 
   const request = (
@@ -296,6 +337,16 @@ export function createTranslationQueue(
     },
     seek(position) {
       playhead = position;
+      if (!started || disposed) return;
+      const here = parked.find(
+        (batch) => batch.start <= position && position < batch.end,
+      );
+      if (!here) return;
+      // 使用者正要看這一段，不用等冷卻結束。
+      unpark(here);
+      if (wakeTimer !== null) clearTimeout(wakeTimer);
+      wakeTimer = null;
+      pump();
     },
     dispose() {
       if (disposed) return;

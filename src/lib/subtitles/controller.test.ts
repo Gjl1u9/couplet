@@ -144,6 +144,37 @@ describe('顯示', () => {
     expect(views.at(-1)).toEqual({ original: 'line 0', translation: null });
   });
 
+  it.each(['zh-CN', 'zh-Hans', 'zh', 'zh-SG'])(
+    '簡體字幕 %s 會翻成繁體',
+    async (lang) => {
+      const { controller, calls, sources } = setup();
+      controller.handle(player('a'));
+      controller.handle(captions('a', { lang }));
+      await flush();
+      expect(calls).toHaveLength(1);
+      expect(sources).toEqual([lang]);
+    },
+  );
+
+  it.each(['zh-TW', 'zh-Hant', 'zh-HK', 'zh-Hant-TW'])(
+    '繁體字幕 %s 不需要翻譯',
+    async (lang) => {
+      const { controller, calls } = setup();
+      controller.handle(player('a'));
+      controller.handle(captions('a', { lang }));
+      await flush();
+      expect(calls).toHaveLength(0);
+    },
+  );
+
+  it('目標語言的地區不同時不翻譯', async () => {
+    const { controller, calls } = setup('en-GB');
+    controller.handle(player('a'));
+    controller.handle(captions('a', { lang: 'en-US' }));
+    await flush();
+    expect(calls).toHaveLength(0);
+  });
+
   it('沒有字幕時不隱藏原生字幕', () => {
     const { controller, native } = setup();
     controller.handle(player('a'));

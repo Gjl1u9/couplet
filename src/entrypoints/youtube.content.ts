@@ -1,11 +1,7 @@
 import { createSubtitleController } from '../lib/subtitles/controller';
 import { createOverlay } from '../lib/subtitles/overlay';
-import type { LanguagePair } from '../lib/translation/google';
-import type {
-  TranslateRequest,
-  TranslateResponse,
-} from '../lib/translation/messages';
-import type { Translate } from '../lib/translation/queue';
+import { createPortTranslate } from '../lib/translation/port';
+import { TRANSLATE_PORT } from '../lib/translation/messages';
 import { parseBridgeMessage } from '../lib/youtube/bridge';
 
 const TARGET_LANGUAGE = 'zh-TW';
@@ -16,18 +12,6 @@ const PLAYBACK_EVENTS = [
   'pause',
   'ratechange',
 ];
-
-const remoteTranslate =
-  (languages: LanguagePair): Translate =>
-  async (texts) => {
-    const request: TranslateRequest = { type: 'translate', languages, texts };
-    const response = await browser.runtime.sendMessage<
-      TranslateRequest,
-      TranslateResponse
-    >(request);
-    if (!response.ok) throw new Error(response.error);
-    return response.translations;
-  };
 
 export default defineContentScript({
   matches: ['https://www.youtube.com/*'],
@@ -44,7 +28,9 @@ export default defineContentScript({
     const controller = createSubtitleController({
       targetLanguage: TARGET_LANGUAGE,
       createTranslate: (source) =>
-        remoteTranslate({ source, target: TARGET_LANGUAGE }),
+        createPortTranslate({ source, target: TARGET_LANGUAGE }, () =>
+          browser.runtime.connect({ name: TRANSLATE_PORT }),
+        ),
       getTime: () => mainVideo()?.currentTime ?? 0,
       render: overlay.render,
       setNativeCaptionsHidden: overlay.setNativeCaptionsHidden,
