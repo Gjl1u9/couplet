@@ -58,5 +58,10 @@ export default defineConfig(
     files: ['**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  {
+    // 開發用擴充功能是純 JS，直接在瀏覽器執行。
+    files: ['tools/recorder-extension/**'],
+    rules: { 'no-undef': 'off' },
+  },
   prettier,
 );
