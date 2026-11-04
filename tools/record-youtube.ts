@@ -61,7 +61,7 @@ function installProbe(): void {
       playerError:
         document
           .querySelector('.ytp-error-content-wrap-reason')
-          ?.textContent?.trim()
+          ?.textContent.trim()
           .slice(0, 120) ?? null,
       ...adClass(),
     };
