@@ -149,16 +149,42 @@ export function createTranslationQueue(
     batch: PendingBatch,
     translations: readonly string[],
   ) => {
-    remove(batch);
-    translated += batch.items.length;
-    notify(() => {
-      onTranslated(
-        batch.items.map((item, index) => ({
-          id: item.id,
-          translation: translations[index] ?? '',
-        })),
-      );
+    const results: TranslatedCue[] = [];
+    const blank: BatchItem[] = [];
+    batch.items.forEach((item, index) => {
+      const translation = translations[index] ?? '';
+      if (translation.trim() === '') blank.push(item);
+      else results.push({ id: item.id, translation });
     });
+
+    translated += results.length;
+    if (results.length > 0) {
+      notify(() => {
+        onTranslated(results);
+      });
+    }
+
+    // Google 偶爾對部分句子回傳空字串，這些句子單獨重送。
+    const attempts = batch.attempts + 1;
+    if (blank.length === 0) {
+      remove(batch);
+    } else if (attempts < maxAttempts) {
+      pending.splice(pending.indexOf(batch), 1, {
+        start: batch.start,
+        end: batch.end,
+        items: blank,
+        attempts,
+      });
+    } else {
+      remove(batch);
+      failed += blank.length;
+      notify(() => {
+        onBatchFailed(
+          blank.map((item) => item.id),
+          new Error('翻譯服務回傳空白結果'),
+        );
+      });
+    }
   };
 
   /** 行數對不上時拆開，通常可以找出造成錯位的那一句。 */

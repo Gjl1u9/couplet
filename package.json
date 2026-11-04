@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "wxt",
     "build": "wxt build",
+    "build:dev": "wxt build --mode development",
     "zip": "wxt zip",
     "postinstall": "wxt prepare",
     "lint": "eslint . --max-warnings=0",

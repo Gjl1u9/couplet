@@ -382,6 +382,57 @@ describe('失敗處理', () => {
   });
 });
 
+describe('空白譯文', () => {
+  it('先交付翻好的句子，空白的單獨重送，翻好後算完成', async () => {
+    const { calls, queue, onTranslated, onComplete, onBatchFailed } = setup({
+      cues: cues(3),
+      maxCuesPerBatch: 3,
+    });
+    queue.start(0);
+    await flush();
+    calls[0]?.resolve(['甲', ' ', '丙']);
+    await flush();
+    expect(onTranslated).toHaveBeenLastCalledWith([
+      { id: 'c0', translation: '甲' },
+      { id: 'c2', translation: '丙' },
+    ]);
+    expect(calls[1]?.texts).toEqual(['line 1']);
+
+    calls[1]?.resolve(['乙']);
+    await flush();
+    expect(onTranslated).toHaveBeenLastCalledWith([
+      { id: 'c1', translation: '乙' },
+    ]);
+    expect(onBatchFailed).not.toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalledWith({ translated: 3, failed: 0 });
+  });
+
+  it('全部空白時不呼叫 onTranslated', async () => {
+    const { calls, queue, onTranslated } = setup({ cues: cues(2) });
+    queue.start(0);
+    await flush();
+    calls[0]?.resolve(['', '']);
+    await flush();
+    expect(onTranslated).not.toHaveBeenCalled();
+    expect(calls[1]?.texts).toEqual(['line 0', 'line 1']);
+  });
+
+  it('重試用完還是空白就算失敗，不會無限重送', async () => {
+    const { calls, queue, onBatchFailed, onComplete } = setup({
+      cues: cues(2),
+    });
+    queue.start(0);
+    for (let i = 0; i < 3; i += 1) {
+      await flush();
+      calls[i]?.resolve(['', '']);
+    }
+    await flush();
+    expect(calls).toHaveLength(3);
+    expect(onBatchFailed).toHaveBeenCalledWith(['c0', 'c1'], expect.any(Error));
+    expect(onComplete).toHaveBeenCalledWith({ translated: 0, failed: 2 });
+  });
+});
+
 describe('結果與節流', () => {
   it('結果對應到正確的字幕 ID', async () => {
     const { calls, queue, onTranslated } = setup();
