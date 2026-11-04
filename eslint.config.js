@@ -26,6 +26,34 @@ export default defineConfig(
     rules: { '@typescript-eslint/no-empty-function': 'off' },
   },
   {
+    // YouTube 的 DOM 變動很頻繁，產品程式碼不能自行做大範圍監聽或輪詢。
+    files: ['src/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "NewExpression[callee.name='MutationObserver']",
+          message: '請改用 src/lib/dom/observers.ts 提供的窄範圍監聽。',
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'setInterval',
+          message: '不要輪詢，請改用事件或對準下一句時間的 setTimeout。',
+        },
+        {
+          name: 'requestAnimationFrame',
+          message: '字幕不需要每幀更新，請改用 timeupdate 和定時器。',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/lib/dom/observers.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
+  {
     // 設定檔不在 tsconfig 內，不做型別檢查。
     files: ['**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],
