@@ -55,6 +55,10 @@
   padding: 0 14px 12px;
 }
 
+.welcome-languages > .muted a {
+  color: inherit;
+}
+
 .welcome-languages-loading {
   height: 68px;
 }

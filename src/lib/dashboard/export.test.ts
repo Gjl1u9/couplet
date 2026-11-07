@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { newReviewState } from '../vocabulary/schedule';
-import type { SavedWord } from '../vocabulary/vocabulary';
+import type { SavedWord, VideoOrigin } from '../vocabulary/vocabulary';
+import { jumpLink } from '../youtube/origin';
 import { wordsToCsv } from './export';
 
 const WORD: SavedWord = {
@@ -48,5 +49,34 @@ describe('wordsToCsv', () => {
 
   it('keeps spreadsheets from running a cell as a formula', () => {
     expect(wordsToCsv([WORD])).toContain(`"'=銀行"`);
+  });
+
+  it('exports every line, to match the translation that covers them', () => {
+    const [encounter] = WORD.encounters;
+    if (!encounter) throw new Error('missing fixture');
+    const csv = wordsToCsv([
+      {
+        ...WORD,
+        encounters: [
+          {
+            ...encounter,
+            cues: [
+              { original: 'We sat by', startMs: 1000 },
+              { original: 'the bank', startMs: 2000 },
+            ],
+            currentCue: 1,
+            translation: '我們坐在河岸邊',
+          },
+        ],
+      },
+    ]);
+    expect(csv).toContain('"We sat by the bank","我們坐在河岸邊"');
+    // The link still goes to the word's own line.
+    expect(csv).toContain(
+      jumpLink(encounter.origin as VideoOrigin, {
+        original: '',
+        startMs: 2000,
+      }),
+    );
   });
 });

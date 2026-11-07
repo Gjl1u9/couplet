@@ -112,6 +112,16 @@ describe('WelcomePage', () => {
     expect(saved.at(-1)?.learningLanguage).toBe('en');
   });
 
+  it('says where data goes before anything is used', () => {
+    const notice = container.querySelector('.welcome-languages')?.textContent;
+    expect(notice).toContain('Subtitle lines go to Google Translate.');
+    expect(notice).toContain('AI service');
+    const link = container.querySelector<HTMLAnchorElement>(
+      '.welcome-languages a',
+    );
+    expect(link?.getAttribute('href')).toBe('https://coupletapp.com/privacy/');
+  });
+
   it('leads to YouTube', () => {
     const link = container.querySelector<HTMLAnchorElement>('a.button');
     expect(link?.getAttribute('href')).toBe('https://www.youtube.com');

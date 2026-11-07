@@ -11,6 +11,11 @@ import {
   createVocabularyService,
   isVocabularyMessage,
 } from '../lib/vocabulary/service';
+import {
+  answerExplainMessage,
+  createProxyExplain,
+  isExplainMessage,
+} from '../lib/lookup/explain';
 import { createAccountSync } from '../lib/sync/account-sync';
 import { LEGACY_LOG_KEY, LEGACY_WORDS_KEY } from '../lib/sync/legacy';
 import {
@@ -91,6 +96,10 @@ export default defineBackground(() => {
     void browser.tabs.create({ url: browser.runtime.getURL(DASHBOARD_PATH) });
   };
 
+  const explain = createProxyExplain({
+    accessToken: () => auth.accessToken(),
+  });
+
   // Only a new install: an update or a browser restart must not open a tab.
   browser.runtime.onInstalled.addListener(({ reason }) => {
     if (reason !== 'install') return;
@@ -106,6 +115,10 @@ export default defineBackground(() => {
       }
       if (isAuthMessage(message)) {
         answerAuthMessage(message, accountAuth, sendResponse);
+        return true;
+      }
+      if (isExplainMessage(message)) {
+        answerExplainMessage(message, explain, sendResponse);
         return true;
       }
       if (isSyncMessage(message)) {

@@ -1,5 +1,6 @@
 import { encounterForReview, type SavedWord } from '../vocabulary/vocabulary';
 import { splitMeaning } from '../lookup/entry';
+import { joinText } from '../youtube/captions';
 import { jumpLink } from '../youtube/origin';
 import { stageLabel, stageOf } from './stats';
 
@@ -35,7 +36,8 @@ export function wordsToCsv(words: readonly SavedWord[]): string {
       word.lemma,
       word.phonetic ?? '',
       word.senses.flatMap((sense) => splitMeaning(sense.meaning)).join('; '),
-      cue?.original ?? '',
+      // All the lines, because the translation covers them all and neither makes sense alone.
+      (encounter?.cues ?? []).map((line) => line.original).reduce(joinText, ''),
       encounter?.translation ?? '',
       encounter?.origin?.title ?? '',
       encounter?.origin ? jumpLink(encounter.origin, cue) : '',

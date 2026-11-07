@@ -136,9 +136,13 @@ Matte and tactile, like sheets on a desk. Behaviour and the features' reasons ar
 - **Level Track:** seven 6px dots, then the current interval.
 - **Lists:** rows divided by `line`. A row is the hit area, but only its word reacts to hover, so nothing touches the dividers.
 
+## AI
+
+Explain with AI is a quiet text button at 12px, with a Beta label and a filled sparkles icon in bright yellow, `#ffd60a`, the one filled icon on these pages. On light paper the icon has a thin amber outline, because bright yellow alone fails 3:1 there.
+
 ## Review Card
 
-Behaviour is in [`REVIEW.md`](REVIEW.md). The Card's title is the largest type on the page. Grade buttons are uncoloured, so they do not suggest an answer.
+Behaviour is in [`REVIEW.md`](REVIEW.md). The Card's title is the largest type on the page. Grade buttons are uncoloured, so they do not suggest an answer. Keys appear as small bordered caps: a number on each grade button, and a line of every shortcut under them, in `ink-muted`.
 
 ## Components
 

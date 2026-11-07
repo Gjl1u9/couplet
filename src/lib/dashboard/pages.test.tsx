@@ -63,6 +63,9 @@ function setup() {
   const remove = vi.fn(() => Promise.resolve());
   const speak = vi.fn();
   const previewSaveSound = vi.fn();
+  const explain = vi.fn<DashboardServices['explain']>(() =>
+    Promise.resolve({ text: 'River side.', remaining: 18 }),
+  );
   const services: DashboardServices = {
     vocabulary: {
       retire,
@@ -87,9 +90,19 @@ function setup() {
     saveSettings: () => Promise.resolve(),
     onSettingsChange: () => () => undefined,
     previewSaveSound,
+    explain,
     onVocabularyChange: () => () => undefined,
   };
-  return { services, retire, restore, revert, remove, speak, previewSaveSound };
+  return {
+    services,
+    explain,
+    retire,
+    restore,
+    revert,
+    remove,
+    speak,
+    previewSaveSound,
+  };
 }
 
 const forget = (wordId: string, at: number): ReviewEvent => ({
@@ -316,6 +329,62 @@ describe('Dashboard pages', () => {
       expect(q('.sentence-translation')).toBeNull();
       await click(named('Show translation'));
       expect(q('.sentence-translation')?.textContent).toBe('這裡的字');
+    });
+
+    it('explains a sentence on request, once, and says what is left', async () => {
+      const { services, explain } = setup();
+      await render('en:bank', services);
+      expect(explain).not.toHaveBeenCalled();
+      await click(named('Explain with AI'));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve));
+      });
+      expect(explain).toHaveBeenCalledWith({
+        word: 'bank',
+        cues: ['before it', 'the bank here', 'after it'],
+        current: 1,
+        source: 'en',
+        target: 'zh-TW',
+      });
+      expect(q('.sentence-explanation')?.textContent).toContain('River side.');
+      expect(q('.sentence-explanation')?.textContent).toContain(
+        '18 left today',
+      );
+      await click(named('Hide explanation'));
+      expect(q('.sentence-explanation')).toBeNull();
+      await click(named('Explain with AI'));
+      expect(explain).toHaveBeenCalledTimes(1);
+    });
+
+    it('says when the daily allowance returns, with nothing to retry', async () => {
+      const { services, explain } = setup();
+      explain.mockRejectedValue(
+        new Error('explain-limit|20|2026-11-08T00:00:00.000Z'),
+      );
+      await render('en:bank', services);
+      await click(named('Explain with AI'));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve));
+      });
+      expect(q('.sentence-explanation')?.textContent).toContain(
+        "You've used today's 20 explanations.",
+      );
+      expect(named('Try again')).toBeUndefined();
+    });
+
+    it('offers another try when an explanation fails', async () => {
+      const { services, explain } = setup();
+      explain.mockRejectedValueOnce(new Error('Down'));
+      await render('en:bank', services);
+      await click(named('Explain with AI'));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve));
+      });
+      await click(named('Try again'));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve));
+      });
+      expect(q('.sentence-explanation')?.textContent).toContain('River side.');
     });
 
     it('opens the dictionary with pronunciation on demand', async () => {

@@ -16,5 +16,7 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 - Turn subtitles on or off from the player's controls, and move or resize them.
 - Sign in with Google to save words, keep them on your device, and sync them across computers.
 - Review saved words on a schedule, in the sentence where you met them, with a link back to that moment in the video.
+- Explain with AI in Words: two or three sentences on a word's meaning, part of speech, and grammar in its sentence, 20
+  times a day.
 - A Dashboard with your words, progress, and settings, in light or dark, and export to CSV.
 - A Welcome Page after install, for picking languages and seeing what to try.

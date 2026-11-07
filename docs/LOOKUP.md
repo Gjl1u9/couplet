@@ -6,6 +6,12 @@ Word lookups go through our Cloudflare Worker, [`worker/`](../worker), at `api.c
 
 `POST /v1/lookup` with `{ word, source, target }`, an `x-install-id` header, and a Supabase access token when signed in. Word length and language codes are checked, and the prompt lives on the server, so the service can only look up words.
 
+## Explanations
+
+`POST /v1/explain` with `{ word, cues, current, source, target }` and a Supabase access token. It needs an account, and sends up to three lines of at most 300 characters to the model, which writes two or three sentences on the word's meaning, part of speech, and grammar.
+
+Each account gets 20 a day, set by `EXPLAIN_DAILY_LIMIT`, resetting at midnight UTC. Unlike lookups, this allowance is shown, as 「18 left today」. The same word in the same lines is cached by a salted hash, for everyone, and costs nothing to ask again, even past the allowance. Failures are refunded.
+
 ## Ceilings
 
 People have no daily allowance and see no counter. Two ceilings exist only to stop scripts and cap the bill. Reaching either reads as 「Lookups are busy right now. Try again later.」, never as a used-up allowance. Each resets at midnight UTC, and is set in [`wrangler.toml`](../worker/wrangler.toml).

@@ -46,18 +46,19 @@ The Learning Language in Settings filters every page, because each language has 
 
 ## Words
 
-| Feature                      | Without it                                                          | What it does                                                 | Interacts with                                       |
-| ---------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
-| Search                       | A long list cannot be used to find one word                         | Matches words, saved forms, and video titles                 | Combines with the stage filter                       |
-| Stage filter                 | The user cannot separate what they are learning from what they know | All, New, Learning, Known                                    | Same definitions as Progress                         |
-| By date or by video          | Words cannot be recalled through the video they came from           | Today, Yesterday, Earlier; or by the newest sentence's video | Uses each word's Encounter                           |
-| Word row                     | Nothing shows what is saved or when it returns                      | Word, video, stage, and next review. Meanings stay hidden    | Clicking opens its details                           |
-| Level Track                  | The user cannot see how far a word has come                         | Seven dots and the current interval                          | Same as the Review Card                              |
-| Dictionary button            | Meanings would crowd the list                                       | Opens the senses and Pronunciation on demand                 | Same senses as the Lookup Panel                      |
-| Sentences                    | The word loses the context it was met in                            | Up to three, each with translation and video link            | Nearby lines collapse, and start collapsed           |
-| Stop reviewing, Review again | A known word keeps returning, and a retired one can never return    | Retires or restores the word, then shows a toast with Undo   | Changes the queue, stages, and subtitle marks        |
-| Delete                       | A mistaken save stays in the list and statistics forever            | Removes the word and its reviews after a confirmation        | Removes it from Home, Review, and subtitle marks     |
-| Export                       | Users cannot take their words elsewhere                             | Downloads the words shown as CSV, in UTF-8 with a BOM        | Respects search and filter; formulas are neutralized |
+| Feature                      | Without it                                                                    | What it does                                                             | Interacts with                                                          |
+| ---------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Search                       | A long list cannot be used to find one word                                   | Matches words, saved forms, and video titles                             | Combines with the stage filter                                          |
+| Stage filter                 | The user cannot separate what they are learning from what they know           | All, New, Learning, Known                                                | Same definitions as Progress                                            |
+| By date or by video          | Words cannot be recalled through the video they came from                     | Today, Yesterday, Earlier; or by the newest sentence's video             | Uses each word's Encounter                                              |
+| Word row                     | Nothing shows what is saved or when it returns                                | Word, video, stage, and next review. Meanings stay hidden                | Clicking opens its details                                              |
+| Level Track                  | The user cannot see how far a word has come                                   | Seven dots and the current interval                                      | Same as the Review Card                                                 |
+| Dictionary button            | Meanings would crowd the list                                                 | Opens the senses and Pronunciation on demand                             | Same senses as the Lookup Panel                                         |
+| Sentences                    | The word loses the context it was met in                                      | Up to three, each with translation and video link                        | Nearby lines collapse, and start collapsed                              |
+| Stop reviewing, Review again | A known word keeps returning, and a retired one can never return              | Retires or restores the word, then shows a toast with Undo               | Changes the queue, stages, and subtitle marks                           |
+| Delete                       | A mistaken save stays in the list and statistics forever                      | Removes the word and its reviews after a confirmation                    | Removes it from Home, Review, and subtitle marks                        |
+| Explain with AI              | A sentence stays unclear when the translation and dictionary don't explain it | Two or three sentences on meaning, part of speech, and grammar, 20 a day | Sends up to three lines to the AI service. See [`LOOKUP.md`](LOOKUP.md) |
+| Export                       | Users cannot take their words elsewhere                                       | Downloads the words shown as CSV, in UTF-8 with a BOM                    | Respects search and filter; formulas are neutralized                    |
 
 **Done when:** a saved word can be found, inspected, retired, restored, deleted, and exported with the keyboard.
 
@@ -84,6 +85,7 @@ The page uses the same compact menu as the Settings Panel, grouped as Account, L
 | -------------- | ----------------------------------------------------- | --------------------------------------------------- | ---------------------------------- |
 | Review count   | Due words stay out of sight until the Dashboard opens | Shows what is due and starts Review, once signed in | Follows the Learning Language      |
 | Dual subtitles | Turning subtitles off needs a video open              | On or off for every video                           | Same setting as the Settings Panel |
+| Product name   | Nothing in the extension leads to the product page    | Links to coupletapp.com in a new tab                | None                               |
 | Account        | Signing in means finding Settings                     | The same Account group as Settings                  | Stays in step across pages         |
 | Open Dashboard | The toolbar no longer opens it directly               | Opens the Dashboard in a new tab, once signed in    | Closes the popup                   |
 
@@ -110,15 +112,15 @@ Saving has no demonstration of its own; the review step says it needs a Google s
 
 ## Out of scope
 
-| Left out                                         | Why                                                            |
-| ------------------------------------------------ | -------------------------------------------------------------- |
-| Premium, AI explanations, payment                | The product launches free, to ship quickly                     |
-| Tasks, achievements, and daily goals             | Home stays minimal                                             |
-| Video catalog                                    | A different product, with content to maintain                  |
-| Watch time and efficiency                        | Needs new tracking                                             |
-| Review frequency targets                         | Those suit adaptive schedulers; the ladder has fixed intervals |
-| Daily limits, manual word entry, review by video | Useful later, once real lists are large enough                 |
-| Reviewing Hard words early                       | It felt like a detour; due words already come back             |
+| Left out                                          | Why                                                            |
+| ------------------------------------------------- | -------------------------------------------------------------- |
+| Premium, payment, explanations on the Review Card | The product launches free, to ship quickly                     |
+| Tasks, achievements, and daily goals              | Home stays minimal                                             |
+| Video catalog                                     | A different product, with content to maintain                  |
+| Watch time and efficiency                         | Needs new tracking                                             |
+| Review frequency targets                          | Those suit adaptive schedulers; the ladder has fixed intervals |
+| Daily limits, manual word entry, review by video  | Useful later, once real lists are large enough                 |
+| Reviewing Hard words early                        | It felt like a detour; due words already come back             |
 
 ## Original design
 
@@ -146,6 +148,7 @@ Other dashboards informed the features and the general airy feel. Layout, wordin
 - Filters and grouping are not remembered between visits, except the Review Card's collapsed context.
 - By-video grouping uses each word's newest sentence, so a word appears once.
 - CSV exports the words on screen, because search and filter already express what the user wants.
+- CSV's Sentence column holds every line of the context, because its translation covers them all and can't be split. The link still goes to the word's own line.
 - The Dictionary uses the page's theme, while the Lookup Panel on video keeps its setting.
 - Words has a Pronunciation button inside the Dictionary. The Review Card keeps it beside the title.
-- v1 learning languages are English, Spanish, French, German, Portuguese, Italian, Japanese, and Korean. Native languages stay Traditional Chinese, Simplified Chinese, English, Japanese, Korean, and Spanish. Others wait until they have run on real videos.
+- v1 learning languages are English, Spanish, French, German, Portuguese, Italian, Japanese, and Korean. Native languages are the 22 in `settings.ts`, which match LinGlass's list.

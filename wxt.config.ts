@@ -6,7 +6,9 @@ export default defineConfig({
   zip: { artifactTemplate: 'couplet-{{version}}-{{browser}}.zip' },
   modules: ['@wxt-dev/module-react'],
   manifest: {
-    name: 'Couplet',
+    // The store shows the name, so it says what the extension does.
+    name: 'Couplet: Dual Subtitles for YouTube',
+    short_name: 'Couplet',
     description: 'Dual subtitles and word review for YouTube',
     // The store's public key, so unpacked builds keep the published extension's ID, which
     // the OAuth redirect depends on: pnjdidlglcbbnfhcnhmhndoakdphhckj. The store assigns that ID

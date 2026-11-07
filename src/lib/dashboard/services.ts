@@ -9,6 +9,11 @@ import {
   VOCABULARY_REVISION_KEY,
   type SyncClient,
 } from '../sync/messages';
+import {
+  createExplainClient,
+  type ExplainInput,
+  type Explanation,
+} from '../lookup/explain';
 import type { SyncStatus } from '../sync/account-sync';
 import {
   defaultSettings,
@@ -38,6 +43,7 @@ export interface DashboardServices {
   /** Calls back when a video tab changes the settings. Returns how to stop. */
   readonly onSettingsChange: (listener: () => void) => () => void;
   readonly previewSaveSound: () => void;
+  readonly explain: (input: ExplainInput) => Promise<Explanation>;
   /** Calls back when another page changes the Vocabulary. Returns how to stop. */
   readonly onVocabularyChange: (listener: () => void) => () => void;
 }
@@ -84,6 +90,9 @@ export function createDashboardServices(): DashboardServices {
         browser.storage.local.onChanged.removeListener(onChanged);
       };
     },
+    explain: createExplainClient((message) =>
+      browser.runtime.sendMessage(message),
+    ),
     previewSaveSound: () => {
       saveSound.play();
     },

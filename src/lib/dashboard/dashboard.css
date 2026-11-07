@@ -20,6 +20,7 @@
   --accent-soft: #fcece7;
   --shadow: none;
   --pop-shadow: 0 2px 0 rgba(41, 37, 29, 0.25);
+  --ai-outline: #a88700;
 }
 
 [data-theme='dark'] {
@@ -42,6 +43,7 @@
   --accent-soft: #3a241e;
   --shadow: none;
   --pop-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  --ai-outline: none;
 }
 
 * {
@@ -872,6 +874,48 @@ h2 {
   line-height: 21px;
 }
 
+.ai-button {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.ai-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  fill: #ffd60a;
+  stroke: var(--ai-outline);
+  stroke-width: 1;
+}
+
+.beta {
+  padding: 0 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 13px;
+}
+
+.sentence-explanation {
+  margin: 10px 0 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--line-strong);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.sentence-explanation p {
+  margin: 0;
+}
+
+.sentence-explanation .muted {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
 .sentence-tools,
 .detail-actions {
   display: flex;
@@ -1148,13 +1192,51 @@ mark {
 }
 
 kbd {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  color: var(--ink-muted);
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
   font-size: 11px;
-  line-height: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  text-align: center;
+}
+
+.grade kbd {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+}
+
+.review-keys {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  justify-content: center;
+  gap: 4px 16px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.review-keys > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.review-keys dt {
+  display: flex;
+  gap: 2px;
+}
+
+.review-keys dd {
+  margin: 0;
 }
 
 html,
@@ -1367,8 +1449,16 @@ h1,
   padding-top: 10px;
 }
 
+/* Too narrow to clear the label, and the line below still lists the numbers. */
+@media (max-width: 480px) {
+  .grade kbd {
+    display: none;
+  }
+}
+
 @media (hover: none) {
-  kbd {
+  kbd,
+  .review-keys {
     display: none;
   }
 }
@@ -1538,6 +1628,15 @@ h1,
   background: var(--surface);
   font-size: 13px;
   line-height: 18px;
+}
+
+.popup-head a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.popup-head a:hover {
+  text-decoration: underline;
 }
 
 .popup-head {

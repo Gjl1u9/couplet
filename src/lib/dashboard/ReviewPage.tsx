@@ -19,6 +19,19 @@ const GRADES: readonly { readonly id: Grade; readonly label: string }[] = [
   { id: 'good', label: 'Got it' },
 ];
 
+/** Always in view, because a shortcut nobody can see is one nobody uses. */
+const KEY_HINTS: readonly {
+  readonly keys: readonly string[];
+  readonly label: string;
+}[] = [
+  { keys: ['1', '2', '3'], label: 'Grade' },
+  { keys: ['Space'], label: 'Translation' },
+  { keys: ['D'], label: 'Dictionary' },
+  { keys: ['P'], label: 'Pronunciation' },
+  { keys: ['C'], label: 'Nearby lines' },
+  { keys: ['Z'], label: 'Undo' },
+];
+
 /** Long waits are left for the next visit. */
 const MAX_WAKE_MS = 60 * 60 * 1000;
 
@@ -324,6 +337,18 @@ export function ReviewPage({
                 </button>
               );
             })}
+            <dl className="review-keys" aria-label="Keyboard shortcuts">
+              {KEY_HINTS.map(({ keys, label }) => (
+                <div key={label}>
+                  <dt>
+                    {keys.map((key) => (
+                      <kbd key={key}>{key}</kbd>
+                    ))}
+                  </dt>
+                  <dd>{label}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </>
       ) : loaded ? (

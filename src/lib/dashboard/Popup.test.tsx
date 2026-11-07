@@ -70,6 +70,7 @@ describe('Popup', () => {
         }),
       saveSettings,
       onSettingsChange: () => () => undefined,
+      explain: () => Promise.reject(new Error('Unused')),
       previewSaveSound: vi.fn(),
       onVocabularyChange: () => () => undefined,
     };
@@ -98,6 +99,14 @@ describe('Popup', () => {
     act(() => {
       root.unmount();
     });
+  });
+
+  it('links the product name to the product page, in a new tab', async () => {
+    await show([]);
+    const link = document.querySelector<HTMLAnchorElement>('.popup-head a');
+    expect(link?.getAttribute('href')).toBe('https://coupletapp.com');
+    expect(link?.target).toBe('_blank');
+    expect(link?.textContent).toBe('Dual Subtitles');
   });
 
   it('counts due words in the learning language and starts review', async () => {

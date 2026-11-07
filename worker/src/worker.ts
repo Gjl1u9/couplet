@@ -1,7 +1,11 @@
 import { DurableObject } from 'cloudflare:workers';
-import { createQwenLookup } from '../../src/lib/lookup/qwen';
+import { createQwenExplain, createQwenLookup } from '../../src/lib/lookup/qwen';
 import type { WordEntry } from '../../src/lib/lookup/types';
-import { handleRequest, type EntryCache } from './handler';
+import {
+  handleRequest,
+  type EntryCache,
+  type ExplanationCache,
+} from './handler';
 import { verifyToken } from './jwt';
 import { consume, refund, type CounterStorage } from './quota';
 
@@ -11,6 +15,7 @@ interface Env {
   readonly SUPABASE_URL: string;
   readonly ABUSE_DAILY_LIMIT: string;
   readonly GLOBAL_DAILY_LIMIT: string;
+  readonly EXPLAIN_DAILY_LIMIT: string;
   readonly QUOTA: DurableObjectNamespace<Quota>;
 }
 
@@ -37,6 +42,10 @@ export class Quota extends DurableObject {
 
   refund(day: string): Promise<void> {
     return refund(this.counters(), day);
+  }
+
+  async used(day: string): Promise<number> {
+    return (await this.ctx.storage.get<number>(day)) ?? 0;
   }
 
   /** Someone who stops coming back leaves nothing behind, as the privacy policy promises. */
@@ -66,6 +75,24 @@ const entryCache = (): EntryCache => {
   };
 };
 
+const explanationCache = (): ExplanationCache => {
+  const url = (key: string) =>
+    `https://cache.couplet.internal/explanation/${key}`;
+  return {
+    get: async (key) => {
+      const hit = await caches.default.match(url(key));
+      return hit ? await hit.text() : undefined;
+    },
+    put: (key, explanation) =>
+      caches.default.put(
+        url(key),
+        new Response(explanation, {
+          headers: { 'cache-control': `max-age=${String(CACHE_SECONDS)}` },
+        }),
+      ),
+  };
+};
+
 const hex = (bytes: ArrayBuffer) =>
   [...new Uint8Array(bytes)]
     .map((byte) => byte.toString(16).padStart(2, '0'))
@@ -87,11 +114,15 @@ export default {
       config: {
         abuseLimit: Number(env.ABUSE_DAILY_LIMIT),
         globalLimit: Number(env.GLOBAL_DAILY_LIMIT),
+        explainLimit: Number(env.EXPLAIN_DAILY_LIMIT),
       },
       lookup: createQwenLookup(env.QWEN_API_KEY),
+      explain: createQwenExplain(env.QWEN_API_KEY),
+      explanations: explanationCache(),
       quota: {
         consume: (subject, day, limit) => quota(subject).consume(day, limit),
         refund: (subject, day) => quota(subject).refund(day),
+        used: (subject, day) => quota(subject).used(day),
       },
       cache: entryCache(),
       verifyUser: async (token) =>
@@ -102,12 +133,11 @@ export default {
             nowSeconds: Date.now() / 1000,
           })
         )?.userId ?? null,
-      // Addresses are never stored as they are.
-      hashIp: async (ip) =>
+      hash: async (text) =>
         hex(
           await crypto.subtle.digest(
             'SHA-256',
-            new TextEncoder().encode(`${env.IP_HASH_SALT}:${ip}`),
+            new TextEncoder().encode(`${env.IP_HASH_SALT}:${text}`),
           ),
         ),
       now: Date.now,

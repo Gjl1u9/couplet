@@ -72,6 +72,16 @@
               <td>Cloudflare, then Alibaba Cloud</td>
             </tr>
             <tr>
+              <td>
+                Subtitle lines around a word, when you choose Explain with AI
+              </td>
+              <td>
+                To explain the word in that sentence. Your account counts the
+                daily limit, and isn't sent to the AI service
+              </td>
+              <td>Cloudflare, then Alibaba Cloud</td>
+            </tr>
+            <tr>
               <td>A hash of your network address, for signed-out lookups</td>
               <td>
                 To stop automated abuse. We don't store the address itself, and
@@ -104,9 +114,10 @@
         </li>
         <li>
           <strong>Alibaba Cloud</strong> is a China-based company whose AI
-          service writes dictionary entries. We use its international service in
-          Singapore. It receives the word and languages, not your account, your
-          email, or the sentence the word came from.
+          service writes dictionary entries and explanations. We use its
+          international service in Singapore. For a lookup, it receives the word
+          and languages. For Explain with AI, it also receives up to three
+          subtitle lines. It never receives your account or email.
         </li>
         <li>
           <strong>Google</strong> provides sign-in and translates subtitle
@@ -140,8 +151,8 @@
           Words already synced come back when you sign in again.
         </li>
         <li>
-          Dictionary entries are kept in a shared cache with no link to who
-          asked.
+          Dictionary entries and explanations are kept in a shared cache with no
+          link to who asked.
         </li>
       </ul>
 

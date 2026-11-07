@@ -1,4 +1,5 @@
 import { sameLanguage } from '../../src/lib/language';
+import type { ExplainInput } from '../../src/lib/lookup/explain';
 import type { LookupService, WordEntry } from '../../src/lib/lookup/types';
 
 export interface HandlerConfig {
@@ -6,11 +7,14 @@ export interface HandlerConfig {
   readonly abuseLimit: number;
   /** The most the service can spend in a day. */
   readonly globalLimit: number;
+  /** Explanations each account gets per day. */
+  readonly explainLimit: number;
 }
 
 export interface QuotaClient {
   consume: (subject: string, day: string, limit: number) => Promise<boolean>;
   refund: (subject: string, day: string) => Promise<void>;
+  used: (subject: string, day: string) => Promise<number>;
 }
 
 export interface EntryCache {
@@ -18,13 +22,24 @@ export interface EntryCache {
   put: (key: string, entry: WordEntry) => Promise<void>;
 }
 
+export interface ExplanationCache {
+  get: (key: string) => Promise<string | null | undefined>;
+  put: (key: string, explanation: string) => Promise<void>;
+}
+
 export interface HandlerDeps {
   readonly config: HandlerConfig;
   readonly lookup: LookupService;
   readonly quota: QuotaClient;
   readonly cache: EntryCache;
+  readonly explain: (
+    input: ExplainInput,
+    signal: AbortSignal,
+  ) => Promise<string>;
+  readonly explanations: ExplanationCache;
   readonly verifyUser: (token: string) => Promise<string | null>;
-  readonly hashIp: (ip: string) => Promise<string>;
+  /** Salted, so neither addresses nor sentences are stored as they are. */
+  readonly hash: (text: string) => Promise<string>;
   readonly now: () => number;
 }
 
@@ -84,6 +99,95 @@ function parseBody(value: unknown): LookupBody | null {
   return { word: trimmed, source, target };
 }
 
+const MAX_CUES = 3;
+const MAX_CUE_LENGTH = 300;
+
+function parseExplainBody(value: unknown): ExplainInput | null {
+  if (typeof value !== 'object' || value === null) return null;
+  const { word, cues, current, source, target } = value as Record<
+    string,
+    unknown
+  >;
+  const lookup = parseBody({ word, source, target });
+  if (
+    !lookup ||
+    !Array.isArray(cues) ||
+    cues.length === 0 ||
+    cues.length > MAX_CUES ||
+    !cues.every(
+      (cue) =>
+        typeof cue === 'string' &&
+        cue.trim() !== '' &&
+        cue.length <= MAX_CUE_LENGTH,
+    ) ||
+    typeof current !== 'number' ||
+    !Number.isInteger(current) ||
+    current < 0 ||
+    current >= cues.length
+  ) {
+    return null;
+  }
+  return { ...lookup, cues: cues as string[], current };
+}
+
+/** Needs an account: unlike lookups, each person has a visible daily allowance. */
+async function handleExplain(
+  parsed: unknown,
+  request: Request,
+  deps: HandlerDeps,
+  json: (status: number, body: unknown) => Response,
+): Promise<Response> {
+  const body = parseExplainBody(parsed);
+  if (!body) return json(400, { error: 'bad_request' });
+  const authorization = request.headers.get('authorization');
+  const token = authorization?.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : null;
+  const userId = token ? await deps.verifyUser(token) : null;
+  if (!userId) return json(401, { error: 'login_required' });
+
+  const now = deps.now();
+  const day = new Date(now).toISOString().slice(0, 10);
+  const resetAt = nextUtcMidnight(now);
+  const subject = `explain:${userId}`;
+  const limit = deps.config.explainLimit;
+  const answer = async (explanation: string) =>
+    json(200, {
+      explanation,
+      remaining: Math.max(limit - (await deps.quota.used(subject, day)), 0),
+    });
+
+  // The same sentence reads the same for everyone, so asking again costs nothing.
+  const key = await deps.hash(
+    JSON.stringify([
+      body.word.toLocaleLowerCase(),
+      body.cues,
+      body.current,
+      body.source,
+      body.target,
+    ]),
+  );
+  const cached = await deps.explanations.get(key);
+  if (cached) return answer(cached);
+
+  if (!(await deps.quota.consume(subject, day, limit))) {
+    return json(429, { error: 'explain_limit', limit, resetAt });
+  }
+  if (!(await deps.quota.consume('global', day, deps.config.globalLimit))) {
+    await deps.quota.refund(subject, day);
+    return json(503, { error: 'service_busy', resetAt });
+  }
+  try {
+    const explanation = await deps.explain(body, request.signal);
+    await deps.explanations.put(key, explanation);
+    return await answer(explanation);
+  } catch {
+    await deps.quota.refund(subject, day);
+    await deps.quota.refund('global', day);
+    return json(502, { error: 'explain_failed' });
+  }
+}
+
 export async function handleRequest(
   request: Request,
   deps: HandlerDeps,
@@ -102,7 +206,8 @@ export async function handleRequest(
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders(origin) });
   }
-  if (new URL(request.url).pathname !== '/v1/lookup') {
+  const { pathname } = new URL(request.url);
+  if (pathname !== '/v1/lookup' && pathname !== '/v1/explain') {
     return json(404, { error: 'not_found' });
   }
   if (request.method !== 'POST')
@@ -113,6 +218,9 @@ export async function handleRequest(
     parsed = await request.json();
   } catch {
     // Same answer as a body of the wrong shape.
+  }
+  if (pathname === '/v1/explain') {
+    return handleExplain(parsed, request, deps, json);
   }
   const body = parseBody(parsed);
   if (!body) return json(400, { error: 'bad_request' });
@@ -156,7 +264,7 @@ export async function handleRequest(
   // Reinstalling gives a new install ID, so anonymous lookups also count by network.
   if (!userId) {
     const ip = request.headers.get('cf-connecting-ip') ?? 'unknown';
-    const ipSubject = `ip:${await deps.hashIp(ip)}`;
+    const ipSubject = `ip:${await deps.hash(ip)}`;
     if (!(await deps.quota.consume(ipSubject, day, limit))) {
       await giveBack();
       return busy();

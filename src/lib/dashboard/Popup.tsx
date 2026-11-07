@@ -7,6 +7,8 @@ import { Icon, ICONS } from './Icon';
 import type { DashboardServices } from './services';
 import { usePageTheme } from './theme';
 
+const PRODUCT_PAGE = 'https://coupletapp.com';
+
 /** Opens from the toolbar: what's due, the subtitles switch, and the account. */
 export function Popup({
   services,
@@ -60,7 +62,9 @@ export function Popup({
     <main className="popup" aria-busy={settings === null}>
       <header className="popup-head">
         <img src={iconUrl} alt="" />
-        <span>{productName}</span>
+        <a href={PRODUCT_PAGE} target="_blank" rel="noreferrer">
+          {productName}
+        </a>
       </header>
       {signedIn ? (
         <section className="popup-review">

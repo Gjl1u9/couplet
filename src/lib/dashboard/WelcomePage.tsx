@@ -263,6 +263,17 @@ function LanguagePicker({
           ? "Couldn't save that change. Try again."
           : 'You can change these any time in the subtitle settings.'}
       </p>
+      <p className="muted">
+        Subtitle lines go to Google Translate. Words you look up, and lines you
+        ask to explain, go through our server to an AI service.{' '}
+        <a
+          href="https://coupletapp.com/privacy/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Privacy policy
+        </a>
+      </p>
     </section>
   );
 }

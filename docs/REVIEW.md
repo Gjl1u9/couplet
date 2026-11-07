@@ -76,7 +76,7 @@ A button stays only if removing it causes a problem nothing else solves.
 
 Each grade shows what happened and a 「Undo」 button in the session head, because a keyboard grade is easy to press by accident. Grades are not coloured, so the buttons do not suggest an answer.
 
-Keyboard: Space toggles, `D` opens the dictionary, `1` `2` `3` grade, `P` plays Pronunciation, `C` collapses the neighbouring cues, `Z` undoes, Esc closes.
+A line under the grade buttons always lists the shortcuts, and each grade button shows its number. Touch screens hide both. Keyboard: Space toggles, `D` opens the dictionary, `1` `2` `3` grade, `P` plays Pronunciation, `C` collapses the neighbouring cues, `Z` undoes, Esc closes.
 
 A failed translation shows 「Couldn't load the translation.」 and 「Try again」 in its place. Words saved before this feature have only their sentence, so their Card has no neighbours or jump.
 

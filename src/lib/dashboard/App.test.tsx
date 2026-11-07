@@ -74,6 +74,7 @@ describe('App across languages', () => {
         return Promise.resolve();
       },
       onSettingsChange: () => () => undefined,
+      explain: () => Promise.reject(new Error('Unused')),
       previewSaveSound: vi.fn(),
       onVocabularyChange: () => () => undefined,
     };

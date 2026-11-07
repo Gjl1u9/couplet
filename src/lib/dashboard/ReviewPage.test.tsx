@@ -71,6 +71,7 @@ async function setup(lemmas: readonly string[], translated = ['譯文']) {
     settings: () => Promise.resolve(defaultSettings('zh-TW')),
     saveSettings: () => Promise.resolve(),
     onSettingsChange: () => () => undefined,
+    explain: () => Promise.reject(new Error('Unused')),
     previewSaveSound: () => undefined,
     onVocabularyChange: () => () => undefined,
   };
@@ -176,6 +177,22 @@ describe('ReviewPage', () => {
     await click(buttonNamed('Try again'));
     await settle();
     expect(q('.review-translation')?.textContent).toBe('譯文');
+  });
+
+  it('lists every shortcut under the grade buttons', async () => {
+    const { services } = await setup(['bank']);
+    await show(services);
+    const hints = q('.review-keys')?.textContent;
+    for (const hint of [
+      '123Grade',
+      'SpaceTranslation',
+      'DDictionary',
+      'PPronunciation',
+      'CNearby lines',
+      'ZUndo',
+    ]) {
+      expect(hints).toContain(hint);
+    }
   });
 
   it('grades by key, shows the interval, and can undo', async () => {

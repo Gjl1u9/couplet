@@ -39,16 +39,21 @@ function setup(overrides: Partial<HandlerDeps['config']> = {}) {
   };
   const lookUp = vi.fn(() => Promise.resolve<WordEntry | null>(ENTRY));
   const stored = new Map<string, WordEntry>();
+  const explain = vi.fn(() => Promise.resolve('River sides.'));
+  const explained = new Map<string, string>();
   const deps: HandlerDeps = {
     config: {
       abuseLimit: 2,
       globalLimit: 100,
+      explainLimit: 2,
       ...overrides,
     },
     lookup: { lookUp },
     quota: {
       consume: (subject, day, limit) => consume(counters(subject), day, limit),
       refund: (subject, day) => refund(counters(subject), day),
+      used: (subject, day) =>
+        Promise.resolve(counters(subject).map.get(day) ?? 0),
     },
     cache: {
       get: (key) => Promise.resolve(stored.get(key)),
@@ -58,10 +63,18 @@ function setup(overrides: Partial<HandlerDeps['config']> = {}) {
       },
     },
     verifyUser: (token) => Promise.resolve(token === 'good' ? 'user-1' : null),
-    hashIp: (ip) => Promise.resolve(`hash-${ip}`),
+    hash: (text) => Promise.resolve(`hash-${text}`),
+    explain,
+    explanations: {
+      get: (key) => Promise.resolve(explained.get(key)),
+      put: (key, text) => {
+        explained.set(key, text);
+        return Promise.resolve();
+      },
+    },
     now: () => NOW,
   };
-  return { deps, lookUp, counters, stored };
+  return { deps, lookUp, counters, stored, explain };
 }
 
 let words = 0;
@@ -258,6 +271,118 @@ describe('handleRequest', () => {
     expect(missing.status).toBe(404);
     const wrong = await handleRequest(request({ method: 'GET' }), deps);
     expect(wrong.status).toBe(405);
+  });
+});
+
+describe('explain', () => {
+  const USER = '2026-11-07';
+  const body = {
+    word: 'banks',
+    cues: ['We sat by the river.', 'The banks were steep.'],
+    current: 1,
+    source: 'en',
+    target: 'zh-TW',
+  };
+  const ask = (deps: HandlerDeps, overrides: object = {}, token = 'good') => {
+    const headers = new Headers({ 'content-type': 'application/json' });
+    if (token) headers.set('authorization', `Bearer ${token}`);
+    return handleRequest(
+      new Request('https://api.test/v1/explain', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ ...body, ...overrides }),
+      }),
+      deps,
+    );
+  };
+
+  it('explains for an account, and says what is left today', async () => {
+    const { deps, explain } = setup();
+    const response = await ask(deps);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      explanation: 'River sides.',
+      remaining: 1,
+    });
+    expect(explain).toHaveBeenCalledWith(body, expect.anything());
+  });
+
+  it.each([[''], ['forged']])('needs a real account (%j)', async (token) => {
+    const { deps, explain } = setup();
+    const response = await ask(deps, {}, token);
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: 'login_required',
+    });
+    expect(explain).not.toHaveBeenCalled();
+  });
+
+  it('stops at the daily allowance, saying when it returns', async () => {
+    const { deps, explain } = setup();
+    await ask(deps, { word: 'one' });
+    await ask(deps, { word: 'two' });
+    const response = await ask(deps, { word: 'three' });
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({
+      error: 'explain_limit',
+      limit: 2,
+      resetAt: '2026-11-08T00:00:00.000Z',
+    });
+    expect(explain).toHaveBeenCalledTimes(2);
+  });
+
+  it('charges nothing for an explanation already written', async () => {
+    const { deps, explain, counters } = setup();
+    await ask(deps);
+    const response = await ask(deps);
+    await expect(response.json()).resolves.toMatchObject({ remaining: 1 });
+    expect(explain).toHaveBeenCalledTimes(1);
+    expect(counters('explain:user-1').map.get(USER)).toBe(1);
+  });
+
+  it('still answers a repeat after the allowance is used', async () => {
+    const { deps } = setup();
+    await ask(deps);
+    await ask(deps, { word: 'two' });
+    const response = await ask(deps);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ remaining: 0 });
+  });
+
+  it('charges nothing for a failure', async () => {
+    const { deps, explain, counters } = setup();
+    explain.mockRejectedValueOnce(new Error('Down'));
+    const response = await ask(deps);
+    expect(response.status).toBe(502);
+    expect(counters('explain:user-1').map.get(USER)).toBe(0);
+    expect(counters('global').map.get(USER)).toBe(0);
+  });
+
+  it('reads as busy past the service limit, and gives the allowance back', async () => {
+    const { deps, counters } = setup({ globalLimit: 0 });
+    const response = await ask(deps);
+    expect(response.status).toBe(503);
+    expect(counters('explain:user-1').map.get(USER)).toBe(0);
+  });
+
+  it.each([
+    ['no lines', { cues: [] }],
+    ['too many lines', { cues: ['a', 'b', 'c', 'd'] }],
+    ['a long line', { cues: ['x'.repeat(301)], current: 0 }],
+    ['a line out of range', { current: 2 }],
+    ['a fractional line', { current: 0.5 }],
+    ['a bad language', { target: 'en"; drop' }],
+  ])('refuses %s, before spending anything', async (_name, overrides) => {
+    const { deps, explain } = setup();
+    const response = await ask(deps, overrides);
+    expect(response.status).toBe(400);
+    expect(explain).not.toHaveBeenCalled();
+  });
+
+  it('keeps lookups free of the allowance', async () => {
+    const { deps, counters } = setup();
+    await handleRequest(request({ token: 'good' }), deps);
+    expect(counters('explain:user-1').map.size).toBe(0);
   });
 });
 
