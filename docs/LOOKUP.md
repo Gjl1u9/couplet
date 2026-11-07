@@ -10,7 +10,7 @@ Word lookups go through our Cloudflare Worker, [`worker/`](../worker), at `api.c
 
 `POST /v1/explain` with `{ word, cues, current, source, target }` and a Supabase access token. It needs an account, and sends up to three lines of at most 300 characters to the model, which writes two or three sentences on the word's meaning, part of speech, and grammar.
 
-Each account gets 20 a day, set by `EXPLAIN_DAILY_LIMIT`, resetting at midnight UTC. Unlike lookups, this allowance is shown, as 「18 left today」. The same word in the same lines is cached by a salted hash, for everyone, and costs nothing to ask again, even past the allowance. Failures are refunded.
+Each account gets 50 a day, set by `EXPLAIN_DAILY_LIMIT`, resetting at midnight UTC. Unlike lookups, this allowance is shown, as 「48 left today」. The same word in the same lines is cached by a salted hash, for everyone, and costs nothing to ask again, even past the allowance. Failures are refunded.
 
 ## Ceilings
 

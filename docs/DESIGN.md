@@ -110,7 +110,7 @@ At the player's top right, in dark paper colours, 320px wide, so it clears the s
 
 Two buttons in our own frosted pill, just left of YouTube's right controls and apart from them: a translucent ink background over a blur, with a thin white border, at YouTube's control height.
 
-- **Subtitle Switch:** the product icon, which turns Dual Subtitles on and off in one click. Off, it turns grey, a line strikes it, and the label says what a click will do.
+- **Subtitle Switch:** the product mark, which turns Dual Subtitles on and off in one click. Off, it turns grey, a line strikes it, and the label says what a click will do.
 - **Settings:** white sliders with vermilion knobs, so it reads apart from YouTube's own white gear. It opens the Settings Panel.
 
 Neither button changes on hover, so the pill stays still under the pointer. The product's colour marks these two buttons as ours, which is the one use of vermilion over video beyond principle 1.
@@ -166,6 +166,15 @@ The only sound is a short two-note chime when a word is saved. It is synthesized
 - Interface copy is in English, in short sentences people actually say, such as "Couldn't reach the dictionary".
 - Buttons state what happens, such as "Try again".
 - Error messages say what happened and what to do.
+
+## Logo
+
+The mark is two rounded squares offset against each other, with the overlap left empty: the original in `ink` and its translation in `accent`. The wordmark is "Couplet" in `sans` 600. [`brand/`](../brand) holds the sources, and [`prototype/logo.html`](../prototype/logo.html) shows the options we weighed.
+
+- **In pages:** draw it inline with `Logo` ([`Logo.tsx`](../src/lib/dashboard/Logo.tsx)), so `ink` and `accent` follow the theme. Never use a PNG in a page.
+- **Toolbar and store:** the toolbar and extensions page ignore our theme, so these files use mid-tones: `#7a8087` and `#df4e35`. [`brand/toolbar.svg`](../brand/toolbar.svg) is drawn on a 16-grid so every edge is a whole pixel at 16, 32, and 48px; [`brand/store.svg`](../brand/store.svg) holds 96px of artwork inside the 128px file.
+- **Over video:** the Subtitle Switch draws the 16-grid mark in white and `subtitle-mark`, or in grey when off.
+- **PNGs:** `node scripts/build-icons.mjs` writes `public/icon/` from `brand/`. Edit the SVGs, never the PNGs.
 
 ## Icons
 

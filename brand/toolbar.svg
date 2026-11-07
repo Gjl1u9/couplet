@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="geometricPrecision">
+  <!-- 16-grid version for the toolbar. Every edge is a whole pixel at 16, 32, and 48px.
+       Colours are mid-tones so the mark holds up on light and dark toolbars. -->
+  <path fill="#7a8087" d="M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z"/>
+  <path fill="#df4e35" d="M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z"/>
+</svg>

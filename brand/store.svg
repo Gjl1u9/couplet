@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-5.333 -5.333 74.667 74.667">
+  <!-- 128px store and extensions-page icon: 96px of artwork centred in 128px.
+       Same mid-tone colours as the toolbar version. -->
+  <path fill="#7a8087" d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"/>
+  <path fill="#df4e35" d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"/>
+</svg>

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>產品 logo 方向</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: var(--space-6) var(--space-4);
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      main {
+        display: grid;
+        gap: var(--space-4);
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1,
+      h2 {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+      }
+
+      .note {
+        margin-top: var(--space-1);
+        color: var(--ink-muted);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .direction {
+        display: grid;
+        gap: var(--space-4);
+        padding: var(--space-5);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-3);
+      }
+
+      .cell {
+        display: grid;
+        gap: var(--space-2);
+        align-content: start;
+      }
+
+      .cell > .label {
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+      }
+
+      .stage {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        min-height: 96px;
+        padding: var(--space-4);
+        background: var(--ground);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+      }
+
+      .stage-dark {
+        background: #0f1115;
+        border-color: #2d323b;
+      }
+
+      .stage-accent {
+        background: #c4371c;
+        border-color: #c4371c;
+        color: #ffffff;
+      }
+
+      .stage-bare {
+        background: var(--surface);
+      }
+
+      .lockup {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      .wordmark {
+        display: grid;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 18px;
+      }
+
+      .wordmark span:last-child {
+        color: var(--ink-muted);
+        font-weight: 500;
+      }
+
+      .stage-accent .wordmark span:last-child {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .mark {
+        display: block;
+        flex: none;
+      }
+
+      .sizes {
+        align-items: flex-end;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+
+    <script>
+      // Colors a mark is drawn with. `bg` fills any cut-out, so it must match
+      // the surface the mark sits on.
+      const palettes = {
+        color: {
+          p: 'var(--ink)',
+          s: 'var(--accent)',
+          t: 'var(--ink-muted)',
+          bg: 'var(--bg)',
+        },
+        mono: {
+          p: 'currentColor',
+          s: 'currentColor',
+          t: 'currentColor',
+          bg: 'var(--bg)',
+        },
+        reverse: {
+          p: '#ffffff',
+          s: '#ffffff',
+          t: 'rgba(255,255,255,0.62)',
+          bg: '#c4371c',
+        },
+      };
+
+      // Path for a rounded rectangle where each corner has its own radius,
+      // in the order top-left, top-right, bottom-right, bottom-left.
+      const box = (x, y, w, h, [a, b, c, d]) =>
+        `M${x + a} ${y}H${x + w - b}${b ? `A${b} ${b} 0 0 1 ${x + w} ${y + b}` : ''}V${
+          y + h - c
+        }${c ? `A${c} ${c} 0 0 1 ${x + w - c} ${y + h}` : ''}H${x + d}${
+          d ? `A${d} ${d} 0 0 1 ${x} ${y + h - d}` : ''
+        }V${y + a}${a ? `A${a} ${a} 0 0 1 ${x + a} ${y}` : ''}Z`;
+
+      const directions = [
+        {
+          id: 'couplet',
+          name: 'A　對聯',
+          note: '上長下短兩條橫塊：原文在上，譯文在下，上排尾端一塊朱紅是正在看的字。最直接，也最接近你們的設計規範。',
+          draw: ({ p, s, t }) => `
+            <path fill="${p}" d="${box(2, 8, 38, 26, [9, 9, 9, 9])}"/>
+            <path fill="${s}" d="${box(44, 8, 18, 26, [9, 9, 9, 9])}"/>
+            <path fill="${t}" d="${box(2, 38, 44, 18, [8, 8, 8, 8])}"/>`,
+        },
+        {
+          id: 'overlap',
+          name: 'B　重疊',
+          note: '兩個圓角方塊錯位疊在一起，交疊處挖空：原文與譯文在同一個畫面裡並存。顏色只有墨與朱紅，最乾淨。',
+          draw: ({ p, s, bg }) => `
+            <defs><clipPath id="clip-overlap"><path d="${box(4, 4, 38, 38, [11, 11, 11, 11])}"/></clipPath></defs>
+            <path fill="${p}" d="${box(4, 4, 38, 38, [11, 11, 11, 11])}"/>
+            <path fill="${s}" d="${box(22, 22, 38, 38, [11, 11, 11, 11])}"/>
+            <path clip-path="url(#clip-overlap)" fill="${bg}" d="${box(22, 22, 38, 38, [11, 11, 11, 11])}"/>`,
+        },
+        {
+          id: 'monogram',
+          name: 'C　D 字',
+          note: '把 Dual 的 D 用兩片切開：上半墨色，下半朱紅，中間的細縫就是原文與譯文之間的行距。有字母，比較像品牌。',
+          draw: ({ p, s }) => `
+            <path fill="${p}" d="M10 6H26A25 25 0 0 1 50.9 29H10Z"/>
+            <path fill="${s}" d="M10 35H50.9A25 25 0 0 1 26 60H10Z" transform="translate(0 -4)"/>`,
+        },
+        {
+          id: 'bubbles',
+          name: 'D　雙對話框',
+          note: '兩個錯位的對話框，各有一個直角：一個說原文、一個說譯文。最容易被看成「翻譯」，但也最像別的通訊軟體。',
+          draw: ({ p, s, bg }) => `
+            <path fill="${p}" d="${box(4, 6, 38, 28, [10, 10, 10, 0])}"/>
+            <path fill="${s}" stroke="${bg}" stroke-width="4" paint-order="stroke" d="${box(22, 28, 38, 28, [0, 10, 10, 10])}"/>`,
+        },
+      ];
+
+      const mark = (direction, size, palette, id) => {
+        const body = direction
+          .draw(palettes[palette])
+          .replaceAll('clip-overlap', `clip-overlap-${id}`);
+        return `<svg class="mark" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
+      };
+
+      const lockup = (direction, size, palette, id) => `
+        <div class="lockup">
+          ${mark(direction, size, palette, id)}
+          <div class="wordmark"><span>Couplet</span></div>
+        </div>`;
+
+      const stage = (cls, bg, inner) =>
+        `<div class="stage ${cls}" style="--bg:${bg}">${inner}</div>`;
+
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <header>
+          <h1>產品 logo：四個方向</h1>
+          <p class="note">
+            都用簡單幾何形狀，配上字標 Couplet（無襯線 600）。定案：B 重疊，正式檔案在 brand/，檢查頁見 logo-check.html。
+          </p>
+        </header>`;
+
+      directions.forEach((direction, index) => {
+        const id = direction.id;
+        const section = document.createElement('section');
+        section.className = 'direction';
+        section.dataset.direction = id;
+        section.innerHTML = `
+          <div>
+            <h2>${direction.name}</h2>
+            <p class="note">${direction.note}</p>
+          </div>
+          <div class="row">
+            <div class="cell">
+              <span class="label">淺色底</span>
+              ${stage('', 'var(--ground)', lockup(direction, 44, 'color', id + 'a'))}
+            </div>
+            <div class="cell" data-theme="dark">
+              <span class="label">深色底</span>
+              ${stage('stage-dark', '#0f1115', lockup(direction, 44, 'color', id + 'b'))}
+            </div>
+          </div>
+          <div class="row">
+            <div class="cell">
+              <span class="label">單色</span>
+              ${stage('stage-bare', 'var(--surface)', lockup(direction, 36, 'mono', id + 'c'))}
+            </div>
+            <div class="cell">
+              <span class="label">反白（朱紅底）</span>
+              ${stage('stage-accent', '#c4371c', lockup(direction, 36, 'reverse', id + 'd'))}
+            </div>
+            <div class="cell">
+              <span class="label">標誌大小：96 / 48 / 32 / 24 / 16</span>
+              ${stage(
+                'sizes stage-bare',
+                'var(--surface)',
+                [96, 48, 32, 24, 16]
+                  .map((size) =>
+                    mark(direction, size, 'color', id + 's' + size),
+                  )
+                  .join(''),
+              )}
+            </div>
+          </div>`;
+        app.append(section);
+      });
+    </script>
+  </body>
+</html>

@@ -12,6 +12,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 - Save a phrase: drag across words, then press the star. Phrases come back for review like any other word, up to 80
   characters.
 
+### Changed
+
+- Explain with AI now allows 50 explanations a day per account, up from 20.
+
 ## [0.1.1] - 2026-11-07
 
 ### Changed
