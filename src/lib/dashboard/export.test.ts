@@ -31,6 +31,17 @@ const WORD: SavedWord = {
 };
 
 describe('wordsToCsv', () => {
+  it("keeps a saved phrase's translation in one piece", () => {
+    const csv = wordsToCsv([
+      {
+        ...WORD,
+        lemma: 'okay, let us go',
+        senses: [{ meaning: '好，走吧', example: '', translation: '' }],
+      },
+    ]);
+    expect(csv).toContain('"okay, let us go","/bæŋk/","好，走吧"');
+  });
+
   it('starts with a BOM and a header', () => {
     const csv = wordsToCsv([]);
     expect(

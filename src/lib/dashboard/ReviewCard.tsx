@@ -4,7 +4,7 @@ import { ICON_SPEAK } from '../ui/dom';
 import type { Encounter, SavedWord } from '../vocabulary/vocabulary';
 import { jumpLink } from '../youtube/origin';
 import { DictionaryButton } from './Dictionary';
-import { formatTimestamp } from './format';
+import { formatTimestamp, isLongText } from './format';
 import { Icon, ICONS } from './Icon';
 import { LevelTrack } from './LevelTrack';
 import type { DashboardServices } from './services';
@@ -134,7 +134,13 @@ export function ReviewCard({
         />
       </div>
       <div className="review-word-row">
-        <h1 className="review-word" lang={word.source} dir="auto">
+        <h1
+          className={
+            isLongText(encounter.form) ? 'review-word is-long' : 'review-word'
+          }
+          lang={word.source}
+          dir="auto"
+        >
           {encounter.form}
         </h1>
         <button

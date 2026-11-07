@@ -90,7 +90,7 @@ The Lookup Panel shows the word and its one or two most common senses, each as a
 - Its width follows its content, from 180px to 360px.
 - The word stays on one line: phonetics move to their own line first, and only a word wider than the row breaks.
 - It sits above the strip, so the subtitle stays readable, connected to the token by a line. It stays 16px inside the player, opens below the strip when the strip is too high for it, and scrolls in a small player rather than leaving the player.
-- For selected text, the first row holds the text in `phrase` style and a play button, and the translation sits in one meaning chip.
+- For selected text, the first row holds the text in `phrase` style, a save button once it has a translation, and a play button. The translation sits in one meaning chip.
 - Clicking the token again, clicking outside, or pressing Esc closes it, so it needs no close button.
 - While loading, the clicked word shows immediately and a skeleton holds the senses' place.
 - Phonetics are optional: the row simply omits them when the source has none.
@@ -142,7 +142,7 @@ Explain with AI is a quiet text button at 12px, with a Beta label and a filled s
 
 ## Review Card
 
-Behaviour is in [`REVIEW.md`](REVIEW.md). The Card's title is the largest type on the page. Grade buttons are uncoloured, so they do not suggest an answer. Keys appear as small bordered caps: a number on each grade button, and a line of every shortcut under them, in `ink-muted`.
+Behaviour is in [`REVIEW.md`](REVIEW.md). The Card's title is the largest type on the page, and over 24 characters it is 24/32, or 22/30 when narrow, so a saved phrase leaves room for the sentence. Grade buttons are uncoloured, so they do not suggest an answer. Keys appear as small bordered caps: a number on each grade button, and a line of every shortcut under them, in `ink-muted`.
 
 ## Components
 

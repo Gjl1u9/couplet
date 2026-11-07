@@ -1,5 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { splitMeaning, toWordEntry } from './entry';
+import {
+  meaningsOf,
+  phraseEntry,
+  phraseLemma,
+  splitMeaning,
+  toWordEntry,
+} from './entry';
+
+describe('saved phrases', () => {
+  it('gives every spelling of a phrase one lemma', () => {
+    expect(phraseLemma(' Give  Up\n')).toBe('give up');
+    expect(phraseLemma('お疲れ様 でした')).toBe('お疲れ様 でした');
+  });
+
+  it('builds an entry with one meaning and no example', () => {
+    expect(phraseEntry('Give Up', '放棄')).toEqual({
+      lemma: 'give up',
+      phonetic: null,
+      senses: [{ meaning: '放棄', example: '', translation: '' }],
+    });
+  });
+
+  it("keeps a phrase's meaning whole, and still splits a word's", () => {
+    expect(
+      meaningsOf({ meaning: '好，走吧', example: '', translation: '' }),
+    ).toEqual(['好，走吧']);
+    expect(
+      meaningsOf({ meaning: '銀行，河岸', example: 'x', translation: 'y' }),
+    ).toEqual(['銀行', '河岸']);
+  });
+});
 
 const SENSE = {
   meaning: '銀行',

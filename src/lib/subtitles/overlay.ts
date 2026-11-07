@@ -65,11 +65,6 @@ export function clampPosition(
   };
 }
 
-export interface TextSelection {
-  readonly text: string;
-  readonly sentence: string;
-}
-
 export interface OverlayOptions {
   readonly sourceLanguage?: () => string | null;
   /** Whether a missing translation is still loading, so its line keeps its place. */
@@ -79,10 +74,8 @@ export interface OverlayOptions {
   readonly onToken?: (cue: WordInCue, element: HTMLElement) => void;
   /** A drag reached a second token. */
   readonly onSelectionStart?: () => void;
-  readonly onSelection?: (
-    selection: TextSelection,
-    anchor: HTMLElement,
-  ) => void;
+  /** The sentence and offset are where the Selection starts, even if it crosses cues. */
+  readonly onSelection?: (selection: WordInCue, anchor: HTMLElement) => void;
   /** A started drag ended back on a single token. */
   readonly onSelectionCancel?: () => void;
   readonly onMoveStart?: () => void;
@@ -221,14 +214,13 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
   const allTokens = () => [...strip.querySelectorAll<HTMLElement>('.token')];
 
   /** Keeps the text between tokens on a line, and joins lines like the captions do. */
-  const selectionOf = (tokens: readonly HTMLElement[]): TextSelection => {
+  const selectionOf = (tokens: readonly HTMLElement[]): WordInCue => {
     const lines = new Map<HTMLElement, HTMLElement[]>();
     for (const token of tokens) {
       const line = token.parentElement;
       if (line) lines.set(line, [...(lines.get(line) ?? []), token]);
     }
     let text = '';
-    const sentences: string[] = [];
     for (const [line, inLine] of lines) {
       const whole = line.textContent;
       const first = inLine[0];
@@ -241,9 +233,13 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
           Number(last.dataset.offset) + last.textContent.length,
         ),
       );
-      sentences.push(whole);
     }
-    return { text, sentence: sentences.reduce(joinText, '') };
+    const start = tokens[0];
+    return {
+      word: text,
+      sentence: start?.parentElement?.textContent ?? '',
+      offset: Number(start?.dataset.offset ?? 0),
+    };
   };
 
   /** Stops the click that ends a drag, wherever the pointer was released. */

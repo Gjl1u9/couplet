@@ -3,14 +3,14 @@ export const STOP_REVIEWING_HINT =
   'Takes this word off your review schedule. It stays in Words.';
 
 export const stoppedMessage = (lemma: string) =>
-  `${lemma} won't come up for review again. It stays in Words as Known.`;
+  `${shortLabel(lemma)} won't come up for review again. It stays in Words as Known.`;
 
 export const restoredMessage = (lemma: string) =>
-  `${lemma} is back in review, starting from the first step.`;
+  `${shortLabel(lemma)} is back in review, starting from the first step.`;
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Encounter, SavedWord } from '../vocabulary/vocabulary';
-import { markWord } from './format';
+import { markWord, shortLabel } from './format';
 import { Icon, ICONS } from './Icon';
 import type { DashboardServices } from './services';
 
@@ -112,7 +112,7 @@ export function DeleteConfirm({
   return (
     <>
       <span className="confirm" role="alert">
-        Delete {word.lemma} and its progress?
+        Delete {shortLabel(word.lemma)} and its progress?
       </span>
       <button className="action" type="button" ref={cancel} onClick={onCancel}>
         Cancel

@@ -1,9 +1,14 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { WordEntry } from '../lookup/types';
-import { createLookupPanel, type LookupPanelOptions } from './lookup-panel';
+import {
+  createLookupPanel,
+  senseRow,
+  type LookupPanelOptions,
+} from './lookup-panel';
 
 const CUE = { word: 'banks', sentence: 'the banks', offset: 4 };
+const PHRASE = { word: 'Get rid of', sentence: 'Get rid of it', offset: 0 };
 const ENTRY: WordEntry = {
   lemma: 'bank',
   phonetic: '/bæŋk/',
@@ -390,12 +395,81 @@ describe('createLookupPanel', () => {
   describe('selected text', () => {
     it('shows the text and its translation in one chip', async () => {
       const { panel, anchor, find } = setup();
-      panel.showSelection('get rid of', anchor);
-      expect(find('.lookup-phrase')?.textContent).toBe('get rid of');
+      panel.showSelection(PHRASE, anchor);
+      expect(find('.lookup-phrase')?.textContent).toBe('Get rid of');
       expect(find('.skeleton')).not.toBeNull();
       await flush();
       expect(find('.meaning-chip')?.textContent).toBe('擺脫');
       expect(find('.skeleton')).toBeNull();
+    });
+
+    it('saves the text as a phrase once it is translated', async () => {
+      const setSaved = vi.fn(() => Promise.resolve());
+      const { panel, anchor, find } = setup({ setSaved });
+      panel.showSelection(PHRASE, anchor);
+      expect(find('.save')).toBeNull();
+      await flush();
+      const save = find('.save');
+      expect(save?.getAttribute('aria-label')).toBe('Save phrase');
+      save?.click();
+      await flush();
+      expect(setSaved).toHaveBeenCalledWith(
+        {
+          lemma: 'get rid of',
+          phonetic: null,
+          senses: [{ meaning: '擺脫', example: '', translation: '' }],
+        },
+        PHRASE,
+        true,
+      );
+      expect(find('.save')?.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('shows a saved phrase as saved', async () => {
+      const onSeenAgain = vi.fn();
+      const { panel, anchor, find } = setup({
+        isSaved: () => Promise.resolve(true),
+        onSeenAgain,
+      });
+      panel.showSelection(PHRASE, anchor);
+      await flush();
+      expect(find('.save')?.getAttribute('aria-pressed')).toBe('true');
+      expect(onSeenAgain).toHaveBeenCalledTimes(1);
+    });
+
+    it('accepts text up to the limit, and no longer', async () => {
+      const { panel, anchor, other, find } = setup();
+      panel.showSelection({ ...PHRASE, word: 'a'.repeat(80) }, anchor);
+      await flush();
+      expect(find('.save')).not.toBeNull();
+      panel.showSelection({ ...PHRASE, word: 'a'.repeat(81) }, other);
+      await flush();
+      expect(find('.save')).toBeNull();
+      expect(find('.meaning-chip')?.textContent).toBe('擺脫');
+    });
+
+    it.each([
+      ['failed', () => Promise.reject(new Error('down'))],
+      ['not needed', () => Promise.resolve(null)],
+      ['empty', () => Promise.resolve(' ')],
+    ])('cannot save when the translation is %s', async (_, translate) => {
+      const { panel, anchor, find } = setup({
+        translateSelection: translate,
+      });
+      panel.showSelection(PHRASE, anchor);
+      await flush();
+      expect(find('.save')).toBeNull();
+    });
+
+    it('shows no example row for a saved phrase', () => {
+      const row = senseRow({
+        meaning: '好，走吧',
+        example: '',
+        translation: '',
+      });
+      expect(row.querySelectorAll('.meaning-chip')).toHaveLength(1);
+      expect(row.querySelector('.couplet-original')).toBeNull();
+      expect(row.querySelector('.couplet-translation')).toBeNull();
     });
 
     it('offers a retry when translation fails', async () => {
@@ -404,7 +478,7 @@ describe('createLookupPanel', () => {
         .mockRejectedValueOnce(new Error('down'))
         .mockResolvedValueOnce('擺脫');
       const { panel, anchor, find } = setup({ translateSelection });
-      panel.showSelection('get rid of', anchor);
+      panel.showSelection(PHRASE, anchor);
       await flush();
       expect(find('.alert')?.textContent).toContain(
         "Couldn't reach the translator",
@@ -418,7 +492,7 @@ describe('createLookupPanel', () => {
       const { panel, anchor, find } = setup({
         translateSelection: () => Promise.resolve(null),
       });
-      panel.showSelection('hello there', anchor);
+      panel.showSelection({ ...PHRASE, word: 'hello there' }, anchor);
       await flush();
       expect(find('.meaning-chip')).toBeNull();
       expect(find('.lookup-senses')?.hidden).toBe(true);
@@ -432,7 +506,7 @@ describe('createLookupPanel', () => {
             finish = resolve;
           }),
       });
-      panel.showSelection('get rid of', anchor);
+      panel.showSelection(PHRASE, anchor);
       panel.toggle(CUE, other);
       finish('late');
       await flush();

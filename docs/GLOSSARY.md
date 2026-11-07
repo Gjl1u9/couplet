@@ -20,7 +20,7 @@ The interface, designs, and code all use these names. Each thing has one name.
 | Subtitle Strip | The one background around a couplet and its Context Lines.                                |
 | Context Line   | The previous or next cue, shown in the strip when turned on. `showContext` in code.       |
 | Grip           | The six-dot handle that moves the strip.                                                  |
-| Selection      | Text picked by dragging across tokens, translated by Google.                              |
+| Selection      | Text picked by dragging across tokens, translated by Google. It can be saved as a phrase. |
 
 ## Settings
 
@@ -44,7 +44,7 @@ The interface, designs, and code all use these names. Each thing has one name.
 | Word Entry    | A word's lemma, phonetics, and senses. `WordEntry` in code.                                  |
 | Sense         | One meaning of a word, with a couplet example.                                               |
 | Lookup Panel  | The compact panel shown over the video after a token is clicked.                             |
-| Saved Word    | A Word Entry the user saved, with its Encounters and schedule. `SavedWord` in code.          |
+| Saved Word    | A word or phrase the user saved, with its Encounters and schedule. `SavedWord` in code.      |
 | Vocabulary    | The user's Saved Words. `createVocabulary` in code.                                          |
 | Pronunciation | The word spoken by a browser voice, from the play button.                                    |
 | Phonetics     | A phonetic transcription or reading of the word, when the source has one.                    |

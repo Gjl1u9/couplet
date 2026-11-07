@@ -75,9 +75,9 @@ export default defineContentScript({
           video.pause();
         }
       },
-      onSelection: ({ text }, anchor) => {
+      onSelection: (cue, anchor) => {
         overlay.selectToken(anchor);
-        lookupPanel.showSelection(text, anchor);
+        lookupPanel.showSelection(cue, anchor);
       },
       onSelectionCancel: () => {
         if (!lookupPanel.isOpen()) resumeIfPausedByLookup();

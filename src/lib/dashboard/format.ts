@@ -11,6 +11,18 @@ function amount(seconds: number): { count: number; unit: string } {
   return { count: Math.round(seconds / DAY), unit: 'day' };
 }
 
+const SHORT_TEXT_LENGTH = 24;
+
+/** A saved phrase can be long enough to need smaller type or a shorter label. */
+export const isLongText = (text: string) =>
+  Array.from(text).length > SHORT_TEXT_LENGTH;
+
+/** Keeps a message about a saved phrase to one line. */
+export const shortLabel = (text: string) =>
+  isLongText(text)
+    ? `${Array.from(text).slice(0, SHORT_TEXT_LENGTH).join('').trimEnd()}…`
+    : text;
+
 /** `10 min`, `1 hour`, or `3 days`. */
 export function formatInterval(seconds: number): string {
   const { count, unit } = amount(seconds);

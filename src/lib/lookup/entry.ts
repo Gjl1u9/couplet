@@ -29,6 +29,24 @@ export function splitMeaning(meaning: string): string[] {
     .filter(Boolean);
 }
 
+/** The longest text the service accepts as a word, so also the longest saved phrase. */
+export const MAX_WORD_LENGTH = 80;
+
+/** A phrase's meaning is a translation, whose commas belong to it. */
+export const meaningsOf = (sense: Sense): string[] =>
+  sense.example ? splitMeaning(sense.meaning) : [sense.meaning];
+
+/** Saving `Give Up` after `give  up` adds to the same Saved Word. */
+export const phraseLemma = (text: string): string =>
+  text.trim().replace(/\s+/gu, ' ').toLocaleLowerCase();
+
+/** A Selection as a Word Entry. Its translation is its one meaning, with no example. */
+export const phraseEntry = (text: string, translation: string): WordEntry => ({
+  lemma: phraseLemma(text),
+  phonetic: null,
+  senses: [{ meaning: translation, example: '', translation: '' }],
+});
+
 /** Checks untrusted data, and returns `null` unless it has a lemma and a usable sense. */
 export function toWordEntry(value: unknown): WordEntry | null {
   if (!isRecord(value) || !Array.isArray(value.senses)) return null;

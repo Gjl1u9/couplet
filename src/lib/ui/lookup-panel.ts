@@ -1,4 +1,4 @@
-import { splitMeaning } from '../lookup/entry';
+import { MAX_WORD_LENGTH, meaningsOf, phraseEntry } from '../lookup/entry';
 import type { PanelTheme } from '../settings/settings';
 import type { Sense, WordEntry, WordInCue } from '../lookup/types';
 import {
@@ -45,22 +45,23 @@ export interface LookupPanel {
   /** Opens for this token, or closes when it is already showing it. */
   toggle: (cue: WordInCue, anchor: HTMLElement) => void;
   /** Shows the translation of text the user selected across tokens. */
-  showSelection: (text: string, anchor: HTMLElement) => void;
+  showSelection: (cue: WordInCue, anchor: HTMLElement) => void;
   close: () => void;
   isOpen: () => boolean;
 }
 
 /** Also used by the Review Card's dictionary, so both look the same. */
-export function senseRow({
-  meaning,
-  example,
-  translation,
-}: Sense): HTMLElement {
+export function senseRow(sense: Sense): HTMLElement {
   const row = element('div', 'lookup-sense');
   const parts = [
-    element('div', 'lookup-meaning', ...splitMeaning(meaning).map(meaningChip)),
-    element('div', 'couplet-original', example),
-    element('div', 'couplet-translation', translation),
+    element('div', 'lookup-meaning', ...meaningsOf(sense).map(meaningChip)),
+    // A saved phrase has no example.
+    ...(sense.example
+      ? [
+          element('div', 'couplet-original', sense.example),
+          element('div', 'couplet-translation', sense.translation),
+        ]
+      : []),
   ];
   for (const part of parts) part.dir = 'auto';
   row.append(...parts);
@@ -129,7 +130,11 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
     if (byKeyboard && previous?.isConnected) previous.focus();
   };
 
-  const saveButton = (cue: WordInCue, entry: WordEntry) => {
+  const saveButton = (
+    cue: WordInCue,
+    entry: WordEntry,
+    saveLabel = 'Save word',
+  ) => {
     let saved = false;
     const show = (next: boolean) => {
       saved = next;
@@ -137,7 +142,7 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
       button.setAttribute('aria-pressed', String(saved));
       button.setAttribute(
         'aria-label',
-        saved ? 'Remove from saved words' : 'Save word',
+        saved ? 'Remove from saved words' : saveLabel,
       );
     };
     const apply = (next: boolean) => {
@@ -148,7 +153,7 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
       });
     };
     let asking = false;
-    const button = iconButton('save', 'Save word', ICON_STAR, () => {
+    const button = iconButton('save', saveLabel, ICON_STAR, () => {
       const next = !saved;
       if (!next || !options.beforeSave) {
         apply(next);
@@ -249,10 +254,11 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
     );
   };
 
-  const loadSelection = (text: string) => {
+  const loadSelection = (cue: WordInCue) => {
     if (!panel) return;
     generation += 1;
     const current = generation;
+    const text = cue.word;
     const heading = element('span', 'lookup-phrase', text);
     heading.dir = 'auto';
     const speak = iconButton('speak', 'Play pronunciation', ICON_SPEAK, () => {
@@ -281,6 +287,11 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
     options.translateSelection(text).then(
       (translation) => {
         if (current !== generation) return;
+        if (translation?.trim() && text.length <= MAX_WORD_LENGTH) {
+          speak.before(
+            saveButton(cue, phraseEntry(text, translation), 'Save phrase'),
+          );
+        }
         body.hidden = translation === null;
         body.replaceChildren(
           ...(translation === null
@@ -294,7 +305,7 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
         const retry = element('button', 'text-button', 'Try again');
         retry.type = 'button';
         retry.addEventListener('click', () => {
-          loadSelection(text);
+          loadSelection(cue);
         });
         body.replaceChildren(
           element(
@@ -354,9 +365,9 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
         load(cue);
       });
     },
-    showSelection(text, nextAnchor) {
+    showSelection(cue, nextAnchor) {
       show(nextAnchor, () => {
-        loadSelection(text);
+        loadSelection(cue);
       });
     },
     close: () => {

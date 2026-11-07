@@ -4,9 +4,46 @@ import {
   formatInterval,
   formatIntervalAdjective,
   formatTimestamp,
+  isLongText,
   markWord,
   savedGroup,
+  shortLabel,
 } from './format';
+
+describe('long saved phrases', () => {
+  it('leaves words and short phrases alone', () => {
+    expect(isLongText('give up')).toBe(false);
+    expect(shortLabel('give up')).toBe('give up');
+    expect(shortLabel('a'.repeat(24))).toBe('a'.repeat(24));
+  });
+
+  it('shortens the rest without a space before the ellipsis', () => {
+    const phrase = 'we need to get rid of all the old stuff';
+    expect(isLongText(phrase)).toBe(true);
+    expect(shortLabel(phrase)).toBe('we need to get rid of al…');
+    expect(shortLabel(`${'a'.repeat(23)} b`)).toBe(`${'a'.repeat(23)}…`);
+  });
+
+  it('never cuts an emoji in half', () => {
+    expect(shortLabel('😀'.repeat(30))).toBe(`${'😀'.repeat(24)}…`);
+  });
+});
+
+describe('markWord with a phrase', () => {
+  it('marks the whole phrase where it was selected', () => {
+    expect(
+      markWord('Get rid of it, get rid of them', 'get rid of', 15),
+    ).toEqual({
+      before: 'Get rid of it, ',
+      mark: 'get rid of',
+      after: ' them',
+    });
+  });
+
+  it('marks nothing when the phrase crosses into the next cue', () => {
+    expect(markWord('we should get', 'get rid of', 10)).toBeNull();
+  });
+});
 
 describe('formatInterval', () => {
   it('uses the largest fitting unit, in the right number', () => {

@@ -371,7 +371,11 @@ describe('createOverlay', () => {
       ).toHaveLength(3);
       pointer('pointerup', start);
       expect(onSelection).toHaveBeenCalledWith(
-        { text: 'get rid of', sentence: 'we need to get rid of it' },
+        {
+          word: 'get rid of',
+          sentence: 'we need to get rid of it',
+          offset: 11,
+        },
         tokens()[4],
       );
     });
@@ -422,8 +426,9 @@ describe('createOverlay', () => {
       const start = drag(2, 3, 4);
       pointer('pointerup', start);
       expect(onSelection.mock.calls[0]?.[0]).toEqual({
-        text: 'get rid of',
-        sentence: 'we should get rid of it',
+        word: 'get rid of',
+        sentence: 'we should get',
+        offset: 10,
       });
     });
 

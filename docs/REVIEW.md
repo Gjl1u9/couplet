@@ -28,6 +28,25 @@ A save records:
 - A new word enters today's Review Queue immediately. Nothing notifies the user; they see it when they open the Dashboard.
 - Clicking the star again in the same open panel undoes the save and restores the earlier state. Deleting from the Vocabulary list asks for confirmation, because it also deletes review progress.
 
+### Saved phrases
+
+A Selection has the same star, once its translation has loaded, because the meaning often spans several tokens: `give up`, Korean `-을 수 없다`, or Japanese that Intl.Segmenter cuts into fragments such as `食 | べら | れ`.
+
+| Decision                              | Why                                                                                                         |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| It is a Saved Word                    | It has the same Encounters, schedule, Card, list, and sync, so there is nothing separate to keep in step    |
+| At most 80 characters                 | The same limit as a word in Lookup and Explain with AI. Longer text can be translated, but shows no star    |
+| No model call                         | Google's translation is already on screen. It is the one meaning, with no Phonetics or example, and is free |
+| The lemma is lowercase, single-spaced | `Give Up` and `give  up` are one Saved Word. The Encounter keeps the text as written, for the Card's title  |
+| A translation's commas stay           | A word's meaning splits into chips at commas, but a phrase's translation is one chip                        |
+| A phrase can cross cues               | Cues split sentences anywhere. It belongs to the cue where it starts, and the Card shows that cue unmarked  |
+
+If a phrase's lemma matches a word saved from a Lookup, they are one Saved Word, and the first save's Word Entry stays.
+
+A title over 24 characters uses smaller type, list rows stop at two lines, and messages shorten the phrase to 24 characters.
+
+Subtitles don't mark saved phrases yet, because marks compare one token at a time.
+
 ## Review Card
 
 A Card has one face and never flips. [`prototype/review.html`](../prototype/review.html) shows it working.
@@ -224,7 +243,6 @@ Cloud sync changes where these live and adds rules to every write. See [`SYNC.md
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | Better algorithm, such as FSRS | `schedule(state, grade, now)` is one pure function, `scheduler` names the rule, and the event log can replay history |
 | Netflix and other sites        | `VideoOrigin` is a union, and one function per site builds the jump link                                             |
-| Saved phrases                  | Identity is a lemma string and `form` is free text, so a Selection can become a word with spaces                     |
 | Sync between devices           | Stable IDs, `updatedAt`, and an append-only event log                                                                |
 | Other Card contents            | Cards render from `Encounter`, and optional fields just hide their row                                               |
 
