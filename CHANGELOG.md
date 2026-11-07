@@ -7,6 +7,12 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-07
+
+### Changed
+
+- The extension is now named Couplet: Learn Languages on YouTube.
+
 ## [0.1.0] - 2026-11-07
 
 The first release: learn a language from YouTube videos with dual subtitles, word lookup, and review.

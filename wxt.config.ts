@@ -7,7 +7,7 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifest: {
     // The store shows the name, so it says what the extension does.
-    name: 'Couplet: Dual Subtitles for YouTube',
+    name: 'Couplet: Learn Languages on YouTube',
     short_name: 'Couplet',
     description: 'Dual subtitles and word review for YouTube',
     // The store's public key, so unpacked builds keep the published extension's ID, which
