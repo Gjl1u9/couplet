@@ -1645,15 +1645,14 @@ h1,
   gap: 8px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--line);
-  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   font-size: 15px;
   font-weight: 600;
 }
 
-.popup-head img {
+.popup-head .logo {
+  flex: none;
   width: 20px;
   height: 20px;
-  border-radius: 4px;
 }
 
 .popup-review {

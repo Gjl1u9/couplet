@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>logo 輸出檢查</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: var(--space-6) var(--space-4);
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      main {
+        display: grid;
+        gap: var(--space-4);
+        max-width: 880px;
+        margin: 0 auto;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1,
+      h2 {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+      }
+
+      .note {
+        margin-top: var(--space-1);
+        color: var(--ink-muted);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--space-3);
+        margin-top: var(--space-3);
+      }
+
+      .bg {
+        display: grid;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        border-radius: var(--radius-md);
+        font-size: 12px;
+        line-height: 16px;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: var(--space-4);
+      }
+
+      .bg img {
+        display: block;
+      }
+
+      .zoom {
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+      }
+
+      /* Popup header as built: Logo plus the sans wordmark. */
+      .popup-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        color: var(--ink);
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .popup-head .logo {
+        flex: none;
+        width: 20px;
+        height: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script>
+      const backgrounds = [
+        ['淺色視窗框 #dee1e6', '#dee1e6', '#1f1f1f'],
+        ['淺色工具列 #ffffff', '#ffffff', '#1f1f1f'],
+        ['深色視窗框 #202124', '#202124', '#e8eaed'],
+        ['深色工具列 #35363a', '#35363a', '#e8eaed'],
+      ];
+
+      const logo = `<svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><path fill="var(--ink)" d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"/><path fill="var(--accent)" d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"/></svg>`;
+
+      const cell = ([name, bg, fg]) => `
+        <div class="bg" style="background:${bg};color:${fg}">
+          <span>${name}</span>
+          <div class="row">
+            <img src="../public/icon/128.png" width="128" height="128" alt="" />
+            <img src="../public/icon/48.png" width="48" height="48" alt="" />
+            <img src="../public/icon/32.png" width="32" height="32" alt="" />
+            <img src="../public/icon/16.png" width="16" height="16" alt="" />
+          </div>
+        </div>`;
+
+      document.getElementById('app').innerHTML = `
+        <header>
+          <h1>logo 輸出檢查</h1>
+          <p class="note">public/icon 的真實 PNG，放在 Chrome 常見的四種底色上。</p>
+        </header>
+        <section><div class="grid">${backgrounds.map(cell).join('')}</div></section>
+        <section>
+          <h2>16px 逐像素放大</h2>
+          <div class="grid"><div class="bg" style="background:#ffffff"><img class="zoom" src="../public/icon/16.png" alt="" /></div></div>
+        </section>
+        <section>
+          <h2>Popup 標題列</h2>
+          <div class="grid">
+            <div class="bg" data-theme="light" style="background:var(--ground)"><div class="popup-head">${logo}<span>Couplet</span></div></div>
+            <div class="bg" data-theme="dark" style="background:var(--ground)"><div class="popup-head">${logo}<span>Couplet</span></div></div>
+          </div>
+        </section>`;
+    </script>
+  </body>
+</html>

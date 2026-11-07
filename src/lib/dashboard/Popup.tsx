@@ -4,6 +4,7 @@ import type { Settings } from '../settings/settings';
 import { dueWords } from '../vocabulary/vocabulary';
 import { AccountGroup, useAccount } from './AccountGroup';
 import { Icon, ICONS } from './Icon';
+import { Logo } from './Logo';
 import type { DashboardServices } from './services';
 import { usePageTheme } from './theme';
 
@@ -13,12 +14,10 @@ const PRODUCT_PAGE = 'https://coupletapp.com';
 export function Popup({
   services,
   productName,
-  iconUrl,
   openDashboard,
 }: {
   readonly services: DashboardServices;
   readonly productName: string;
-  readonly iconUrl: string;
   readonly openDashboard: (path: string) => void;
 }) {
   const [account] = useAccount(services);
@@ -61,7 +60,7 @@ export function Popup({
   return (
     <main className="popup" aria-busy={settings === null}>
       <header className="popup-head">
-        <img src={iconUrl} alt="" />
+        <Logo />
         <a href={PRODUCT_PAGE} target="_blank" rel="noreferrer">
           {productName}
         </a>

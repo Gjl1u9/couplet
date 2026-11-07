@@ -12,10 +12,7 @@ const root = document.getElementById('root');
 if (root) {
   createRoot(root).render(
     <StrictMode>
-      <WelcomePage
-        iconUrl={browser.runtime.getURL('/icon/48.png')}
-        services={createDashboardServices()}
-      />
+      <WelcomePage services={createDashboardServices()} />
     </StrictMode>,
   );
 }

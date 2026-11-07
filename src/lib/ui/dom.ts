@@ -49,38 +49,31 @@ export const ICON_ADJUSTMENTS_KNOBS = [
   'M17 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
 ];
 
-/** The product icon, from its small version in prototype/icon.html. Off, it is grey and struck through. */
+/**
+ * The product mark, on the 16-grid of brand/toolbar.svg, in the colours it
+ * takes over video: white for the original, vermilion for the translation.
+ * Off, it is grey and struck through.
+ */
 export function productMark(active: boolean): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', '0 0 16 16');
   svg.setAttribute('aria-hidden', 'true');
   const OFF = '#a7adb7';
-  const rows = [
-    { x: 0, y: 0, width: 16, height: 16, rx: 3.5, fill: '#15181e' },
+  const shapes = [
     {
-      x: 2,
-      y: 4,
-      width: 5,
-      height: 3,
-      rx: 0.5,
+      d: 'M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z',
       fill: active ? '#ffffff' : OFF,
     },
     {
-      x: 8,
-      y: 4,
-      width: 6,
-      height: 3,
-      rx: 0.5,
+      d: 'M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z',
       fill: active ? '#ff7a59' : OFF,
     },
-    { x: 2, y: 9, width: 8, height: 2, rx: 0.5, fill: OFF },
   ];
-  for (const row of rows) {
-    const rect = document.createElementNS(SVG_NS, 'rect');
-    for (const [name, value] of Object.entries(row)) {
-      rect.setAttribute(name, String(value));
-    }
-    svg.append(rect);
+  for (const shape of shapes) {
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', shape.d);
+    path.setAttribute('fill', shape.fill);
+    svg.append(path);
   }
   if (!active) {
     const strike = document.createElementNS(SVG_NS, 'line');

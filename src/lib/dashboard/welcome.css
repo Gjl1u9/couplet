@@ -14,7 +14,7 @@
   font-weight: 600;
 }
 
-.welcome-head img {
+.welcome-head .logo {
   width: 24px;
   height: 24px;
 }
@@ -348,10 +348,9 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-.demo-toolbar img {
+.demo-toolbar .logo {
   width: 18px;
   height: 18px;
-  border-radius: 4px;
 }
 
 .demo-popup {
@@ -371,7 +370,7 @@
   font-size: 13px;
 }
 
-.demo-popup .popup-head img {
+.demo-popup .popup-head .logo {
   width: 16px;
   height: 16px;
 }
