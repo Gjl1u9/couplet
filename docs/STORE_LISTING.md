@@ -4,13 +4,7 @@ Everything the developer dashboard asks for. Copy each block as it is. Images ar
 
 ## Store listing
 
-**Name:** comes from the manifest: `Couplet: Learn Languages on YouTube`.
-
-**Summary** (132 characters at most):
-
-```text
-Free dual subtitles for YouTube. Click a word for its meaning, save it, and review it in the sentence you heard it in.
-```
+**Name and summary:** come from [`public/_locales`](../public/_locales), through the manifest, so the dashboard can't edit them. Changing them takes a new package.
 
 **Category:** Education. **Language:** English.
 
@@ -24,7 +18,7 @@ What you can do:
 • Click a word to see its meaning, phonetics, and example sentences, and hear it spoken
 • Drag across a phrase to translate it
 • Show the lines before and after, and select across them
-• Save a word with its sentence and the moment you met it
+• Save a word or phrase with its sentence and the moment you met it
 • Review on a schedule, with a link back to that moment in the video
 • See your streak, your progress, and what needs more practice
 • Ask AI to explain a sentence, 50 times a day
@@ -39,33 +33,29 @@ Your data: subtitle text is sent to Google Translate. What you look up or ask to
 Couplet is an independent product, and isn't affiliated with or endorsed by YouTube or Google.
 ```
 
-**Traditional Chinese** (optional localization):
+**Traditional Chinese description:** the dashboard's Language menu lists each locale in `public/_locales` once a package with it is uploaded. Choose Traditional Chinese, and paste this:
 
 ```text
-摘要:在 YouTube 上同時看兩行字幕。點一下單字看意思,收藏後在當初聽到的句子裡複習。
-```
+Couplet 讓你用平常就在看的影片學語言。原文和翻譯上下並排，每個字都可以查、可以存，之後還能複習。
 
-```text
-Couplet 讓你用平常就在看的影片學語言。原文和翻譯上下並排,每個字都可以查、可以存,之後還能複習。
-
-你可以:
-• 同時看原文和翻譯,不用開 CC
-• 點單字看意思、音標和例句,也能聽發音
-• 拖曳選取片語來翻譯,也可以跨上下句
+你可以：
+• 同時看原文和翻譯，不用開 CC
+• 點單字看意思、音標和例句，也能聽發音
+• 拖曳選取片語來翻譯，也可以跨上下句
 • 顯示前後句
-• 收藏單字,並保留當時的句子和影片時間點
-• 依排程複習,可直接跳回影片當下
-• 查看連續天數、進度,以及需要加強的單字
-• 請 AI 解釋單字在句子裡的用法,每天 20 次
+• 收藏單字或片語，並保留當時的句子和影片時間點
+• 依排程複習，可直接跳回影片當下
+• 查看連續天數、進度，以及需要加強的單字
+• 請 AI 解釋單字或片語在句子裡的用法，每天 50 次
 • 匯出成 CSV
 
-學習語言 8 種,翻譯語言 22 種。
+學習語言 8 種，翻譯語言 22 種。
 
-看字幕和查字不用帳號。收藏和複習要用 Google 登入,單字會在你的電腦之間同步。
+看字幕和查字不用帳號。收藏和複習要用 Google 登入，單字會在你的電腦之間同步。
 
-你的資料:字幕文字會傳送到 Google 翻譯。你查的單字,以及要求解釋的句子,會經過我們的伺服器傳送到阿里雲的 AI 服務。我們不販售資料,也沒有廣告。詳情請見隱私權政策。
+你的資料：字幕文字會傳送到 Google 翻譯。你查的單字，以及要求解釋的句子，會經過我們的伺服器傳送到阿里雲的 AI 服務。我們不販售資料，也沒有廣告。詳情請見隱私權政策。
 
-Couplet 是獨立產品,與 YouTube 或 Google 沒有任何關聯,也未獲其背書。
+Couplet 是獨立產品，與 YouTube 或 Google 沒有任何關聯，也未獲其背書。
 ```
 
 **Links:** homepage `https://coupletapp.com`, privacy policy `https://coupletapp.com/privacy/`. Leave the support URL empty until `support@coupletapp.com` receives mail.
@@ -133,7 +123,7 @@ No test account is needed. Any Google account can sign in.
 1. After install, the Welcome Page opens. Choose languages if you like. English as the learning language works with the video below.
 2. Open https://www.youtube.com/watch?v=TwDJhUJL-5o and wait up to 15 seconds, after any ad, for the two lines of subtitles.
 3. Click a word to see its Lookup Panel. Drag across several words to translate a phrase. No account is needed for these.
-4. Press the star in the Lookup Panel, and sign in with Google from the prompt at the player's top right. The word is saved.
+4. Press the star in the Lookup Panel, and sign in with Google from the prompt at the player's top right. The word is saved. A translated phrase has the same star.
 5. Click the extension's toolbar icon, then Start review or Open Dashboard, to see Review, Words, and Progress.
 6. In Words, open a word and press Explain with AI. It's limited to 50 a day per account.
 

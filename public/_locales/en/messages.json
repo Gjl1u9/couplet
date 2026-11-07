@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Couplet: Dual Subtitles to Learn Languages on YouTube",
+    "description": "The extension's name in the Chrome Web Store. At most 75 characters."
+  },
+  "extensionDescription": {
+    "message": "Free dual subtitles for YouTube. Click a word for its meaning, save it, and review it in the sentence you heard it in.",
+    "description": "The summary in the Chrome Web Store. At most 132 characters."
+  }
+}

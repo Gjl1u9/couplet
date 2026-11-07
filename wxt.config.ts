@@ -10,10 +10,12 @@ export default defineConfig({
     optimizeDeps: { entries: ['src/entrypoints/*/index.html'] },
   }),
   manifest: {
-    // The store shows the name, so it says what the extension does.
-    name: 'Couplet: Learn Languages on YouTube',
+    // The store shows the name and summary, so they say what the extension does. Their text
+    // is in public/_locales, and each locale there also gets a description in the dashboard.
+    default_locale: 'en',
+    name: '__MSG_extensionName__',
     short_name: 'Couplet',
-    description: 'Dual subtitles and word review for YouTube',
+    description: '__MSG_extensionDescription__',
     // The store's public key, so unpacked builds keep the published extension's ID, which
     // the OAuth redirect depends on: pnjdidlglcbbnfhcnhmhndoakdphhckj. The store assigns that ID
     // itself and can refuse an upload with this field, so its package leaves it out.
