@@ -5,6 +5,10 @@ export default defineConfig({
   outDir: 'dist',
   zip: { artifactTemplate: 'couplet-{{version}}-{{browser}}.zip' },
   modules: ['@wxt-dev/module-react'],
+  // By default Vite scans every HTML file in the project, including dist/ while it is rebuilt.
+  vite: () => ({
+    optimizeDeps: { entries: ['src/entrypoints/*/index.html'] },
+  }),
   manifest: {
     // The store shows the name, so it says what the extension does.
     name: 'Couplet: Learn Languages on YouTube',

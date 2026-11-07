@@ -6,7 +6,7 @@ import {
   encounterForReview,
   type SavedWord,
 } from '../vocabulary/vocabulary';
-import { formatDue, formatInterval } from './format';
+import { formatDue, formatInterval, shortLabel } from './format';
 import { ReviewCard, type ReviewCardHandle } from './ReviewCard';
 import type { DashboardServices } from './services';
 import { Toast } from './Toast';
@@ -175,7 +175,7 @@ export function ReviewPage({
       if (!next) {
         // Deleted in another tab, so there is nothing left to grade.
         dispatch({ type: 'deleted' });
-        setStatus(`${word.lemma} was deleted`);
+        setStatus(`${shortLabel(word.lemma)} was deleted`);
         return;
       }
       const eventAt = next.review.lastReviewedAt;
@@ -186,8 +186,8 @@ export function ReviewPage({
       });
       setStatus(
         next.review.retired
-          ? `${word.lemma}: finished`
-          : `${word.lemma}: back in ${formatInterval((next.review.dueAt - (eventAt ?? 0)) / 1000)}`,
+          ? `${shortLabel(word.lemma)}: finished`
+          : `${shortLabel(word.lemma)}: back in ${formatInterval((next.review.dueAt - (eventAt ?? 0)) / 1000)}`,
       );
     });
   };
@@ -211,7 +211,7 @@ export function ReviewPage({
     once(async () => {
       await services.vocabulary.remove(word.id);
       dispatch({ type: 'deleted' });
-      setStatus(`Deleted ${word.lemma}`);
+      setStatus(`Deleted ${shortLabel(word.lemma)}`);
     });
   };
 

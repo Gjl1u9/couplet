@@ -13,6 +13,8 @@ npm install
 npm run dev
 ```
 
+Load `dist/chrome-mv3-dev` as an unpacked extension, and keep `npm run dev` running. That build's pages load from the dev server, so they turn blank when it stops. To test without a server, run `npm run build` and load `dist/chrome-mv3`.
+
 Lookups go through our Cloudflare Worker, which holds the AI key. See [`docs/LOOKUP.md`](docs/LOOKUP.md).
 
 Run the full check before committing. It matches CI:

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Couplet">
+  <!-- Original (ink) and translation (vermilion) overlap; the overlap is left empty. -->
+  <path fill="#15181e" d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"/>
+  <path fill="#c4371c" d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"/>
+</svg>

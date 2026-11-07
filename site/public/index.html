@@ -23,6 +23,7 @@
         --accent: #c9401f;
         --on-accent: #ffffff;
         --accent-soft: #fcece7;
+        --ai-outline: #a88700;
       }
 
       [data-theme='dark'] {
@@ -37,6 +38,7 @@
         --accent: #ff8363;
         --on-accent: #1a1d23;
         --accent-soft: #3a241e;
+        --ai-outline: none;
       }
 
       * {
@@ -171,10 +173,10 @@
         white-space: nowrap;
       }
 
-      .brand img {
+      .brand .logo {
+        flex: none;
         width: 26px;
         height: 26px;
-        border-radius: 5px;
       }
 
       .top nav {
@@ -229,6 +231,49 @@
       .hero {
         padding: 72px 0 40px;
         text-align: center;
+      }
+
+      /* Filled, unlike the other icons, so AI reads apart. */
+      .ai-icon {
+        flex: none;
+        width: 16px;
+        height: 16px;
+        fill: #ffd60a;
+        stroke: var(--ai-outline);
+        stroke-width: 1;
+      }
+
+      .announce {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 36px;
+        margin-bottom: 22px;
+        padding: 0 12px;
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        background: var(--surface);
+        font-size: 14px;
+        line-height: 20px;
+        text-decoration: none;
+      }
+
+      /* Keeps the hit area at 44px while the shape stays small. */
+      .announce::after {
+        content: '';
+        position: absolute;
+        inset: -5px 0;
+      }
+
+      /* The border changes, because a darker background would dim the accent text. */
+      .announce:hover {
+        border-color: var(--ink);
+      }
+
+      .announce b {
+        color: var(--accent);
+        font-weight: 600;
       }
 
       h1 {
@@ -346,8 +391,9 @@
         fill: currentColor;
       }
 
-      .control-row .is-ours {
-        color: #ff8363;
+      /* The Subtitle Switch: the product mark, white and vermilion over video. */
+      .control-row .is-mark {
+        stroke: none;
       }
 
       .control-gap {
@@ -616,6 +662,29 @@
         grid-column: span 3;
       }
 
+      .feature.is-full {
+        display: grid;
+        grid-column: span 6;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 18px 28px;
+      }
+
+      .feature.is-full .sample {
+        padding-top: 0;
+      }
+
+      .feature .new-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0 0 4px;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 18px;
+      }
+
       .sample {
         margin-top: auto;
         padding-top: 18px;
@@ -653,6 +722,16 @@
         font-weight: 600;
         text-decoration: underline 2px;
         text-underline-offset: 3px;
+      }
+
+      .sentence .explanation {
+        display: block;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        color: var(--ink-muted);
+        font-size: 14px;
+        line-height: 21px;
       }
 
       .sentence .jump {
@@ -826,6 +905,10 @@
         .feature.is-wide {
           grid-column: span 6;
         }
+
+        .feature.is-full {
+          grid-template-columns: 1fr;
+        }
       }
 
       /* Phones keep the same layout at a smaller size. */
@@ -900,7 +983,16 @@
     <header class="top">
       <div class="wrap">
         <a class="brand" href="#top">
-          <img src="/icon/128.png" alt="" />
+          <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+            <path
+              fill="var(--ink)"
+              d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"
+            />
+            <path
+              fill="var(--accent)"
+              d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"
+            />
+          </svg>
           Couplet
         </a>
         <nav aria-label="Page">
@@ -919,7 +1011,24 @@
     </header>
 
     <main id="top">
+      <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+        <!-- From Tabler Icons (MIT). -->
+        <symbol id="sparkles" viewBox="0 0 24 24">
+          <path
+            d="M17.964 2.733c.156 .563 .312 1 .484 1.353c.342 .71 .758 1.125 1.47 1.467c.353 .17 .79 .326 1.352 .484c.98 .276 .97 1.668 -.013 1.93a8.3 8.3 0 0 0 -1.34 .481c-.71 .342 -1.127 .757 -1.463 1.453a8 8 0 0 0 -.486 1.352c-.258 .988 -1.658 1 -1.932 .015c-.156 -.565 -.312 -1.002 -.484 -1.354c-.342 -.71 -.758 -1.124 -1.458 -1.46a8 8 0 0 0 -1.374 -.495a.4 .4 0 0 1 -.06 -.02l-.044 -.017l-.045 -.02l-.049 -.025l-.035 -.02a.4 .4 0 0 1 -.049 -.03l-.032 -.023l-.043 -.034l-.033 -.028l-.036 -.035l-.034 -.035l-.028 -.033l-.035 -.043l-.022 -.032a.4 .4 0 0 1 -.032 -.049l-.02 -.035l-.025 -.05l-.02 -.044l-.017 -.043a.4 .4 0 0 1 -.02 -.06l-.01 -.034a.5 .5 0 0 1 -.02 -.098l-.006 -.065l-.005 -.035v-.05a.4 .4 0 0 1 .003 -.085a.5 .5 0 0 1 .013 -.093a.5 .5 0 0 1 .024 -.103a.4 .4 0 0 1 .02 -.06l.017 -.044l.02 -.045l.025 -.049l.02 -.035a.4 .4 0 0 1 .03 -.049l.023 -.032l.034 -.043l.028 -.033l.035 -.036l.035 -.034q .015 -.015 .033 -.028l.043 -.035l.032 -.022a.4 .4 0 0 1 .049 -.032l.035 -.02l.05 -.025l.044 -.02l.043 -.017a.4 .4 0 0 1 .06 -.02l.027 -.008a8.3 8.3 0 0 0 1.339 -.48c.71 -.342 1.127 -.757 1.47 -1.466c.17 -.354 .327 -.792 .483 -1.355c.272 -.976 1.657 -.976 1.928 0"
+          />
+          <path
+            d="M10.965 6.737q .219 .801 .503 1.574c.856 2.28 1.945 3.363 4.23 4.22q .708 .265 1.571 .506c.976 .272 .974 1.656 -.002 1.927q -.798 .221 -1.568 .504c-2.288 .858 -3.376 1.94 -4.229 4.216a19 19 0 0 0 -.505 1.579c-.268 .983 -1.662 .983 -1.93 0a19 19 0 0 0 -.503 -1.574c-.856 -2.281 -1.944 -3.363 -4.226 -4.219a20 20 0 0 0 -1.594 -.513a.4 .4 0 0 1 -.054 -.018l-.044 -.017l-.043 -.02a.3 .3 0 0 1 -.048 -.024l-.036 -.02a.4 .4 0 0 1 -.048 -.03l-.032 -.024l-.044 -.034l-.033 -.029l-.037 -.034l-.034 -.037l-.03 -.033l-.033 -.044l-.023 -.032a.4 .4 0 0 1 -.03 -.048l-.021 -.036a.3 .3 0 0 1 -.024 -.048l-.02 -.043l-.017 -.044a.4 .4 0 0 1 -.018 -.054a.2 .2 0 0 1 -.01 -.039a.4 .4 0 0 1 -.014 -.059l-.007 -.04l-.007 -.056l-.003 -.044l-.002 -.05v-.05q 0 -.023 .004 -.044q .001 -.03 .007 -.057l.007 -.04a.4 .4 0 0 1 .017 -.076l.007 -.021a.4 .4 0 0 1 .018 -.054l.017 -.044l.02 -.043a.3 .3 0 0 1 .024 -.048l.02 -.036a.4 .4 0 0 1 .03 -.048l.024 -.032l.034 -.044l.029 -.033l.034 -.037l.037 -.034l.033 -.03l.044 -.033l.032 -.023a.4 .4 0 0 1 .048 -.03l.036 -.021a.3 .3 0 0 1 .048 -.024l.043 -.02l.044 -.017a.4 .4 0 0 1 .054 -.018l.021 -.007a20 20 0 0 0 1.568 -.504c2.287 -.858 3.375 -1.94 4.229 -4.216a19 19 0 0 0 .505 -1.579c.268 -.983 1.662 -.983 1.93 0"
+          />
+        </symbol>
+      </svg>
+
       <div class="wrap hero">
+        <a class="announce" href="#explain">
+          <svg class="ai-icon" aria-hidden="true"><use href="#sparkles" /></svg>
+          <b>New</b>
+          <span>Explain with AI: 50 free a day</span>
+        </a>
         <h1>Watch what you love. <em>Keep</em> the words you meet.</h1>
         <p class="lead">
           Two lines of subtitles on YouTube. Click a word for its meaning, save
@@ -994,8 +1103,15 @@
                 </svg>
                 <span class="time">1:00 / 4:12</span>
                 <span class="control-gap"></span>
-                <svg class="icon is-ours" viewBox="0 0 24 24">
-                  <path d="M4 9h16M7 15h10" />
+                <svg class="icon is-mark" viewBox="0 0 16 16">
+                  <path
+                    fill="#ffffff"
+                    d="M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z"
+                  />
+                  <path
+                    fill="#ff7a59"
+                    d="M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z"
+                  />
                 </svg>
                 <svg class="icon" viewBox="0 0 24 24">
                   <path
@@ -1057,6 +1173,33 @@
           <p>A word sticks better when you remember where you met it.</p>
         </div>
         <div class="features">
+          <article class="sheet feature is-full" id="explain">
+            <div>
+              <p class="new-label">
+                <svg class="ai-icon" aria-hidden="true">
+                  <use href="#sparkles" />
+                </svg>
+                New
+              </p>
+              <h3>Explain with AI</h3>
+              <p>
+                Still stuck on a sentence? Open a saved word and press Explain
+                with AI. You get two or three sentences on its meaning, part of
+                speech, and grammar in that line. Sign in for 50 free
+                explanations a day.
+              </p>
+            </div>
+            <div class="sample">
+              <div class="sentence" lang="en">
+                We sat on the <span class="mark">bank</span> and watched the
+                boats go by.
+                <span class="explanation" lang="zh-Hant">
+                  這裡的「bank」是名詞，意思是「河岸」，不是「銀行」。「sat on
+                  the bank」就是坐在河岸上。
+                </span>
+              </div>
+            </div>
+          </article>
           <article class="sheet feature is-wide">
             <h3>Both languages, one glance</h3>
             <p>
@@ -1182,7 +1325,7 @@
             </summary>
             <p>
               Yes. Subtitles, lookups, saving, and review are all free. You also
-              get 20 AI explanations a day.
+              get 50 AI explanations a day.
             </p>
           </details>
           <details>
@@ -1194,7 +1337,7 @@
             </summary>
             <p>
               Not for subtitles or looking up words. Sign in with Google to save
-              words and review them.
+              words, review them, and use Explain with AI.
             </p>
           </details>
           <details>

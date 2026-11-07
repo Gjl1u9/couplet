@@ -14,7 +14,6 @@ if (root) {
       <Popup
         services={createDashboardServices()}
         productName={browser.runtime.getManifest().short_name ?? 'Couplet'}
-        iconUrl={browser.runtime.getURL('/icon/48.png')}
         openDashboard={(path) => {
           // Closing first could cancel the request along with this page.
           void browser.tabs

@@ -11,6 +11,7 @@ import {
   type NativeLanguage,
   type Settings,
 } from '../settings/settings';
+import { Logo } from './Logo';
 import type { DashboardServices } from './services';
 import { Select } from './SettingsPage';
 import { usePageTheme } from './theme';
@@ -160,16 +161,16 @@ function NearbyLinesDemo() {
   );
 }
 
-function ReviewDemo({ iconUrl }: { readonly iconUrl: string }) {
+function ReviewDemo() {
   return (
     <>
       <div className="demo-toolbar">
         <span className="demo-address" />
-        <img src={iconUrl} alt="" />
+        <Logo variant="toolbar" />
       </div>
       <div className="demo-popup">
         <div className="popup-head">
-          <img src={iconUrl} alt="" />
+          <Logo />
           <span>Couplet</span>
         </div>
         <div className="demo-popup-row">
@@ -280,10 +281,8 @@ function LanguagePicker({
 
 /** Opens once after install: languages first, then what to try. */
 export function WelcomePage({
-  iconUrl,
   services,
 }: {
-  readonly iconUrl: string;
   readonly services: Pick<DashboardServices, 'settings' | 'saveSettings'>;
 }) {
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -300,7 +299,7 @@ export function WelcomePage({
   return (
     <main className="welcome">
       <header className="welcome-head">
-        <img src={iconUrl} alt="" />
+        <Logo />
         <span>Couplet</span>
       </header>
       <div className="welcome-intro">
@@ -411,7 +410,7 @@ export function WelcomePage({
           label="A pointer opens Couplet from the browser toolbar and clicks Start review, and the Dashboard opens on a Review Card."
           kind="is-review"
         >
-          <ReviewDemo iconUrl={iconUrl} />
+          <ReviewDemo />
         </Step>
       </div>
     </main>

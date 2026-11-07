@@ -79,7 +79,6 @@ describe('Popup', () => {
         <Popup
           services={services}
           productName="Dual Subtitles"
-          iconUrl="/icon.png"
           openDashboard={openDashboard}
         />,
       );

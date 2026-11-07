@@ -27,7 +27,7 @@ What you can do:
 • Save a word with its sentence and the moment you met it
 • Review on a schedule, with a link back to that moment in the video
 • See your streak, your progress, and what needs more practice
-• Ask AI to explain a sentence, 20 times a day
+• Ask AI to explain a sentence, 50 times a day
 • Export your list as a CSV
 
 Choose from 8 languages to learn and 22 to translate into.
@@ -84,6 +84,8 @@ Couplet 是獨立產品,與 YouTube 或 Google 沒有任何關聯,也未獲其�
 | Small promo tile | `store/promo-small.jpg`           | 440×280  |
 | Marquee promo    | `store/promo-marquee.jpg`         | 1400×560 |
 
+The store icon is rendered from [`brand/store.svg`](../brand/store.svg), and the two promo images from [`brand/promo.html`](../brand/promo.html). Edit the sources, then run `node scripts/build-icons.mjs` and `node scripts/build-promo.mjs`; see [Logo in `DESIGN.md`](DESIGN.md#logo). Screenshot 2 shows the Welcome Page header, so retake it whenever the logo changes. The other screenshots show no logo.
+
 The Dashboard screenshots use sample words and video titles. The YouTube screenshot shows a third-party channel's video, so replace it with a video you have the rights to show, or get the channel's permission.
 
 ## Privacy practices
@@ -133,7 +135,7 @@ No test account is needed. Any Google account can sign in.
 3. Click a word to see its Lookup Panel. Drag across several words to translate a phrase. No account is needed for these.
 4. Press the star in the Lookup Panel, and sign in with Google from the prompt at the player's top right. The word is saved.
 5. Click the extension's toolbar icon, then Start review or Open Dashboard, to see Review, Words, and Progress.
-6. In Words, open a word and press Explain with AI. It's limited to 20 a day per account.
+6. In Words, open a word and press Explain with AI. It's limited to 50 a day per account.
 
 Subtitles appear only on videos that have subtitles in the chosen learning language. The extension says so in its settings panel when a video has none.
 ```

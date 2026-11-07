@@ -539,10 +539,16 @@ h2 {
   white-space: nowrap;
 }
 
+/* A saved phrase stays within two lines, so it can't stretch a list. */
 .row-word {
+  display: -webkit-box;
+  overflow: hidden;
   font-size: 15px;
   font-weight: 600;
   line-height: 22px;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .big-number {
@@ -976,6 +982,7 @@ mark {
   font-size: 20px;
   font-weight: 650;
   line-height: 28px;
+  overflow-wrap: anywhere;
 }
 
 .dict-sense {
@@ -1084,6 +1091,12 @@ mark {
   letter-spacing: -0.015em;
   line-height: 44px;
   overflow-wrap: anywhere;
+}
+
+/* Still larger than the current cue, which is 20px. */
+.review-word.is-long {
+  font-size: 24px;
+  line-height: 32px;
 }
 
 .cues {
@@ -1374,6 +1387,11 @@ h1,
     line-height: 36px;
   }
 
+  .review-word.is-long {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
   .review {
     min-height: calc(100dvh - 108px);
   }
@@ -1645,15 +1663,14 @@ h1,
   gap: 8px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--line);
-  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   font-size: 15px;
   font-weight: 600;
 }
 
-.popup-head img {
+.popup-head .logo {
+  flex: none;
   width: 20px;
   height: 20px;
-  border-radius: 4px;
 }
 
 .popup-review {

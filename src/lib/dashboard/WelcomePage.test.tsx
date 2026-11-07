@@ -29,7 +29,6 @@ describe('WelcomePage', () => {
     await act(async () => {
       root.render(
         <WelcomePage
-          iconUrl="/icon.png"
           services={{
             settings: () => Promise.resolve(defaultSettings('fr-CA')),
             saveSettings: (settings) => {

@@ -296,6 +296,18 @@ describe('explain', () => {
     );
   };
 
+  it('explains a saved phrase up to the limit, and no longer', async () => {
+    const { deps, explain } = setup();
+    const phrase = `get rid of ${'x'.repeat(69)}`;
+    expect(phrase).toHaveLength(80);
+    expect((await ask(deps, { word: phrase })).status).toBe(200);
+    expect(explain).toHaveBeenCalledWith(
+      expect.objectContaining({ word: phrase }),
+      expect.anything(),
+    );
+    expect((await ask(deps, { word: `${phrase}x` })).status).toBe(400);
+  });
+
   it('explains for an account, and says what is left today', async () => {
     const { deps, explain } = setup();
     const response = await ask(deps);

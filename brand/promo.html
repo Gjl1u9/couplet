@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Couplet store promo images</title>
+    <style>
+      /* The product page's light palette, so the store matches the page. */
+      :root {
+        --paper: #fbf8f0;
+        --ink: #29251d;
+        --ink-muted: #6a6354;
+        --accent: #c9401f;
+        --font:
+          -apple-system, 'Helvetica Neue', 'PingFang TC', 'Noto Sans TC',
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #888;
+        font-family: var(--font);
+      }
+
+      .art {
+        position: relative;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .logo {
+        flex: none;
+      }
+
+      .name {
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      /* Small promo tile, 440x280. */
+      #small {
+        width: 440px;
+        height: 280px;
+        justify-content: center;
+        gap: 22px;
+      }
+
+      #small .logo {
+        width: 92px;
+        height: 92px;
+      }
+
+      #small .name {
+        font-size: 56px;
+      }
+
+      /* Marquee promo, 1400x560. */
+      #marquee {
+        width: 1400px;
+        height: 560px;
+        padding: 0 96px;
+        gap: 72px;
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: grid;
+        gap: 36px;
+      }
+
+      .lockup {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+
+      #marquee .logo {
+        width: 128px;
+        height: 128px;
+      }
+
+      #marquee .name {
+        font-size: 96px;
+      }
+
+      .tagline {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 34px;
+        font-weight: 500;
+        line-height: 46px;
+      }
+
+      /* A couplet, as it appears over a video. */
+      .scene {
+        display: grid;
+        flex: none;
+        align-content: center;
+        width: 640px;
+        height: 340px;
+        padding: 0 32px;
+        background: linear-gradient(160deg, #4b5560, #262c33);
+        border-radius: 22px;
+      }
+
+      .strip {
+        display: grid;
+        gap: 8px;
+        padding: 20px 26px;
+        background: rgba(12, 14, 18, 0.82);
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .original {
+        color: #ffffff;
+        font-size: 30px;
+        font-weight: 500;
+        line-height: 42px;
+      }
+
+      .original u {
+        text-decoration: none;
+        border-bottom: 4px solid #ff7a59;
+      }
+
+      .translation {
+        color: #d6dae0;
+        font-size: 27px;
+        line-height: 38px;
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="mark" viewBox="0 0 64 64">
+        <path
+          fill="var(--ink)"
+          d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"
+        />
+        <path
+          fill="var(--accent)"
+          d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"
+        />
+      </symbol>
+    </svg>
+
+    <div class="art" id="small">
+      <svg class="logo" aria-hidden="true"><use href="#mark" /></svg>
+      <span class="name">Couplet</span>
+    </div>
+
+    <div class="art" id="marquee">
+      <div class="brand">
+        <div class="lockup">
+          <svg class="logo" aria-hidden="true"><use href="#mark" /></svg>
+          <span class="name">Couplet</span>
+        </div>
+        <p class="tagline">
+          Watch what you love.<br />Keep the words you meet.
+        </p>
+      </div>
+      <div class="scene" aria-hidden="true">
+        <div class="strip">
+          <div class="original">We sat on the <u>bank</u> of the river.</div>
+          <div class="translation">我們坐在河岸邊。</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

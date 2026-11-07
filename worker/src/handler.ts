@@ -1,4 +1,5 @@
 import { sameLanguage } from '../../src/lib/language';
+import { MAX_WORD_LENGTH } from '../../src/lib/lookup/entry';
 import type { ExplainInput } from '../../src/lib/lookup/explain';
 import type { LookupService, WordEntry } from '../../src/lib/lookup/types';
 
@@ -49,7 +50,6 @@ const ALLOWED_ORIGINS = new Set([
   'chrome-extension://pnjdidlglcbbnfhcnhmhndoakdphhckj',
 ]);
 
-const MAX_WORD_LENGTH = 80;
 const LANGUAGE_CODE = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}$/;
 const INSTALL_ID = /^[0-9a-f-]{16,64}$/i;
 

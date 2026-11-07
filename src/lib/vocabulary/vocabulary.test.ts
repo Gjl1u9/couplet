@@ -6,6 +6,7 @@ import {
   markedForms,
   type EncounterInput,
 } from './vocabulary';
+import { phraseEntry } from '../lookup/entry';
 import { createMemoryStore } from '../sync/store';
 
 const ENTRY = {
@@ -187,6 +188,44 @@ describe('createVocabulary', () => {
 });
 
 describe('shared identity', () => {
+  it('keeps one Saved Word for a phrase in any case or spacing', async () => {
+    const { vocabulary } = setup();
+    await vocabulary.save(
+      input('Give Up now', {
+        entry: phraseEntry('Give Up', '放棄'),
+        form: 'Give Up',
+        formOffset: 0,
+      }),
+      1,
+    );
+    await vocabulary.save(
+      input('never give  up', {
+        entry: phraseEntry('give  up', '放棄'),
+        form: 'give  up',
+        formOffset: 6,
+      }),
+      2,
+    );
+    const words = await vocabulary.list();
+    expect(words).toHaveLength(1);
+    expect(words[0]?.lemma).toBe('give up');
+    expect(words[0]?.forms).toEqual(['Give Up', 'give  up']);
+    expect(words[0]?.encounters).toHaveLength(2);
+    expect(await vocabulary.has('give up', 'en')).toBe(true);
+  });
+
+  it('keeps a colon in a phrase out of the way of its identity', async () => {
+    const { vocabulary } = setup();
+    const entry = phraseEntry('Note: this', '注意：這個');
+    await vocabulary.save(
+      input('Note: this', { entry, form: 'Note: this' }),
+      1,
+    );
+    expect(await vocabulary.has('note: this', 'en')).toBe(true);
+    await vocabulary.removeByLemma('note: this', 'en');
+    expect(await vocabulary.list()).toEqual([]);
+  });
+
   it('treats regional tracks as one word', async () => {
     const { vocabulary } = setup();
     await vocabulary.save(input('one'), 1);
