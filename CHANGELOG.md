@@ -7,6 +7,8 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-07
+
 ### Added
 
 - Save a phrase: drag across words, then press the star. Phrases come back for review like any other word, up to 80

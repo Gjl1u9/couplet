@@ -24,7 +24,7 @@ What you can do:
 • Click a word to see its meaning, phonetics, and example sentences, and hear it spoken
 • Drag across a phrase to translate it
 • Show the lines before and after, and select across them
-• Save a word with its sentence and the moment you met it
+• Save a word or phrase with its sentence and the moment you met it
 • Review on a schedule, with a link back to that moment in the video
 • See your streak, your progress, and what needs more practice
 • Ask AI to explain a sentence, 50 times a day
@@ -133,7 +133,7 @@ No test account is needed. Any Google account can sign in.
 1. After install, the Welcome Page opens. Choose languages if you like. English as the learning language works with the video below.
 2. Open https://www.youtube.com/watch?v=TwDJhUJL-5o and wait up to 15 seconds, after any ad, for the two lines of subtitles.
 3. Click a word to see its Lookup Panel. Drag across several words to translate a phrase. No account is needed for these.
-4. Press the star in the Lookup Panel, and sign in with Google from the prompt at the player's top right. The word is saved.
+4. Press the star in the Lookup Panel, and sign in with Google from the prompt at the player's top right. The word is saved. A translated phrase has the same star.
 5. Click the extension's toolbar icon, then Start review or Open Dashboard, to see Review, Words, and Progress.
 6. In Words, open a word and press Explain with AI. It's limited to 50 a day per account.
 
