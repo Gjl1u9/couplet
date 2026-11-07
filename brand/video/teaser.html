@@ -1,0 +1,1177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Couplet promo video</title>
+    <style>
+      /* The product page's paper palette around the product's real interface. */
+      :root {
+        --paper: #ddd5c2;
+        --sheet: #fbf8f0;
+        --ink: #29251d;
+        --muted: #6a6354;
+        --line: #857c6a;
+        --accent: #c9401f;
+        --serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+        --sans: -apple-system, 'Helvetica Neue', 'PingFang TC', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        margin: 0;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      #stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      /* Titles sit on their own band, so the push-in never runs under the words. */
+      #band {
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 190px;
+        background: var(--paper);
+      }
+
+      .title {
+        position: absolute;
+        top: 58px;
+        right: 0;
+        left: 0;
+        margin: 0;
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 72px;
+        font-weight: 600;
+        line-height: 84px;
+        text-align: center;
+      }
+
+      .title .word {
+        display: inline-block;
+        white-space: pre;
+      }
+
+      .title .key {
+        position: relative;
+      }
+
+      .rule {
+        position: absolute;
+        right: 0;
+        bottom: -7px;
+        left: 0;
+        height: 5px;
+        background: var(--accent);
+        transform-origin: left center;
+      }
+
+      #view {
+        position: absolute;
+        inset: 190px 0 0;
+        overflow: hidden;
+        perspective: 1800px;
+      }
+
+      #camera {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: 0 0;
+      }
+
+      #window {
+        width: 1320px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--sheet);
+        box-shadow: 0 34px 90px rgba(41, 37, 29, 0.24);
+      }
+
+      #bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 16px;
+        border-bottom: 1px solid #d9d1be;
+      }
+
+      #bar i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #d9d1be;
+      }
+
+      #address {
+        flex: 1;
+        margin-left: 12px;
+        padding: 3px 14px;
+        border-radius: 14px;
+        background: #e6dfcc;
+        color: var(--muted);
+        font:
+          13px/18px -apple-system,
+          'Helvetica Neue',
+          sans-serif;
+      }
+
+      #content {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: #1a2226;
+      }
+
+      #player,
+      #search,
+      #review {
+        position: absolute;
+        inset: 0;
+        isolation: isolate;
+      }
+
+      #search {
+        z-index: 2;
+        padding: 58px 150px;
+        background: var(--sheet);
+        color: var(--ink);
+        font-family: var(--sans);
+      }
+
+      #query {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 62px;
+        padding: 0 26px;
+        border: 1px solid var(--line);
+        border-radius: 31px;
+        font-size: 24px;
+      }
+
+      #query svg {
+        flex: none;
+        width: 24px;
+        height: 24px;
+        color: var(--muted);
+      }
+
+      #caret {
+        width: 2px;
+        height: 28px;
+        margin-left: -12px;
+        background: var(--ink);
+      }
+
+      .result {
+        margin-top: 46px;
+      }
+
+      .result i {
+        display: block;
+        height: 16px;
+        margin-bottom: 14px;
+        border-radius: 4px;
+        background: #e6dfcc;
+      }
+
+      .result i:first-child {
+        width: 44%;
+        height: 24px;
+        background: #d9d1be;
+      }
+
+      #review {
+        z-index: 3;
+        background: var(--paper);
+      }
+
+      #scene {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #controls {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 40px 18px 8px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+        color: #fff;
+        font:
+          15px/20px -apple-system,
+          'Helvetica Neue',
+          sans-serif;
+      }
+
+      #progress {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.35);
+      }
+
+      #played {
+        height: 100%;
+        background: #ff7a59;
+      }
+
+      #row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 42px;
+      }
+
+      #row svg {
+        flex: none;
+        width: 24px;
+        height: 24px;
+      }
+
+      #gap {
+        flex: 1;
+      }
+
+      #overlay {
+        position: absolute;
+        inset: 0;
+      }
+
+      #cursor {
+        position: absolute;
+        z-index: 6;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        transform-origin: 3px 3px;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+      }
+
+      #ring {
+        position: absolute;
+        z-index: 5;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        margin: -28px 0 0 -28px;
+        border: 3px solid #ff7a59;
+        border-radius: 50%;
+      }
+
+      #end {
+        position: absolute;
+        z-index: 8;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      #lockup {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+
+      #lockup svg {
+        width: 132px;
+        height: 132px;
+      }
+
+      #lockup span {
+        font-family: var(--sans);
+        font-size: 112px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      #tagline {
+        margin: 52px 0 0;
+        font-family: var(--serif);
+        font-size: 60px;
+        font-weight: 600;
+        line-height: 72px;
+        text-align: center;
+      }
+
+      #tagline span {
+        position: relative;
+        display: inline-block;
+      }
+
+      #install {
+        margin-top: 58px;
+        padding: 20px 44px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #ffffff;
+        font-family: var(--sans);
+        font-size: 34px;
+        font-weight: 600;
+        line-height: 40px;
+      }
+
+      #site {
+        margin-top: 24px;
+        color: var(--muted);
+        font-family: var(--sans);
+        font-size: 26px;
+        line-height: 34px;
+      }
+
+      #veil {
+        position: absolute;
+        z-index: 9;
+        inset: 0;
+        background: var(--paper);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="view">
+        <div id="camera">
+          <div id="window">
+            <div id="bar">
+              <i></i><i></i><i></i>
+              <div id="address">youtube.com/watch</div>
+            </div>
+            <div id="content">
+              <div id="player">
+                <svg
+                  id="scene"
+                  viewBox="0 0 800 450"
+                  preserveAspectRatio="xMidYMid slice"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#d9d0b6" />
+                      <stop offset="1" stop-color="#c2c5b0" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="800" height="450" fill="url(#sky)" />
+                  <circle id="sun" cx="610" cy="92" r="38" fill="#efe6cd" />
+                  <path
+                    id="far"
+                    d="M-40 196 150 112l130 72 120-92 170 112 110-62 160 80v230H-40z"
+                    fill="#94a091"
+                  />
+                  <path
+                    id="near"
+                    d="M-40 250 180 174l170 72 150-52 150 62 190-44v240H-40z"
+                    fill="#62766b"
+                  />
+                  <rect y="276" width="800" height="174" fill="#40565a" />
+                  <g
+                    id="ripples"
+                    stroke="#6d868a"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  >
+                    <path
+                      d="M60 312h130M300 296h110M520 308h150M610 372h120M120 392h90"
+                    />
+                  </g>
+                  <g id="boat-a">
+                    <path d="M430 290h86l-14 18h-58z" fill="#29251d" />
+                    <path d="M470 290v-54l32 44z" fill="#fbf8f0" />
+                  </g>
+                  <g id="boat-b">
+                    <path d="M226 318h60l-10 13h-40z" fill="#29251d" />
+                    <path d="M252 318v-36l20 30z" fill="#e6dfcc" />
+                  </g>
+                </svg>
+                <div id="controls">
+                  <div id="progress"><div id="played"></div></div>
+                  <div id="row">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path id="toggle" d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M6 15H3V9h3l5-4v14zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"
+                      />
+                    </svg>
+                    <span id="clock">1:00 / 4:12</span>
+                    <span id="gap"></span>
+                    <svg id="switch" viewBox="0 0 16 16">
+                      <path
+                        fill="#ffffff"
+                        d="M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z"
+                      />
+                      <path
+                        fill="#ff7a59"
+                        d="M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+                    </svg>
+                  </div>
+                </div>
+                <div id="overlay"></div>
+              </div>
+              <div id="search">
+                <div id="query">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-4-4" />
+                  </svg>
+                  <span id="typed"></span>
+                  <span id="caret"></span>
+                </div>
+                <div class="result">
+                  <i></i><i style="width: 92%"></i><i style="width: 78%"></i>
+                </div>
+                <div class="result">
+                  <i></i><i style="width: 86%"></i><i style="width: 62%"></i>
+                </div>
+                <div class="result">
+                  <i></i><i style="width: 90%"></i><i style="width: 70%"></i>
+                </div>
+              </div>
+              <div id="review"></div>
+              <div id="ring"></div>
+              <svg id="cursor" viewBox="0 0 30 30" aria-hidden="true">
+                <path
+                  d="M3 3l8.2 22 3.6-8.6L23.6 13z"
+                  fill="#ffffff"
+                  stroke="#15181e"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="band"></div>
+      <div id="end">
+        <div id="lockup">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path
+              fill="#29251d"
+              d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"
+            />
+            <path
+              fill="#c9401f"
+              d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"
+            />
+          </svg>
+          <span>Couplet</span>
+        </div>
+        <p id="tagline">
+          Watch what you love.
+          <span>Keep<i class="rule" id="tagline-rule"></i></span> the words you
+          meet.
+        </p>
+        <div id="install">Add to Chrome, free</div>
+        <div id="site">coupletapp.com</div>
+      </div>
+      <div id="veil"></div>
+    </div>
+
+    <script>
+      const VIEW = { width: 1920, height: 890 };
+      const ZOOM = 1.46;
+      const DURATION = 38;
+
+      // Every moment in one place, so the pacing can be changed without hunting.
+      const AT = {
+        wordClick: 11,
+        wordClose: 14.5,
+        secondCue: 15,
+        dragStart: 16.4,
+        dragEnd: 17.3,
+        phraseEntry: 17.75,
+        starClick: 21,
+        toReview: 23.2,
+        showTranslation: 25.6,
+        backToVideo: 27.9,
+        playerBack: 28.3,
+        toEnd: 31.5,
+      };
+
+      const TITLES = [
+        { plain: 'You pause.', key: '', start: 0.35, leave: 1.5 },
+        { plain: 'You look it up.', key: '', start: 1.75, leave: 3.1 },
+        { plain: 'You forget.', key: '', start: 3.35, leave: 4.7 },
+        {
+          plain: 'Now the words are',
+          key: 'right there.',
+          start: 5.15,
+          leave: 9.1,
+        },
+        { plain: 'Click', key: 'any word.', start: 9.45, leave: 14.3 },
+        { plain: 'Or a', key: 'whole phrase.', start: 14.65, leave: 19.75 },
+        { plain: 'Keep', key: 'it.', start: 20.05, leave: 23.1 },
+        {
+          plain: 'Review it',
+          key: 'where you heard it.',
+          start: 23.45,
+          leave: 99,
+        },
+      ];
+
+      // Spans of the film during which the video is playing.
+      const PLAYING = [
+        [0, 0.45],
+        [5, AT.wordClick],
+        [AT.wordClose + 0.1, AT.dragStart],
+        [AT.playerBack, DURATION],
+      ];
+
+      const clamp = (value) => Math.min(1, Math.max(0, value));
+      const easeOut = (value) => 1 - (1 - value) ** 3;
+      const easeInOut = (value) =>
+        value < 0.5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2;
+      const ramp = (t, start, end, ease = easeOut) =>
+        ease(clamp((t - start) / (end - start)));
+      const mix = (from, to, amount) => from + (to - from) * amount;
+      const $ = (id) => document.getElementById(id);
+
+      function buildTitle({ plain, key }) {
+        const element = document.createElement('h1');
+        element.className = 'title';
+        const word = (text) => {
+          const span = document.createElement('span');
+          span.className = 'word';
+          span.textContent = text;
+          return span;
+        };
+        const plainWords = plain.split(' ');
+        plainWords.forEach((text, at) => {
+          const last = at === plainWords.length - 1;
+          element.append(word(last && !key ? text : `${text} `));
+        });
+        if (key) {
+          const wrap = document.createElement('span');
+          wrap.className = 'word key';
+          const keyWords = key.split(' ');
+          keyWords.forEach((text, at) => {
+            const span = word(at < keyWords.length - 1 ? `${text} ` : text);
+            wrap.append(span);
+          });
+          const rule = document.createElement('i');
+          rule.className = 'rule';
+          wrap.append(rule);
+          element.append(wrap);
+        }
+        $('band').append(element);
+        return element;
+      }
+
+      function animateTitle(element, t, { start, leave }) {
+        const all = [...element.querySelectorAll('.word')].filter(
+          (word) => !word.classList.contains('key'),
+        );
+        all.forEach((word, at) => {
+          const shown = ramp(t, start + at * 0.09, start + at * 0.09 + 0.34);
+          word.style.opacity = shown;
+          word.style.transform = `translateY(${mix(26, 0, shown)}px)`;
+        });
+        const rule = element.querySelector('.rule');
+        if (rule) {
+          const from = start + all.length * 0.09 + 0.1;
+          rule.style.transform = `scaleX(${ramp(t, from, from + 0.4, easeInOut)})`;
+        }
+        const gone = ramp(t, leave, leave + 0.24);
+        element.style.opacity = t < start ? 0 : 1 - gone;
+        element.style.transform = `translateY(${mix(0, -18, gone)}px)`;
+      }
+
+      const icon = (paths) =>
+        `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths
+          .map((d) => `<path d="${d}"></path>`)
+          .join('')}</svg>`;
+      const ICON = {
+        speak: [
+          'M15 8a5 5 0 0 1 0 8',
+          'M17.7 5a9 9 0 0 1 0 14',
+          'M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5',
+        ],
+        star: [
+          'M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245',
+        ],
+        play: ['M8 5v14l11 -7z'],
+        right: ['M9 6l6 6l-6 6'],
+        up: ['M6 15l6 -6l6 6'],
+        check: ['M5 12l5 5l9 -10'],
+        trash: [
+          'M4 7h16',
+          'M10 11v6',
+          'M14 11v6',
+          'M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12',
+          'M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3',
+        ],
+        site: [
+          'M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4z',
+          'M10 9l5 3l-5 3z',
+        ],
+        dictionary: [
+          'M10 19h-6a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1h6a2 2 0 0 1 2 2a2 2 0 0 1 2 -2h6a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-6a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2',
+          'M12 5v16',
+          'M7 7h1',
+          'M7 11h1',
+          'M16 7h1',
+          'M16 11h1',
+        ],
+      };
+
+      const sense = (meaning, example, translation) => `
+        <div class="lookup-sense">
+          <div class="lookup-meaning"><span class="meaning-chip">${meaning}</span></div>
+          <div class="couplet-original">${example}</div>
+          <div class="couplet-translation">${translation}</div>
+        </div>`;
+
+      const FIRST_CUE = {
+        original: 'We sat on the bank and watched the boats go by.',
+        translation: '我們坐在河岸邊，看著船隻經過。',
+      };
+      const SECOND_CUE = {
+        original: 'We had to get rid of the old boat.',
+        translation: '我們得把那艘舊船處理掉。',
+      };
+      const THIRD_CUE = 'It had been leaking all summer.';
+      const parts = {};
+
+      const cueBox = ({ original, translation }) => {
+        const box = document.createElement('div');
+        box.className = 'box is-raised';
+        box.innerHTML = `
+          <div class="strip">
+            <div class="original" lang="en">${original
+              .split(' ')
+              .map(
+                (word) =>
+                  `<button class="token" type="button">${word}</button>`,
+              )
+              .join(' ')}</div>
+            <div class="translation" lang="zh-Hant">${translation}</div>
+          </div>`;
+        return box;
+      };
+
+      /** The product's real styles, in shadow roots like the extension's. */
+      async function mount() {
+        const stylesheet = (root, href) => {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          return new Promise((resolve, reject) => {
+            link.onload = resolve;
+            link.onerror = reject;
+            root.append(link);
+          });
+        };
+
+        const overlay = $('overlay').attachShadow({ mode: 'open' });
+        const loaded = ['tokens', 'lookup-panel', 'overlay'].map((name) =>
+          stylesheet(overlay, `../../src/lib/ui/${name}.css`),
+        );
+        const first = cueBox(FIRST_CUE);
+        const second = cueBox(SECOND_CUE);
+        const panels = document.createElement('div');
+        panels.className = 'panels';
+        panels.innerHTML = `
+          <div class="panel lookup-panel word-panel" data-theme="dark">
+            <div class="lookup-head">
+              <div class="lookup-title">
+                <span class="lookup-word">bank</span>
+                <span class="phonetic">/bæŋk/</span>
+              </div>
+              <div class="lookup-actions">
+                <button class="icon-button save" type="button">${icon(ICON.star)}</button>
+                <button class="icon-button speak" type="button">${icon(ICON.speak)}</button>
+              </div>
+            </div>
+            <div class="lookup-senses" lang="zh-Hant">
+              <div class="loading">
+                <div class="skeleton lookup-skeleton"></div>
+                <div class="skeleton lookup-skeleton is-long"></div>
+              </div>
+              <div class="loaded">
+                ${sense('銀行', 'I need to go to the bank.', '我得去一趟銀行。')}
+                ${sense('河岸', 'We sat on the river bank.', '我們坐在河岸上。')}
+              </div>
+            </div>
+          </div>
+          <div class="panel lookup-panel phrase-panel" data-theme="dark">
+            <div class="lookup-head">
+              <div class="lookup-title"><span class="lookup-phrase">get rid of</span></div>
+              <div class="lookup-actions">
+                <button class="icon-button save" type="button">${icon(ICON.star)}</button>
+                <button class="icon-button speak" type="button">${icon(ICON.speak)}</button>
+              </div>
+            </div>
+            <div class="lookup-senses" lang="zh-Hant">
+              <div class="loading"><div class="skeleton lookup-skeleton is-long"></div></div>
+              <div class="loaded"><div class="lookup-meaning"><span class="meaning-chip">擺脫</span></div></div>
+            </div>
+          </div>`;
+        const extra = document.createElement('style');
+        // Stands in for :hover, which a rendered frame has no pointer to trigger.
+        extra.textContent = `
+          * { transition: none !important; animation: none !important; }
+          .token { color: inherit; font: inherit; }
+          .token.is-hover::before { background: rgba(255, 255, 255, 0.18); }
+          .panels { position: absolute; inset: 0; }`;
+        overlay.append(extra, first, second, panels);
+
+        const review = $('review').attachShadow({ mode: 'open' });
+        loaded.push(
+          stylesheet(review, '../../src/lib/dashboard/dashboard.css'),
+        );
+        const page = document.createElement('div');
+        page.dataset.theme = 'light';
+        page.className = 'video-page';
+        page.innerHTML = `
+          <div class="page review">
+            <div class="review-head">
+              <span class="text-button">End review</span>
+              <span class="review-status"></span>
+              <span class="muted review-count">1 / 3</span>
+            </div>
+            <div class="review-bar"><span style="width: 0"></span></div>
+            <article class="card review-card">
+              <div class="review-source">
+                <span class="text-button back">${icon(ICON.play)} Back to video 1:06</span>
+                <span class="review-title">
+                  <span class="video-title">${icon(ICON.site)}<span class="video-title-text">A Slow Day Along the River</span></span>
+                </span>
+                <span class="dict-anchor"><button class="icon-button" type="button">${icon(ICON.dictionary)}</button></span>
+              </div>
+              <div class="review-word-row">
+                <h1 class="review-word" lang="en">get rid of</h1>
+                <button class="icon-button" type="button">${icon(ICON.speak)}</button>
+              </div>
+              <span class="level">
+                <span class="level-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+                New word
+              </span>
+              <div class="cues" lang="en">
+                <p class="cue">${FIRST_CUE.original}</p>
+                <p class="cue is-current">We had to <mark>get rid of</mark> the old boat.<button class="icon-button" type="button">${icon(ICON.up)}</button></p>
+                <p class="cue">${THIRD_CUE}</p>
+              </div>
+              <div class="review-tools">
+                <button class="text-button disclosure" type="button" aria-expanded="false">${icon(ICON.right)}<span class="disclosure-label">Show translation</span></button>
+              </div>
+              <p class="review-translation" lang="zh-Hant" hidden>我們坐在河岸邊，看著船隻經過。我們得把那艘舊船處理掉。它整個夏天都在漏水。</p>
+              <div class="review-actions">
+                <button class="action" type="button">${icon(ICON.check)} Stop reviewing</button>
+                <button class="action is-danger" type="button">${icon(ICON.trash)} Delete</button>
+              </div>
+            </article>
+            <div class="grades">
+              <button class="grade" type="button"><kbd>1</kbd><b>Forgot</b><small>10 min</small></button>
+              <button class="grade" type="button"><kbd>2</kbd><b>Unsure</b><small>1 day</small></button>
+              <button class="grade" type="button"><kbd>3</kbd><b>Got it</b><small>3 days</small></button>
+            </div>
+          </div>`;
+        const reviewExtra = document.createElement('style');
+        reviewExtra.textContent = `
+          .video-page {
+            height: 100%;
+            overflow: hidden;
+            background: var(--ground);
+            color: var(--ink);
+            font-family: -apple-system, 'Helvetica Neue', 'PingFang TC', sans-serif;
+            zoom: 1.28;
+          }
+          /* Frames are exact moments, so nothing may run on the clock. */
+          * { transition: none !important; animation: none !important; }
+          .video-page .page.review {
+            max-width: 800px;
+            min-height: 0;
+            margin: 0 auto;
+            padding: 12px 0 0;
+          }
+          .video-page .review-head { margin-bottom: 4px; }
+          .video-page .cues { margin-top: 12px; }
+          .video-page .review-actions { margin-top: 10px; padding-top: 10px; }
+          .video-page .review-translation[hidden] { display: none; }
+          .video-page .grades { position: static; margin-top: 14px; padding-top: 0; }`;
+        review.append(reviewExtra, page);
+
+        await Promise.all(loaded);
+        await document.fonts.ready;
+
+        const content = $('content').getBoundingClientRect();
+        const center = (element) => {
+          const box = element.getBoundingClientRect();
+          return {
+            x: box.left + box.width / 2 - content.left,
+            y: box.top + box.height / 2 - content.top,
+          };
+        };
+
+        parts.first = first;
+        parts.second = second;
+        parts.firstTokens = first.querySelectorAll('.token');
+        parts.secondTokens = second.querySelectorAll('.token');
+        parts.wordToken = parts.firstTokens[4];
+        parts.range = [3, 4, 5].map((at) => parts.secondTokens[at]);
+        parts.phraseToken = parts.secondTokens[4];
+        parts.wordPanel = panels.querySelector('.word-panel');
+        parts.phrasePanel = panels.querySelector('.phrase-panel');
+
+        const place = (panel, token, box) => {
+          box.style.display = 'flex';
+          const tokenBox = token.getBoundingClientRect();
+          const strip = box.querySelector('.strip').getBoundingClientRect();
+          panel.placedCenter =
+            tokenBox.left + tokenBox.width / 2 - content.left;
+          panel.style.bottom = `${content.bottom - strip.top + 14}px`;
+          token.style.setProperty(
+            '--leader',
+            `${tokenBox.top - strip.top + 14}px`,
+          );
+        };
+        second.style.display = 'none';
+        place(parts.wordPanel, parts.wordToken, first);
+        parts.word = center(parts.wordToken);
+        first.style.display = 'none';
+        place(parts.phrasePanel, parts.phraseToken, second);
+        parts.rangeStart = center(parts.range[0]);
+        parts.rangeEnd = center(parts.range[2]);
+        setPanel(parts.phrasePanel, true, 0, content.width);
+        parts.star = center(parts.phrasePanel.querySelector('.save'));
+        second.style.display = 'none';
+
+        parts.width = content.width;
+        parts.back = center(review.querySelector('.back'));
+        parts.disclosure = center(review.querySelector('.disclosure'));
+        parts.disclosureButton = review.querySelector('.disclosure');
+        parts.disclosureLabel = review.querySelector('.disclosure-label');
+        parts.translation = review.querySelector('.review-translation');
+
+        parts.windowHeight = $('window').offsetHeight;
+        parts.push = {
+          x: VIEW.width / 2 - ($('window').offsetWidth / 2) * ZOOM,
+          y: VIEW.height - parts.windowHeight * ZOOM + 22,
+        };
+        parts.base = {
+          x: (VIEW.width - 1320) / 2,
+          y: (VIEW.height - parts.windowHeight) / 2 + 4,
+        };
+
+        // The pointer's route: each leg arrives at its place by `to`.
+        parts.route = [
+          { from: 10, to: 10.75, ...parts.word, y: parts.word.y + 4 },
+          { from: 11.6, to: 12.1, x: parts.word.x + 150, y: parts.word.y + 96 },
+          {
+            from: 15.3,
+            to: 16.2,
+            x: parts.rangeStart.x - 6,
+            y: parts.rangeStart.y + 4,
+          },
+          {
+            from: AT.dragStart + 0.05,
+            to: AT.dragEnd - 0.05,
+            x: parts.rangeEnd.x + 8,
+            y: parts.rangeEnd.y + 4,
+          },
+          { from: 20.05, to: 20.8, x: parts.star.x, y: parts.star.y + 2 },
+          {
+            from: 24.5,
+            to: 25.4,
+            x: parts.disclosure.x - 40,
+            y: parts.disclosure.y + 4,
+          },
+          { from: 27, to: 27.72, x: parts.back.x, y: parts.back.y + 4 },
+        ];
+        parts.routeStart = { x: parts.word.x + 300, y: parts.word.y + 190 };
+        parts.clicks = [
+          { at: AT.wordClick, ...parts.word },
+          { at: AT.starClick, ...parts.star },
+          { at: AT.showTranslation, ...parts.disclosure },
+          { at: AT.backToVideo, ...parts.back },
+        ];
+      }
+
+      /** Shows a panel's skeleton or entry, and places it by the product's rule. */
+      function setPanel(panel, entry, opacity, area = parts.width) {
+        panel.style.display = 'flex';
+        panel.style.opacity = opacity;
+        panel.style.visibility = opacity > 0 ? 'visible' : 'hidden';
+        panel.querySelector('.loading').style.display = entry
+          ? 'none'
+          : 'block';
+        panel.querySelector('.loaded').style.display = entry ? 'block' : 'none';
+        panel.querySelector('.save').style.display = entry ? 'flex' : 'none';
+        const width = panel.offsetWidth;
+        panel.style.left = `${Math.max(16, Math.min(panel.placedCenter - width / 2, area - width - 16))}px`;
+      }
+
+      function playedSeconds(t) {
+        let seconds = 0;
+        for (const [start, end] of PLAYING) {
+          if (start === AT.playerBack) break;
+          seconds += clamp((t - start) / (end - start)) * (end - start);
+        }
+        return seconds;
+      }
+      const SECOND_CUE_AT = playedSeconds(AT.secondCue);
+      // The jump lands two seconds before the cue, as "Back to video" does.
+      const videoSeconds = (t) =>
+        t >= AT.playerBack
+          ? SECOND_CUE_AT - 2 + (t - AT.playerBack)
+          : playedSeconds(t);
+
+      function pointer(t) {
+        let at = parts.routeStart;
+        for (const leg of parts.route) {
+          if (t < leg.from) break;
+          const moved = ramp(t, leg.from, leg.to, easeInOut);
+          at = { x: mix(at.x, leg.x, moved), y: mix(at.y, leg.y, moved) };
+        }
+        return at;
+      }
+
+      function render(t) {
+        $('veil').style.opacity = Math.max(
+          1 - ramp(t, 0, 0.3),
+          ramp(t, DURATION - 0.5, DURATION, easeInOut),
+        );
+        TITLES.forEach((title) => {
+          animateTitle(title.element, t, title);
+        });
+
+        // The window rises, flattens, pushes in for the subtitles, and pulls back for Review.
+        const rise = ramp(t, 0.05, 0.9);
+        const push =
+          ramp(t, 9.15, 10.2, easeInOut) *
+          (1 - ramp(t, AT.toReview - 0.45, AT.toReview + 0.4, easeInOut));
+        const x = mix(parts.base.x, parts.push.x, push);
+        const y = mix(parts.base.y + mix(120, 0, rise), parts.push.y, push);
+        const scale = mix(mix(0.97, 1, rise), ZOOM, push);
+        $('camera').style.opacity = ramp(t, 0.05, 0.4);
+        $('camera').style.transform =
+          `translate3d(${x}px, ${y}px, 0) rotateX(${mix(7, 0, rise)}deg) scale(${scale})`;
+
+        // The video moves only while it is playing.
+        const video = videoSeconds(t);
+        $('boat-a').setAttribute(
+          'transform',
+          `translate(${video * 5.4} ${Math.sin(video * 1.7) * 1.6})`,
+        );
+        $('boat-b').setAttribute(
+          'transform',
+          `translate(${video * -3.1} ${Math.sin(video * 1.4 + 1) * 1.3})`,
+        );
+        $('ripples').setAttribute(
+          'transform',
+          `translate(${Math.sin(video * 0.8) * 7} 0)`,
+        );
+        $('sun').setAttribute('cx', 610 - video * 0.5);
+        $('far').setAttribute('transform', `translate(${video * -0.7} 0)`);
+        $('near').setAttribute('transform', `translate(${video * -1.3} 0)`);
+        $('played').style.width = `${23.8 + video * 0.4}%`;
+        const seconds = 60 + Math.floor(video);
+        $('clock').textContent =
+          `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')} / 4:12`;
+        const playing = PLAYING.some(([from, to]) => t >= from && t < to);
+        $('toggle').setAttribute(
+          'd',
+          playing ? 'M7 5h4v14H7zM13 5h4v14h-4z' : 'M8 5v14l11-7z',
+        );
+
+        // Before the product: looking the word up elsewhere, then losing it.
+        const searchIn = ramp(t, 1.55, 1.85, easeInOut);
+        const searchOut = ramp(t, 4.65, 5.05, easeInOut);
+        const fade = ramp(t, 3.4, 4.6, easeInOut);
+        $('search').style.opacity = searchIn * (1 - searchOut);
+        $('search').style.filter =
+          `blur(${fade * 9}px) opacity(${1 - fade * 0.55})`;
+        const query = 'bank meaning';
+        $('typed').textContent = query.slice(
+          0,
+          Math.floor(ramp(t, 1.95, 2.75, (value) => value) * query.length),
+        );
+        $('caret').style.opacity =
+          t < 3.2 && Math.floor(t * 3) % 2 === 0 ? 1 : 0;
+
+        // Cues: the first plays, the second follows the first panel, and the jump replays them.
+        const showSecond =
+          (t >= AT.secondCue && t < AT.playerBack) ||
+          (t >= AT.playerBack && video >= SECOND_CUE_AT);
+        const showFirst = t >= 5 && !showSecond;
+        parts.first.style.display = showFirst ? 'flex' : 'none';
+        parts.second.style.display = showSecond ? 'flex' : 'none';
+        const firstStrip = parts.first.querySelector('.strip');
+        const stripIn = ramp(t, 6.4, 6.75);
+        firstStrip.style.opacity = t >= AT.playerBack ? 1 : stripIn;
+        firstStrip.style.transform = `translateY(${t >= AT.playerBack ? 0 : mix(14, 0, stripIn)}px)`;
+        parts.first.querySelector('.translation').style.opacity =
+          t >= AT.playerBack ? 1 : ramp(t, 6.8, 7.15);
+        parts.second.querySelector('.strip').style.opacity =
+          t >= AT.playerBack ? 1 : ramp(t, AT.secondCue, AT.secondCue + 0.15);
+
+        // Clicking a word selects it and opens its panel, which later closes.
+        const wordOpen = t >= AT.wordClick && t < AT.wordClose;
+        parts.wordToken.classList.toggle(
+          'is-hover',
+          t >= AT.wordClick - 0.3 && t < AT.wordClick,
+        );
+        parts.wordToken.classList.toggle('is-selected', wordOpen);
+        setPanel(
+          parts.wordPanel,
+          t >= AT.wordClick + 0.42,
+          wordOpen ? ramp(t, AT.wordClick + 0.03, AT.wordClick + 0.13) : 0,
+        );
+
+        // Dragging marks each word the pointer reaches, then the panel opens.
+        const reached = pointer(t).x;
+        const selection = t >= AT.dragStart && t < AT.toReview;
+        parts.range.forEach((token) => {
+          const box = token.getBoundingClientRect();
+          const scaleNow = $('camera').getBoundingClientRect().width / 1320;
+          const start =
+            (box.left - $('content').getBoundingClientRect().left) / scaleNow;
+          token.classList.toggle(
+            'is-in-range',
+            selection && reached >= start - 4,
+          );
+        });
+        parts.phraseToken.classList.toggle(
+          'is-selected',
+          t >= AT.dragEnd && t < AT.toReview,
+        );
+        const phraseOpen = t >= AT.dragEnd + 0.03 && t < AT.toReview;
+        setPanel(
+          parts.phrasePanel,
+          t >= AT.phraseEntry,
+          phraseOpen ? ramp(t, AT.dragEnd + 0.03, AT.dragEnd + 0.13) : 0,
+        );
+
+        // Pressing the star fills it, with a small pop.
+        const star = parts.phrasePanel.querySelector('.save');
+        const saved = t >= AT.starClick;
+        star.classList.toggle('is-saved', saved);
+        const pop = clamp((t - AT.starClick) / 0.34);
+        star.style.transform = `scale(${saved ? 1 + 0.45 * Math.sin(Math.PI * pop) : 1})`;
+
+        // Review, and the jump back to the moment.
+        const reviewShown =
+          ramp(t, AT.toReview - 0.1, AT.toReview + 0.3, easeInOut) *
+          (1 - ramp(t, AT.backToVideo + 0.05, AT.playerBack, easeInOut));
+        $('review').style.opacity = reviewShown;
+        $('review').style.visibility = reviewShown > 0 ? 'visible' : 'hidden';
+        const translated = t >= AT.showTranslation;
+        parts.translation.hidden = !translated;
+        parts.disclosureButton.setAttribute(
+          'aria-expanded',
+          String(translated),
+        );
+        parts.disclosureLabel.textContent = translated
+          ? 'Hide translation'
+          : 'Show translation';
+
+        let address = 'youtube.com/watch';
+        if (t >= 1.7 && t < 4.9) address = 'search';
+        if (reviewShown > 0.5) address = 'Couplet · Review';
+        $('address').textContent = address;
+
+        // The pointer, pressing and rippling on each click.
+        const shown =
+          (t >= 9.9 && t < 12.6) ||
+          (t >= 15.2 && t < 22.9) ||
+          (t >= 24.4 && t < AT.backToVideo + 0.25);
+        const at = pointer(t);
+        const nearest = parts.clicks.find(
+          (click) => t >= click.at - 0.1 && t < click.at + 0.45,
+        );
+        const pressed = t >= AT.dragStart && t < AT.dragEnd;
+        const press = pressed
+          ? 0.86
+          : 1 -
+            (nearest
+              ? 0.14 * Math.sin(Math.PI * clamp((t - nearest.at + 0.1) / 0.2))
+              : 0);
+        $('cursor').style.opacity = shown ? 1 : 0;
+        $('cursor').style.transform =
+          `translate(${at.x - 3}px, ${at.y - 3}px) scale(${press})`;
+        if (nearest && t >= nearest.at) {
+          const ring = clamp((t - nearest.at) / 0.42);
+          $('ring').style.opacity = (1 - ring) * 0.85;
+          $('ring').style.transform =
+            `translate(${nearest.x}px, ${nearest.y}px) scale(${mix(0.35, 1.5, easeOut(ring))})`;
+        } else {
+          $('ring').style.opacity = 0;
+        }
+
+        // The ending: what it is, why it matters, and where to get it.
+        $('end').style.opacity = ramp(t, AT.toEnd, AT.toEnd + 0.55, easeInOut);
+        const rise2 = (element, start) => {
+          const value = ramp(t, start, start + 0.5);
+          element.style.opacity = value;
+          element.style.transform = `translateY(${mix(24, 0, value)}px)`;
+        };
+        rise2($('lockup'), AT.toEnd + 0.4);
+        rise2($('tagline'), AT.toEnd + 0.8);
+        $('tagline-rule').style.transform =
+          `scaleX(${ramp(t, AT.toEnd + 1.3, AT.toEnd + 1.75, easeInOut)})`;
+        rise2($('install'), AT.toEnd + 1.5);
+        rise2($('site'), AT.toEnd + 1.8);
+      }
+
+      window.ready = (async () => {
+        for (const title of TITLES) title.element = buildTitle(title);
+        await mount();
+        render(Number(new URLSearchParams(location.search).get('t') ?? 8));
+      })();
+      window.render = render;
+      window.DURATION = DURATION;
+    </script>
+  </body>
+</html>
