@@ -11,51 +11,85 @@ Everything the developer dashboard asks for. Copy each block as it is. Images ar
 **Description:**
 
 ```text
-Couplet helps you learn a language from the videos you already watch. It shows the original above a translation, and turns every subtitle into something you can look up, keep, and review.
+Learn a language from the YouTube videos you already watch. Couplet shows dual subtitles, gives you the meaning of any word you click, and brings saved words back in the sentence you heard them in. Free to use.
 
-What you can do:
-• Read both languages at once, with no need to turn on captions
-• Click a word to see its meaning, phonetics, and example sentences, and hear it spoken
-• Drag across a phrase to translate it
-• Show the lines before and after, and select across them
-• Save a word or phrase with its sentence and the moment you met it
-• Review on a schedule, with a link back to that moment in the video
+WATCH WITH DUAL SUBTITLES
+• See the original above your language, with no need to turn on captions
+• Works on videos with subtitles, including auto-generated ones
+• Move and resize the subtitles, or show the lines before and after
+• Hide the translation to test yourself
+
+LOOK UP WITHOUT LEAVING THE VIDEO
+• Click a word for its meaning, phonetics, and example sentences
+• Hear it spoken
+• Drag across a phrase to translate it, even across two lines
+• The video can pause while you read
+
+KEEP WHAT YOU MEET
+• Save a word or phrase with one click
+• Each one keeps its sentence, the lines around it, and the moment in the video
+• Your list syncs between your computers, and exports as a CSV
+
+REVIEW IN CONTEXT
+• Saved words come back on a schedule, from ten minutes to two months
+• One click returns to the exact moment in the video
 • See your streak, your progress, and what needs more practice
-• Ask AI to explain a sentence, 50 times a day
-• Export your list as a CSV
 
-Choose from 8 languages to learn and 22 to translate into.
+ASK AI WHEN A SENTENCE STAYS UNCLEAR
+• In your word list, get two or three sentences on meaning and grammar
+• 50 explanations a day
 
-Subtitles and lookups work without an account. Saving and review need a Google sign-in, and your list syncs between your computers.
+LANGUAGES
+Learn English, Spanish, French, German, Portuguese, Italian, Japanese, or Korean, with translations into 22 languages.
 
-Your data: subtitle text is sent to Google Translate. What you look up or ask to explain goes through our server to an AI service run by Alibaba Cloud. We don't sell your data or show ads. Details are in the privacy policy.
+ACCOUNT AND PRIVACY
+Subtitles and lookups work without an account. To save and review, sign in with Google.
 
-Couplet is an independent product, and isn't affiliated with or endorsed by YouTube or Google.
+We don't sell your data or show ads. Subtitles go to Google Translate, and lookups and AI explanations are handled by Alibaba Cloud's AI service. See the privacy policy for details.
+
+Couplet is an independent product, not affiliated with YouTube or Google.
 ```
 
 **Traditional Chinese description:** the dashboard's Language menu lists each locale in `public/_locales` once a package with it is uploaded. Choose Traditional Chinese, and paste this:
 
 ```text
-Couplet 讓你用平常就在看的影片學語言。原文和翻譯上下並排，每個字都可以查、可以存，之後還能複習。
+用你平常就在看的 YouTube 影片學語言。Couplet 提供雙字幕，點一下單字就看到意思，收藏後還會在當初聽到的句子裡複習。免費使用。
 
-你可以：
-• 同時看原文和翻譯，不用開 CC
-• 點單字看意思、音標和例句，也能聽發音
-• 拖曳選取片語來翻譯，也可以跨上下句
-• 顯示前後句
-• 收藏單字或片語，並保留當時的句子和影片時間點
-• 依排程複習，可直接跳回影片當下
+看影片，同時看雙字幕
+• 原文和翻譯上下並排，不用開 CC
+• 有字幕的影片都能用，包括自動產生的字幕
+• 字幕可以移動、調整大小，也能顯示前後句
+• 想測試自己時，可以隱藏翻譯
+
+不離開影片就能查
+• 點單字看意思、音標和例句
+• 可以聽發音
+• 拖曳選取片語來翻譯，也可以跨兩行
+• 查字時影片可以自動暫停
+
+把遇到的字留下來
+• 一鍵收藏單字或片語
+• 保留當時的句子、前後句和影片時間點
+• 單字會在你的電腦之間同步，也能匯出成 CSV
+
+在原本的情境裡複習
+• 收藏的字會依排程回來，間隔從十分鐘到兩個月
+• 一鍵跳回影片當下
 • 查看連續天數、進度，以及需要加強的單字
-• 請 AI 解釋單字或片語在句子裡的用法，每天 50 次
-• 匯出成 CSV
 
-學習語言 8 種，翻譯語言 22 種。
+句子還是看不懂，就問 AI
+• 在單字清單裡，用兩三句話說明意思和文法
+• 每天 50 次
 
-看字幕和查字不用帳號。收藏和複習要用 Google 登入，單字會在你的電腦之間同步。
+語言
+可以學英文、西班牙文、法文、德文、葡萄牙文、義大利文、日文和韓文，翻譯語言有 22 種。
 
-你的資料：字幕文字會傳送到 Google 翻譯。你查的單字，以及要求解釋的句子，會經過我們的伺服器傳送到阿里雲的 AI 服務。我們不販售資料，也沒有廣告。詳情請見隱私權政策。
+帳號與隱私
+看字幕和查字不用帳號。想收藏和複習，用 Google 登入就好。
 
-Couplet 是獨立產品，與 YouTube 或 Google 沒有任何關聯，也未獲其背書。
+我們不賣資料，也沒有廣告。字幕會傳到 Google 翻譯，查字和 AI 解釋由阿里雲的 AI 服務處理，詳見隱私權政策。
+
+Couplet 是獨立產品，與 YouTube 和 Google 沒有關聯。
 ```
 
 **Links:** homepage `https://coupletapp.com`, privacy policy `https://coupletapp.com/privacy/`. Leave the support URL empty until `support@coupletapp.com` receives mail.
