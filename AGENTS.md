@@ -23,3 +23,4 @@ Use the names in [`docs/GLOSSARY.md`](docs/GLOSSARY.md).
 | `artifact-design`             | Publishing an Artifact page                       |
 | `ui-polish`                   | Auditing and fixing visual defects in any UI      |
 | `dashboard-ui`                | Building or changing Dashboard pages              |
+| `store-release`               | Releasing, testing a build, submitting, videos    |
