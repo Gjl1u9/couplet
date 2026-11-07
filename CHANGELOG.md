@@ -13,10 +13,11 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 - Save a phrase: drag across words, then press the star. Phrases come back for review like any other word, up to 80
   characters.
+- A Traditional Chinese name and summary in the Chrome Web Store.
 
 ### Changed
 
-- The extension is now named Couplet: Dual Subtitles to Learn Languages on YouTube.
+- The extension is now named Couplet: Dual Subtitles to Learn Languages on YouTube, with a clearer summary.
 - Explain with AI now allows 50 explanations a day per account, up from 20.
 - Couplet has a new logo: two overlapping squares, the original and its translation. It shows on the toolbar, in the popup,
   on the Welcome Page, and on the player's subtitle switch.
