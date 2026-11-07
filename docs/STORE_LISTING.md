@@ -4,12 +4,12 @@ Everything the developer dashboard asks for. Copy each block as it is. Images ar
 
 ## Store listing
 
-**Name:** comes from the manifest: `Couplet: Dual Subtitles for YouTube`.
+**Name:** comes from the manifest: `Couplet: Learn Languages on YouTube`.
 
 **Summary** (132 characters at most):
 
 ```text
-Watch YouTube with two lines of subtitles. Click a word for its meaning, save it, and review it in the sentence you heard it in.
+Free dual subtitles for YouTube. Click a word for its meaning, save it, and review it in the sentence you heard it in.
 ```
 
 **Category:** Education. **Language:** English.
@@ -75,15 +75,16 @@ Couplet 是獨立產品,與 YouTube 或 Google 沒有任何關聯,也未獲其�
 | Dashboard field  | File                              | Size     |
 | ---------------- | --------------------------------- | -------- |
 | Store icon       | `public/icon/128.png`             | 128×128  |
-| Screenshot 1     | `store/screenshot-1-welcome.jpg`  | 1280×800 |
-| Screenshot 2     | `store/screenshot-2-words.jpg`    | 1280×800 |
-| Screenshot 3     | `store/screenshot-3-review.jpg`   | 1280×800 |
-| Screenshot 4     | `store/screenshot-4-progress.jpg` | 1280×800 |
-| Screenshot 5     | `store/screenshot-5-home.jpg`     | 1280×800 |
+| Screenshot 1     | `store/screenshot-0-youtube.jpg`  | 1280×800 |
+| Screenshot 2     | `store/screenshot-1-welcome.jpg`  | 1280×800 |
+| Screenshot 3     | `store/screenshot-2-words.jpg`    | 1280×800 |
+| Screenshot 4     | `store/screenshot-3-review.jpg`   | 1280×800 |
+| Screenshot 5     | `store/screenshot-4-progress.jpg` | 1280×800 |
+| Spare            | `store/screenshot-5-home.jpg`     | 1280×800 |
 | Small promo tile | `store/promo-small.jpg`           | 440×280  |
 | Marquee promo    | `store/promo-marquee.jpg`         | 1400×560 |
 
-These use sample words and video titles. Add a real capture of the subtitles on a video you have the rights to show, as the first screenshot, if you have one.
+The Dashboard screenshots use sample words and video titles. The YouTube screenshot shows a third-party channel's video, so replace it with a video you have the rights to show, or get the channel's permission.
 
 ## Privacy practices
 
