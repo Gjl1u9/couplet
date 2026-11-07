@@ -1,0 +1,59 @@
+/* Zhupi global tokens. See docs/DESIGN.md. */
+:host,
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --ground: #eef0f3;
+  --surface: #ffffff;
+  --ink: #15181e;
+  --ink-muted: #565d68;
+  --line: #d8dce2;
+  --line-strong: #868d98;
+  --accent: #c4371c;
+  --on-accent: #ffffff;
+  --accent-soft: #fbe7e1;
+  --saved: #b7791f;
+  --chip: #eef0f3;
+  --alert: #8a5600;
+  --skeleton: #e4e7eb;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: #0f1115;
+  --surface: #181b21;
+  --ink: #eef0f3;
+  --ink-muted: #a7adb7;
+  --line: #2d323b;
+  --line-strong: #727986;
+  --accent: #ff7a59;
+  --on-accent: #15181e;
+  --accent-soft: #3b221c;
+  --saved: #f5c542;
+  --chip: rgba(255, 255, 255, 0.12);
+  --alert: #f2b544;
+  --skeleton: #2d323b;
+}
+
+:host,
+:root {
+  --subtitle-scrim: rgba(12, 14, 18, 0.82);
+  --subtitle-original: #ffffff;
+  --subtitle-translation: #d6dae0;
+  --subtitle-context: #aeb4bd;
+  --subtitle-mark: #ff7a59;
+  --subtitle-saved: #f5c542;
+  --font-sans:
+    'IBM Plex Sans', 'PingFang TC', 'Noto Sans TC', 'Hiragino Sans',
+    'Microsoft JhengHei', sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 32px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --shadow-panel: 0 12px 32px rgba(0, 0, 0, 0.45);
+}

@@ -1,9 +1,23 @@
 import type { Cue } from '../translation/batches';
 
+/** A cue and its neighbours, as stored with a Saved Word. */
+export interface CueContext {
+  readonly cues: readonly {
+    readonly original: string;
+    readonly startMs: number;
+  }[];
+  readonly currentCue: number;
+}
+
+/** A clicked word can be in a Context Line, or the video may have moved on since. */
+const CONTEXT_SEARCH_CUES = 3;
+
 export interface ActiveCue {
   readonly id: string;
   readonly text: string;
   readonly translation: string | null;
+  readonly previous: string | null;
+  readonly next: string | null;
 }
 
 /** 單一 session 的字幕和譯文。依時間查詢使用二分搜尋，長影片也不用掃整份字幕。 */
@@ -41,13 +55,37 @@ export class SubtitleStore {
   }
 
   cueAt(time: number): ActiveCue | null {
-    const cue = this.cues[this.lastStartedIndex(time)];
+    const index = this.lastStartedIndex(time);
+    const cue = this.cues[index];
     if (!cue || time >= cue.end) return null;
     return {
       id: cue.id,
       text: cue.text,
       translation: this.translations.get(cue.id) ?? null,
+      previous: this.cues[index - 1]?.text ?? null,
+      next: this.cues[index + 1]?.text ?? null,
     };
+  }
+
+  /** The nearest cue with this text around the time, with its neighbours. */
+  contextFor(time: number, text: string): CueContext | null {
+    const center = Math.max(this.lastStartedIndex(time), 0);
+    for (let distance = 0; distance <= CONTEXT_SEARCH_CUES; distance += 1) {
+      for (const index of [center - distance, center + distance]) {
+        if (this.cues[index]?.text !== text) continue;
+        const around = [index - 1, index, index + 1]
+          .map((at) => this.cues[at])
+          .filter((cue) => cue !== undefined);
+        return {
+          cues: around.map((cue) => ({
+            original: cue.text,
+            startMs: Math.round(cue.start * 1000),
+          })),
+          currentCue: index === 0 ? 0 : 1,
+        };
+      }
+    }
+    return null;
   }
 
   /** 下一次字幕內容會改變的時間點，沒有的話回傳 null。 */

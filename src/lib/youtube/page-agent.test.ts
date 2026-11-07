@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ControllerEvent } from '../subtitles/controller';
+import type { PageEvent } from './bridge';
 import {
   createPageAgent,
   patchXhr,
@@ -44,10 +44,11 @@ function setup(initial: Partial<FakeState> = {}) {
     ...initial,
   };
   let player: YouTubePlayer | null = fakePlayer(state);
-  const posted: ControllerEvent[] = [];
+  const posted: PageEvent[] = [];
   const requester = { request: vi.fn(), finish: vi.fn() };
   const watchPlayer = vi.fn();
   const agent = createPageAgent({
+    learningLanguage: 'en',
     getPlayer: () => player,
     post: (event) => posted.push(event),
     requester,
@@ -82,7 +83,7 @@ const captions = (
   ...overrides,
 });
 
-const captionsPosted = (posted: readonly ControllerEvent[]) =>
+const captionsPosted = (posted: readonly PageEvent[]) =>
   posted.filter((e) => e.type === 'captions');
 
 describe('回報播放器狀態', () => {
@@ -90,7 +91,7 @@ describe('回報播放器狀態', () => {
     const { agent, posted } = setup();
     agent.report();
     agent.report();
-    expect(posted).toEqual([
+    expect(posted.filter((e) => e.type === 'player')).toEqual([
       { type: 'player', videoId: 'a', adShowing: false },
     ]);
   });
@@ -102,11 +103,9 @@ describe('回報播放器狀態', () => {
     agent.report();
     state.ad = false;
     agent.report();
-    expect(posted.map((e) => e.type === 'player' && e.adShowing)).toEqual([
-      false,
-      true,
-      false,
-    ]);
+    expect(
+      posted.filter((e) => e.type === 'player').map((e) => e.adShowing),
+    ).toEqual([false, true, false]);
   });
 
   it('沒有播放器時不回報', () => {
@@ -185,9 +184,9 @@ describe('選字幕軌', () => {
     const { agent, requester, state, goTo } = setup({ tracks: [] });
     agent.report();
     expect(requester.request).not.toHaveBeenCalled();
-    state.tracks = [{ languageCode: 'fr' }];
+    state.tracks = [{ languageCode: 'en-GB' }];
     goTo('b');
-    expect(requester.request).toHaveBeenCalledWith({ languageCode: 'fr' });
+    expect(requester.request).toHaveBeenCalledWith({ languageCode: 'en-GB' });
   });
 
   it('換影片時先結束上一次請求，避免舊的重試繼續跑', () => {
@@ -422,5 +421,74 @@ describe('patchXhr', () => {
     const { open } = setupXhr();
     expect(() => open('http://[invalid')).not.toThrow();
     expect(FakeXhr.opened).toHaveLength(1);
+  });
+});
+
+describe('learning language', () => {
+  const noLanguage = (tracks: FakeState['tracks']) => {
+    const state: FakeState = {
+      videoId: 'a',
+      responseId: 'a',
+      ad: false,
+      tracks,
+    };
+    const posted: PageEvent[] = [];
+    const requester = { request: vi.fn(), finish: vi.fn() };
+    const agent = createPageAgent({
+      getPlayer: () => fakePlayer(state),
+      post: (event) => posted.push(event),
+      requester,
+      watchPlayer: vi.fn(),
+    });
+    return { agent, posted, requester };
+  };
+
+  it('selects nothing until the language is known', () => {
+    const { agent, requester } = noLanguage([{ languageCode: 'en' }]);
+    agent.report();
+    expect(requester.request).not.toHaveBeenCalled();
+    agent.setLearningLanguage('en');
+    expect(requester.request).toHaveBeenCalledWith({ languageCode: 'en' });
+  });
+
+  it('reports when the video has no track in that language', () => {
+    const { agent, posted, requester } = noLanguage([{ languageCode: 'fr' }]);
+    agent.setLearningLanguage('ja');
+    expect(requester.request).not.toHaveBeenCalled();
+    expect(posted).toContainEqual({
+      type: 'track-status',
+      videoId: 'a',
+      available: false,
+    });
+  });
+
+  it('switches track on the same video, and ignores a repeated language', () => {
+    const { agent, requester } = noLanguage([
+      { languageCode: 'en' },
+      { languageCode: 'fr' },
+    ]);
+    agent.setLearningLanguage('en');
+    agent.setLearningLanguage('en');
+    expect(requester.request).toHaveBeenCalledTimes(1);
+    agent.setLearningLanguage('fr');
+    expect(requester.request).toHaveBeenLastCalledWith({ languageCode: 'fr' });
+  });
+
+  it('forwards the new track after switching back to an earlier language', () => {
+    const { agent, posted } = noLanguage([
+      { languageCode: 'en' },
+      { languageCode: 'fr' },
+    ]);
+    agent.setLearningLanguage('en');
+    agent.onCaptured(captions());
+    agent.setLearningLanguage('fr');
+    agent.onCaptured(captions({ lang: 'fr' }));
+    agent.setLearningLanguage('en');
+    agent.onCaptured(captions());
+    expect(captionsPosted(posted).map((e) => e.lang)).toEqual([
+      'en',
+      'fr',
+      'en',
+    ]);
   });
 });

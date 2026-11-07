@@ -1,12 +1,133 @@
+import { createAuth } from '../lib/auth/auth';
+import { answerAuthMessage, isAuthMessage } from '../lib/auth/messages';
+import { createSupabase } from '../lib/auth/supabase';
+import { createDeepSeekLookup } from '../lib/lookup/deepseek';
+import { LOOKUP_PORT, servePortLookup } from '../lib/lookup/port';
 import { createGoogleTranslate } from '../lib/translation/google';
 import { TRANSLATE_PORT } from '../lib/translation/messages';
 import { servePortTranslate } from '../lib/translation/port';
+import {
+  answerVocabularyMessage,
+  createVocabularyService,
+  isVocabularyMessage,
+} from '../lib/vocabulary/service';
+import { createAccountSync } from '../lib/sync/account-sync';
+import { LEGACY_LOG_KEY, LEGACY_WORDS_KEY } from '../lib/sync/legacy';
+import {
+  answerSyncMessage,
+  isSyncMessage,
+  SYNC_STATUS_KEY,
+  VOCABULARY_REVISION_KEY,
+} from '../lib/sync/messages';
+import { createSupabaseRemote } from '../lib/sync/remote';
+import { openIndexedDbStore } from '../lib/sync/store';
+import { DASHBOARD_PATH, isOpenDashboardMessage } from '../lib/dashboard/open';
+
+const SYNC_ALARM = 'sync';
 
 export default defineBackground(() => {
+  const { local } = browser.storage;
+  const supabase = createSupabase();
+  const auth = createAuth({
+    backend: supabase.auth,
+    launch: (url) =>
+      browser.identity.launchWebAuthFlow({ url, interactive: true }),
+    redirectUrl: () => browser.identity.getRedirectURL(),
+  });
+  let revision = Date.now();
+  const sync = createAccountSync({
+    userId: () => auth.userId(),
+    openStore: openIndexedDbStore,
+    remote: createSupabaseRemote(supabase),
+    deviceId: async () => {
+      const stored = (await local.get('deviceId')).deviceId;
+      if (typeof stored === 'string') return stored;
+      const created = crypto.randomUUID();
+      await local.set({ deviceId: created });
+      return created;
+    },
+    legacy: {
+      read: async () => {
+        const items = await local.get([LEGACY_WORDS_KEY, LEGACY_LOG_KEY]);
+        return { words: items[LEGACY_WORDS_KEY], log: items[LEGACY_LOG_KEY] };
+      },
+      remove: () =>
+        local.remove([LEGACY_WORDS_KEY, LEGACY_LOG_KEY, 'vocabularySchema']),
+    },
+    notify: () => {
+      revision += 1;
+      void local.set({ [VOCABULARY_REVISION_KEY]: revision });
+    },
+    onStatus: (status) => {
+      void local.set({ [SYNC_STATUS_KEY]: status });
+    },
+    onError: (error) => {
+      console.warn('[dual-subtitles] 同步失敗', error);
+    },
+  });
+  // What pages ask for: sync follows sign-in, and gets a last chance before sign-out.
+  const accountAuth: typeof auth = {
+    ...auth,
+    signIn: async () => {
+      const account = await auth.signIn();
+      if (account) await sync.signedIn();
+      return account;
+    },
+    signOut: async () => {
+      await sync.signingOut();
+      await auth.signOut();
+      sync.signedOut();
+    },
+  };
+  const handleVocabulary = createVocabularyService({
+    vocabulary: sync.vocabulary,
+    createTranslate: (languages) => createGoogleTranslate(languages),
+    onError: (message, error) => {
+      console.warn(`[dual-subtitles] ${message}`, error);
+    },
+  });
+  const openDashboard = () => {
+    void browser.tabs.create({ url: browser.runtime.getURL(DASHBOARD_PATH) });
+  };
+
+  browser.runtime.onMessage.addListener(
+    (message: unknown, sender, sendResponse: (response: unknown) => void) => {
+      if (sender.id !== browser.runtime.id) return undefined;
+      if (isOpenDashboardMessage(message)) {
+        openDashboard();
+        return undefined;
+      }
+      if (isAuthMessage(message)) {
+        answerAuthMessage(message, accountAuth, sendResponse);
+        return true;
+      }
+      if (isSyncMessage(message)) {
+        answerSyncMessage(message, sync, sendResponse);
+        return true;
+      }
+      if (!isVocabularyMessage(message)) return undefined;
+      answerVocabularyMessage(message, handleVocabulary, sendResponse);
+      // Tells the browser the answer comes later.
+      return true;
+    },
+  );
+
+  void browser.alarms.create(SYNC_ALARM, { periodInMinutes: 5 });
+  browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === SYNC_ALARM) void sync.syncNow();
+  });
+  void sync.syncNow();
+
   browser.runtime.onConnect.addListener((port) => {
-    if (port.name !== TRANSLATE_PORT) return;
     if (port.sender?.id !== browser.runtime.id) return;
-    servePortTranslate(port, (languages) => createGoogleTranslate(languages));
+    if (port.name === TRANSLATE_PORT) {
+      servePortTranslate(port, (languages) => createGoogleTranslate(languages));
+    } else if (port.name === LOOKUP_PORT) {
+      servePortLookup(
+        port,
+        createDeepSeekLookup(import.meta.env.DEEPSEEK_API_KEY),
+      );
+    }
   });
 
   if (import.meta.env.MODE === 'development') {

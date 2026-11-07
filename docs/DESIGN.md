@@ -1,0 +1,158 @@
+# Zhupi: global UI style
+
+Subtitles, panels, and the Dashboard all use this style. Zhupi (朱批) means annotating text with a vermilion brush: content is ink, and the word the user is looking at is vermilion. Token values live in [`src/lib/ui/tokens.css`](../src/lib/ui/tokens.css). [`prototype/style.html`](../prototype/style.html) shows them applied to a page.
+
+## Principles
+
+1. **One vermilion brush:** over video and on the Review Card, `accent` marks only the word the user is looking at: the selected token, and the pronunciation being played. Primary buttons, navigation, and switches use `ink`. Errors use `alert`. The Dashboard has its own wider rule below.
+2. **Couplets:** language content always puts the original above the translation. The translation is smaller and lighter. Subtitles, examples, the vocabulary list, and review all share this structure.
+3. **Video first:** anything over the video is small, closes immediately, and keeps the subtitle being studied visible.
+4. **Content over decoration:** build hierarchy with type, spacing, and `line`.
+
+## Tokens
+
+| Type      | Tokens                                                                                                               | Use                                                 |
+| --------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Surfaces  | `ground`, `surface`                                                                                                  | Page background; panels and content blocks          |
+| Text      | `ink`, `ink-muted`                                                                                                   | Primary text; secondary text                        |
+| Lines     | `line`, `line-strong`                                                                                                | Decorative dividers; control borders                |
+| Accent    | `accent`, `on-accent`, `accent-soft`                                                                                 | Follow principle 1; `accent-soft` is for hover      |
+| Chips     | `chip`                                                                                                               | Meaning backgrounds                                 |
+| Status    | `alert`, `skeleton`, `saved`                                                                                         | Errors and warnings; loading skeletons; Saved Words |
+| Subtitles | `subtitle-scrim`, `subtitle-original`, `subtitle-translation`, `subtitle-context`, `subtitle-mark`, `subtitle-saved` | Over video only; identical in light and dark themes |
+| Spacing   | `space-1` 4px, `space-2` 8px, `space-3` 12px, `space-4` 16px, `space-5` 20px, `space-6` 32px                         | Components and layout                               |
+| Radius    | `radius-sm` 4px, `radius-md` 8px, `radius-lg` 14px                                                                   | Tokens and labels; buttons and inputs; panels       |
+| Shadow    | `shadow-panel`                                                                                                       | Panels over video only; pages separate with borders |
+
+## Type
+
+| Style                 | Family | Size/line height    | Weight | Use                           |
+| --------------------- | ------ | ------------------- | ------ | ----------------------------- |
+| `card-word`           | `sans` | 32/40, 24/32 narrow | 600    | The Review Card's title       |
+| `card-cue`            | `sans` | 20/30               | 500    | The Review Card's current cue |
+| `word`                | `sans` | 20/28               | 600    | The Lookup Panel's word       |
+| `phonetics`           | `sans` | 13/20               | 400    | Phonetics and readings        |
+| `title`               | `sans` | 20/28               | 600    | Page and section titles       |
+| `meaning`             | `sans` | 16/24               | 500    | Word translations             |
+| `phrase`              | `sans` | 16/24               | 600    | Selected text in panels       |
+| `couplet-original`    | `sans` | 15/22               | 500    | Couplet originals             |
+| `couplet-translation` | `sans` | 14/21               | 400    | Couplet translations          |
+| `label`               | `sans` | 12/16               | 500    | Short labels                  |
+
+Everything uses one neutral `sans` stack, so type carries hierarchy through size and weight. It names IBM Plex Sans, which the extension does not bundle yet, so it currently renders with the system fallbacks. CJK text always uses system fonts.
+
+## Themes
+
+- Panels over video default to `dark`. The Lookup panel setting switches the Lookup Panel to `light`; the Settings Panel stays `dark`.
+- Extension pages follow the system until the user picks light or dark.
+- `data-theme` switches themes, and components use only tokens.
+
+## Subtitles
+
+The Subtitle Strip is one background fitted to its longest line, holding the original above the translation.
+
+- The strip uses `subtitle-scrim` and `radius-md`, spans at most 86% of the player width, and balances wrapped lines.
+- Type scales with the player: the original is `clamp(14px, 2.4cqw, 34px)` and the translation is `clamp(13px, 2.1cqw, 30px)`, both multiplied by the subtitle size setting: small 0.68, medium 0.8 (default), large 0.96.
+- The strip sits 6% from the bottom while the controls are hidden, and moves above the controls when they show.
+- Token hover, selected, and focus shapes hug the word: at most 1em tall, shorter than the line, and inside the strip. The hit area keeps the line's full height.
+- The selected token has a `subtitle-mark` underline and a line of the same color connecting it to the Lookup Panel. Below the strip, the underline alone marks it.
+- While a translation loads, its line shows a skeleton, so the original stays in place.
+- `dir="auto"` decides text direction.
+
+### Context Lines
+
+The previous and next cues can appear above and below the couplet, inside the strip. They are off by default, because the video comes first. A button outside the strip's right edge turns them on and off; it appears on hover or focus, and the choice is saved. Its icon changes with the state, and its `aria-label` says what it will do. They are `subtitle-context`, 88% of the translation's size, and originals only, so the strip stays small. Their words are tokens like any other.
+
+### Marks on Saved Words
+
+A token matching a Saved Word still on the schedule has a dotted `subtitle-saved` underline. It stays quiet and clicks like any other token.
+
+### Selecting text
+
+Dragging from one token to another selects every token between them, including across Context Lines. Selected tokens use the same mark as a selected token, and releasing opens the Lookup Panel with the text and its Google translation. A drag that returns to its first token cancels. Selecting pauses the video, because a new cue would replace the tokens under the pointer.
+
+### Moving the strip
+
+A six-dot grip outside the strip's left edge moves it. It appears on hover or focus and takes no space, so showing it never moves the words. Only the grip moves the strip, because the words must stay clickable.
+
+- Drag anywhere inside the player. The place is saved as fractions of the player, so it carries across videos and player sizes.
+- Near a side, the strip narrows to stay inside the player.
+- The strip stays where it was placed, and only moves up when the controls would cover it.
+- Double-clicking the grip, pressing Home on it, or "Reset" in the Settings Panel restores the default place. Arrow keys move it by 2%.
+
+## Lookup Panel
+
+The Lookup Panel shows the word and its one or two most common senses, each as a couplet example, and stays as small as its content.
+
+- The first row holds the word, its phonetics, a save button, and a play button. The word becomes its lemma once the entry loads, and the save button appears then. 8px separates this row from the senses.
+- A saved word's button is a star filled with `saved`; an unsaved one is an `ink-muted` outline.
+- Each sense is its meaning, then an example couplet. A `line` divider separates two senses.
+- Its width follows its content, from 180px to 360px.
+- The word stays on one line: phonetics move to their own line first, and only a word wider than the row breaks.
+- It sits above the strip, so the subtitle stays readable, connected to the token by a line. It stays 16px inside the player, opens below the strip when the strip is too high for it, and scrolls in a small player rather than leaving the player.
+- For selected text, the first row holds the text in `phrase` style and a play button, and the translation sits in one meaning chip.
+- Clicking the token again, clicking outside, or pressing Esc closes it, so it needs no close button.
+- While loading, the clicked word shows immediately and a skeleton holds the senses' place.
+- Phonetics are optional: the row simply omits them when the source has none.
+
+## Sign-in Toast
+
+At the player's top right, in dark paper colours, 320px wide, so it clears the subtitle and most Lookup Panels. One line and one button, with the Google mark on a white tile. It fades in over 200ms, or appears at once under reduced motion. It leaves after 10 seconds, unless pointed at, focused, or signing in.
+
+## Settings menu
+
+The Settings Panel and the Dashboard's Settings page share one compact menu, in [`settings-menu.css`](../src/lib/ui/settings-menu.css): titled groups of 34px rows at 13px, with 26px selects, 30×18px switches, and 24px segmented controls. Rows use the same labels and order on both.
+
+- Over video it is a popup in the middle of the player, 300px wide, in dark paper colours. It scrolls when the player is too short.
+- Selects are our own control, in [`select-menu.ts`](../src/lib/ui/select-menu.ts): a 132×26px button and a list of 28px rows, with a check on the current one. The list keeps its parents' colours and opens in the top layer, so scrolling and fullscreen cannot clip it.
+- A row is the hit area for its switch or select, so these controls may be smaller than 44px. Segmented options and actions are at least 24px tall.
+
+## Dashboard: Paper
+
+Matte and tactile, like sheets on a desk. Behaviour and the features' reasons are in [`DASHBOARD.md`](DASHBOARD.md). Its tokens are in [`dashboard.css`](../src/lib/dashboard/dashboard.css), because they replace the ones used over video.
+
+- **Sheets:** light `surface` cards with a `line-strong` border, on a darker `ground` with a fine grain. Corners are 5px, and pages have no shadows.
+- **Toast:** ink on the page's top edge, with one 「Undo」. It says what an action did, so it never covers the grade buttons or the rail. It leaves after 8 seconds, unless pointed at or focused.
+- **Type:** serif for page titles, large numbers, and the word; sans-serif for the rest.
+- **Layout:** an 84px rail with named icons beside a single centered column, 880px at most. Below 720px, the rail moves to the bottom.
+- **Colour:** `accent` marks primary actions, the current page, progress, and the word being looked at. Stages use their own colours, always with a text label. `danger` marks Delete and hard-word counts. The check on I know this is green.
+- **Review activity:** one 15px square per day, in four shades of `accent` by the day's share of the busiest day.
+- **Level Track:** seven 6px dots, then the current interval.
+- **Lists:** rows divided by `line`. A row is the hit area, but only its word reacts to hover, so nothing touches the dividers.
+
+## Review Card
+
+Behaviour is in [`REVIEW.md`](REVIEW.md). The Card's title is the largest type on the page. Grade buttons are uncoloured, so they do not suggest an answer.
+
+## Components
+
+- **Buttons:** primary buttons have an `ink` background and `surface` text; secondary buttons have a `line-strong` border. Hit areas are at least 44×44px, and may overlap surrounding padding so compact rows stay compact. Adjacent icon buttons in the Lookup Panel are the one exception: 30×44px, so the icons sit close together.
+- **Meaning chips:** each meaning sits on a `chip` background with `radius-sm`. Chips, never commas or semicolons, separate meanings.
+- **Hover and focus shapes:** the shape hugs what it marks, separately from the hit area. Around borderless text it is at most 4px wider per side and 4px taller per side than the line. It never touches or overlaps a neighbouring control, text, or container edge. Grow the hit area with a transparent `::after`, and keep it inside the row. A bordered button fills its own border box.
+- **Icon buttons:** hover and focus shapes are 25×25px around the 17px icon, whatever the hit area. On extension pages, icons are 20px and shapes 28×28px; the dictionary icon is 24px and its shape 32×32px.
+- **Switches and segmented controls:** the selected state uses `ink`.
+- **Form focus:** a form control's focus ring touches its edge, with `outline-offset: 0`, so no gap shows between them.
+- **Video titles:** a 14px outline icon of the source site comes first, in the title's colour, so sites read apart without a brand colour competing with `accent`.
+- **Panels and content blocks:** `surface` background, `line` border, `radius-lg`.
+- **Lists and tables:** separated with `line`, with the word in the first column and source sentences as couplets.
+- **Loading:** `skeleton` reserves the content's layout.
+
+## Sound
+
+The only sound is a short two-note chime when a word is saved. It is synthesized, plays once per save, and is controlled by "Save sound", on by default. State is never carried by sound alone.
+
+## Copy
+
+- Interface copy is in English, in short sentences people actually say, such as "Couldn't reach the dictionary".
+- Buttons state what happens, such as "Try again".
+- Error messages say what happened and what to do.
+
+## Icons
+
+Use line icons: 24×24 canvas shown at 17px, or 20px on extension pages, stroke width 2 on that canvas, round caps, color inherited from text. The play, save, and dictionary icons come from Tabler Icons (MIT). Icon buttons have an `aria-label`.
+
+The product icon is the Couplet: two rows on `ink`, the upper one ending in vermilion. Its 16, 32, and 48px files use a version drawn on a 16-unit grid. The 128px file holds 96px of artwork, as the Chrome Web Store asks. The source is in [`prototype/icon.html`](../prototype/icon.html).
+
+## Accessibility
+
+Text contrast is at least 4.5:1. Control borders, focus rings, and icons are at least 3:1. State is always carried by text or an icon as well as color.

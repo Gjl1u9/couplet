@@ -1,0 +1,136 @@
+/* Shared by the panels over the video and the Review Card's dictionary. */
+.panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-panel);
+  font-weight: 400;
+  text-align: left;
+  pointer-events: auto;
+}
+
+/* Lookup Panel: the word's row, then one or two senses */
+.lookup-panel {
+  width: max-content;
+  min-width: 180px;
+  max-width: min(360px, 88cqw);
+  padding: 8px 8px 12px 16px;
+  overflow-y: auto;
+}
+
+.lookup-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 28px;
+}
+
+/* Phonetics move to their own line before the word ever breaks. */
+.lookup-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  min-width: 0;
+}
+
+.lookup-word {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.lookup-phrase {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.phonetic {
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* Full 44px hit areas that add no height to the compact row. */
+.lookup-actions {
+  display: flex;
+  flex: none;
+  margin: -8px 0 -8px auto;
+}
+
+.lookup-actions .icon-button {
+  width: 30px;
+  color: var(--ink-muted);
+}
+
+.lookup-actions .speak.is-playing {
+  color: var(--accent);
+}
+
+.lookup-actions .save.is-saved {
+  color: var(--saved);
+}
+
+.lookup-actions .save.is-saved .icon {
+  fill: currentColor;
+}
+
+.lookup-senses {
+  margin-top: 8px;
+  padding-right: 8px;
+}
+
+.lookup-sense + .lookup-sense {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.lookup-meaning {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.meaning-chip {
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--chip);
+}
+
+.couplet-original {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.couplet-translation {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+}
+
+.lookup-skeleton {
+  width: 72px;
+  height: 16px;
+  margin: 4px 0;
+}
+
+.lookup-skeleton.is-long {
+  width: 160px;
+  height: 14px;
+}

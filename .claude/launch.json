@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototype",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const{createServer:c}=require('http'),f=require('fs'),p=require('path');const d='/Users/andrew/Desktop/dual-subtitles';const t={'.html':'text/html;charset=utf-8','.css':'text/css'};c((q,r)=>{const n=p.normalize(q.url.split('?')[0]);f.readFile(p.join(d,n),(e,b)=>{if(e){r.writeHead(404);r.end();return}r.writeHead(200,{'content-type':t[p.extname(n)]||'text/plain'});r.end(b)})}).listen(Number(process.env.PORT)||4173,'127.0.0.1')"
+      ],
+      "port": 4173
+    }
+  ]
+}

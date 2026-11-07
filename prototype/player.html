@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>字幕與面板原型</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap"
+    />
+    <link rel="stylesheet" href="./ui.css" />
+  </head>
+  <body>
+    <main class="player">
+      <div class="sample-tag">示意影片</div>
+      <div class="sample-board" aria-hidden="true">
+        ∂u/∂t + (u·∇)u = −∇p/ρ + ν∇²u
+      </div>
+      <div class="subtitle">
+        <!-- prettier-ignore -->
+        <div class="subtitle-original">
+          <button
+            class="token"
+            popovertarget="lookup-the"
+            style="anchor-name: --token-0"
+          >The</button><div
+            class="panel lookup-panel"
+            id="lookup-the"
+            popover
+            style="position-anchor: --token-0"
+            role="dialog"
+            aria-label="the"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">the</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/ðə/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-the"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">限定詞</div>
+                <div>
+                  <div class="meaning">這個；那個</div>
+                  <div class="couplet-original">
+                    Close <mark>the</mark> door.
+                  </div>
+                  <div class="couplet-translation">把門關上。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="token"
+            popovertarget="lookup-ns"
+            style="anchor-name: --token-1"
+          >Navier-Stokes</button><div
+            class="panel lookup-panel"
+            id="lookup-ns"
+            popover
+            style="position-anchor: --token-1"
+            role="dialog"
+            aria-label="Navier-Stokes"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">Navier-Stokes</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/nævˈjeɪ stoʊks/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-ns"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">專有名詞</div>
+                <div>
+                  <div class="meaning">
+                    納維-斯托克斯（方程）：描述黏性流體運動的方程組
+                  </div>
+                  <div class="couplet-original">
+                    Weather models rely on the
+                    <mark>Navier-Stokes</mark> equations.
+                  </div>
+                  <div class="couplet-translation">
+                    天氣模型仰賴納維-斯托克斯方程。
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="token"
+            popovertarget="lookup-equation"
+            style="anchor-name: --token-2"
+          >equations</button><div
+            class="panel lookup-panel"
+            id="lookup-equation"
+            popover
+            style="position-anchor: --token-2"
+            role="dialog"
+            aria-label="equation"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">equation</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/ɪˈkweɪʒn/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-equation"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">名詞</div>
+                <div>
+                  <div class="meaning">方程式；等式</div>
+                  <div class="couplet-original">
+                    Solve the <mark>equation</mark> for x.
+                  </div>
+                  <div class="couplet-translation">解出方程式中的 x。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="token"
+            popovertarget="lookup-describe"
+            style="anchor-name: --token-3"
+          >describe</button><div
+            class="panel lookup-panel"
+            id="lookup-describe"
+            popover
+            style="position-anchor: --token-3"
+            role="dialog"
+            aria-label="describe"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">describe</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/dɪˈskraɪb/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-describe"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">動詞</div>
+                <div>
+                  <div class="meaning">描述；形容</div>
+                  <div class="couplet-original">
+                    Can you <mark>describe</mark> what happened?
+                  </div>
+                  <div class="couplet-translation">
+                    你能描述發生了什麼事嗎？
+                  </div>
+                </div>
+              </div>
+              <div class="sense">
+                <div class="pos">動詞</div>
+                <div>
+                  <div class="meaning">畫出（圖形或軌跡）</div>
+                  <div class="couplet-original">
+                    The ball <mark>described</mark> a long arc.
+                  </div>
+                  <div class="couplet-translation">球劃出一道長弧線。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="token"
+            popovertarget="lookup-how"
+            style="anchor-name: --token-4"
+          >how</button><div
+            class="panel lookup-panel"
+            id="lookup-how"
+            popover
+            style="position-anchor: --token-4"
+            role="dialog"
+            aria-label="how"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">how</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/haʊ/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-how"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">副詞</div>
+                <div>
+                  <div class="meaning">如何；怎麼</div>
+                  <div class="couplet-original">
+                    Tell me <mark>how</mark> it works.
+                  </div>
+                  <div class="couplet-translation">告訴我它怎麼運作。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="token"
+            popovertarget="lookup-fluid"
+            style="anchor-name: --token-5"
+          >fluids</button><div
+            class="panel lookup-panel"
+            id="lookup-fluid"
+            popover
+            style="position-anchor: --token-5"
+            role="dialog"
+            aria-label="fluid"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">fluid</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/ˈfluːɪd/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-fluid"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">名詞</div>
+                <div>
+                  <div class="meaning">流體；液體</div>
+                  <div class="couplet-original">
+                    Drink plenty of <mark>fluids</mark>.
+                  </div>
+                  <div class="couplet-translation">多喝點水分。</div>
+                </div>
+              </div>
+              <div class="sense">
+                <div class="pos">形容詞</div>
+                <div>
+                  <div class="meaning">不固定的；流動的</div>
+                  <div class="couplet-original">
+                    The situation is still <mark>fluid</mark>.
+                  </div>
+                  <div class="couplet-translation">情況仍在變化。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="token"
+            popovertarget="lookup-move"
+            style="anchor-name: --token-6"
+          >move</button><div
+            class="panel lookup-panel"
+            id="lookup-move"
+            popover
+            style="position-anchor: --token-6"
+            role="dialog"
+            aria-label="move"
+          >
+            <div class="lookup-head">
+              <h2 class="headword">move</h2>
+              <div class="pronunciation">
+                <button class="icon-button" aria-label="播放發音"><svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" />
+                    <path d="M15.5 9a4 4 0 0 1 0 6" />
+                    <path d="M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  </svg></button
+                ><span>/muːv/</span>
+              </div>
+              <button
+                class="icon-button close"
+                aria-label="關閉"
+                popovertarget="lookup-move"
+                popovertargetaction="hide"
+              ><svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg></button>
+            </div>
+            <div class="senses">
+              <div class="sense">
+                <div class="pos">動詞</div>
+                <div>
+                  <div class="meaning">移動</div>
+                  <div class="couplet-original">
+                    The car didn’t <mark>move</mark>.
+                  </div>
+                  <div class="couplet-translation">車子沒有動。</div>
+                </div>
+              </div>
+              <div class="sense">
+                <div class="pos">動詞</div>
+                <div>
+                  <div class="meaning">搬家</div>
+                  <div class="couplet-original">
+                    We <mark>moved</mark> to Taipei last year.
+                  </div>
+                  <div class="couplet-translation">我們去年搬到台北。</div>
+                </div>
+              </div>
+              <div class="sense">
+                <div class="pos">名詞</div>
+                <div>
+                  <div class="meaning">舉動；一步</div>
+                  <div class="couplet-original">
+                    It was a smart <mark>move</mark>.
+                  </div>
+                  <div class="couplet-translation">這是聰明的一步。</div>
+                </div>
+              </div>
+            </div>
+          </div>.</div>
+        <div class="subtitle-translation">
+          納維-斯托克斯方程描述流體如何運動。
+        </div>
+      </div>
+      <div class="controls">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+          role="img"
+          aria-label="影片已暫停"
+        >
+          <path d="M7 5l12 7-12 7V5z" />
+        </svg>
+        <div class="progress" aria-hidden="true"></div>
+        <span>4:02 / 18:05</span>
+        <button
+          class="icon-button settings-button"
+          popovertarget="settings"
+          aria-label="字幕設定"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M4 9h16" />
+            <path d="M7 15h10" />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="panel settings-panel"
+        id="settings"
+        popover
+        role="dialog"
+        aria-label="字幕設定"
+      >
+        <div class="settings-head">
+          字幕設定<button
+            class="icon-button close"
+            aria-label="關閉"
+            popovertarget="settings"
+            popovertargetaction="hide"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        <div class="settings-group">
+          <label class="setting" for="show-subtitle"
+            >雙語字幕<input
+              class="switch"
+              type="checkbox"
+              id="show-subtitle"
+              checked
+          /></label>
+          <label class="setting" for="learning-language"
+            >學習語言<select id="learning-language">
+              <option>英文</option>
+              <option>日文</option>
+              <option>西班牙文</option>
+              <option>韓文</option>
+            </select></label
+          >
+          <label class="setting" for="native-language"
+            >母語<select id="native-language">
+              <option>繁體中文</option>
+              <option>简体中文</option>
+              <option>English</option>
+              <option>日本語</option>
+              <option>한국어</option>
+              <option>Español</option>
+            </select></label
+          >
+          <p class="setting-note">
+            學習語言決定字幕和單字庫；母語決定譯文和查字翻譯。已存的單字不會變。
+          </p>
+        </div>
+        <div class="settings-group">
+          <label class="setting" for="show-translation"
+            >顯示譯文<input
+              class="switch"
+              type="checkbox"
+              id="show-translation"
+              checked
+          /></label>
+          <div class="setting" role="radiogroup" aria-label="字幕大小">
+            <span>字幕大小</span>
+            <div class="segmented">
+              <label><input type="radio" name="size" value="small" />小</label
+              ><label
+                ><input
+                  type="radio"
+                  name="size"
+                  value="medium"
+                  checked
+                />中</label
+              ><label><input type="radio" name="size" value="large" />大</label>
+            </div>
+          </div>
+          <label class="setting" for="pause-on-lookup"
+            >點字時暫停影片<input
+              class="switch"
+              type="checkbox"
+              id="pause-on-lookup"
+              checked
+          /></label>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

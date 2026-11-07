@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { parseCaptions, selectSourceTrack } from './captions';
+import {
+  parseCaptions,
+  selectLearningTrack,
+  selectSourceTrack,
+} from './captions';
 
 describe('selectSourceTrack', () => {
   const en = { languageCode: 'en' };
@@ -246,5 +250,44 @@ describe('parseCaptions：自動字幕', () => {
       ]),
     ]);
     expect(cues.map((c) => c.text)).toEqual(['Yes.', 'Next']);
+  });
+});
+
+describe('selectLearningTrack', () => {
+  const asr = { languageCode: 'en', kind: 'asr' };
+  const manual = { languageCode: 'en-GB' };
+  const french = { languageCode: 'fr' };
+
+  it('prefers human-made captions over automatic ones', () => {
+    expect(
+      selectLearningTrack({ captionTracks: [asr, manual, french] }, 'en'),
+    ).toBe(manual);
+  });
+
+  it('prefers the default track when it matches', () => {
+    expect(
+      selectLearningTrack(
+        {
+          captionTracks: [manual, asr],
+          audioTracks: [{ defaultCaptionTrackIndex: 1 }],
+        },
+        'en',
+      ),
+    ).toBe(asr);
+  });
+
+  it('falls back to automatic captions, and ignores other languages', () => {
+    expect(selectLearningTrack({ captionTracks: [french, asr] }, 'en')).toBe(
+      asr,
+    );
+    expect(selectLearningTrack({ captionTracks: [french] }, 'en')).toBeNull();
+    expect(selectLearningTrack(null, 'en')).toBeNull();
+  });
+
+  it('matches any variant of a language family', () => {
+    const traditional = { languageCode: 'zh-Hant' };
+    expect(selectLearningTrack({ captionTracks: [traditional] }, 'zh')).toBe(
+      traditional,
+    );
   });
 });

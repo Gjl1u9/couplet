@@ -94,13 +94,16 @@ describe('顯示', () => {
     controller.handle(captions('a'));
     await flush();
 
-    expect(views.at(-1)).toEqual({ original: 'line 0', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'line 0',
+      translation: null,
+    });
     expect(native).toEqual([true]);
     expect(sources).toEqual(['en']);
 
     calls[0]?.resolve(calls[0].texts.map((t) => `zh ${t}`));
     await flush();
-    expect(views.at(-1)).toEqual({
+    expect(views.at(-1)).toMatchObject({
       original: 'line 0',
       translation: 'zh line 0',
     });
@@ -113,7 +116,10 @@ describe('顯示', () => {
     await flush();
     calls[0]?.resolve(calls[0].texts.map(() => '  '));
     await flush();
-    expect(views.at(-1)).toEqual({ original: 'line 0', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'line 0',
+      translation: null,
+    });
   });
 
   it('內容沒變就不重繪', async () => {
@@ -141,7 +147,10 @@ describe('顯示', () => {
     controller.handle(captions('a', { lang: 'zh-Hant' }));
     await flush();
     expect(calls).toHaveLength(0);
-    expect(views.at(-1)).toEqual({ original: 'line 0', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'line 0',
+      translation: null,
+    });
   });
 
   it.each(['zh-CN', 'zh-Hans', 'zh', 'zh-SG'])(
@@ -194,7 +203,10 @@ describe('廣告', () => {
 
     setTime(25);
     controller.handle(player('a', false));
-    expect(views.at(-1)).toEqual({ original: 'line 2', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'line 2',
+      translation: null,
+    });
 
     calls[0]?.resolve(calls[0].texts.map(() => 'x'));
     await flush();
@@ -208,7 +220,10 @@ describe('廣告', () => {
     controller.handle(player('a', true));
     expect(views.at(-1)).toBeNull();
     controller.handle(player('a', false));
-    expect(views.at(-1)).toEqual({ original: 'line 0', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'line 0',
+      translation: null,
+    });
   });
 
   it('廣告期間的 seek 不影響翻譯位置，update 也不顯示字幕', () => {
@@ -239,7 +254,10 @@ describe('切換影片', () => {
     await flush();
     old?.resolve(old.texts.map(() => '舊譯文'));
     await flush();
-    expect(views.at(-1)).toEqual({ original: 'new 0', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'new 0',
+      translation: null,
+    });
     expect(views.some((v) => v?.translation === '舊譯文')).toBe(false);
   });
 
@@ -307,7 +325,10 @@ describe('翻譯順序與錯誤', () => {
     controller.handle(player('b'));
     controller.handle(captions('b'));
     await flush();
-    expect(views.at(-1)).toEqual({ original: 'line 0', translation: null });
+    expect(views.at(-1)).toMatchObject({
+      original: 'line 0',
+      translation: null,
+    });
   });
 });
 
@@ -357,4 +378,87 @@ describe('真實錄製回放', () => {
       controller.dispose();
     },
   );
+});
+
+describe('settings changes', () => {
+  const started = async () => {
+    const t = setup();
+    t.controller.handle(player('a'));
+    t.controller.handle(captions('a'));
+    await flush();
+    return t;
+  };
+
+  it('reports the source language and whether a translation is coming', async () => {
+    const t = await started();
+    expect(t.controller.sourceLanguage()).toBe('en');
+    expect(t.controller.expectsTranslation()).toBe(true);
+  });
+
+  it('expects no translation when the source is the native language', async () => {
+    const t = setup('en');
+    t.controller.handle(player('a'));
+    t.controller.handle(captions('a'));
+    await flush();
+    expect(t.controller.expectsTranslation()).toBe(false);
+  });
+
+  it('stops expecting a translation after a failure', async () => {
+    const t = setup();
+    const failing = createSubtitleController({
+      targetLanguage: 'zh-TW',
+      createTranslate: () => () => Promise.reject(new Error('offline')),
+      getTime: () => 0,
+      render: () => undefined,
+      setNativeCaptionsHidden: () => undefined,
+    });
+    failing.handle(player('a'));
+    failing.handle(captions('a'));
+    await vi.advanceTimersByTimeAsync(3_600_000);
+    expect(t.calls).toEqual([]);
+    expect(failing.expectsTranslation()).toBe(false);
+  });
+
+  it('translates again, without old translations, for a new native language', async () => {
+    const t = await started();
+    const first = t.calls[0];
+    first?.resolve(first.texts.map((text) => `zh:${text}`));
+    await flush();
+    t.controller.update();
+    expect(t.views.at(-1)?.translation).toMatch(/^zh:/);
+
+    t.controller.setTargetLanguage('ja');
+    expect(t.views.at(-1)?.translation).toBeNull();
+    await flush();
+    expect(t.calls).toHaveLength(2);
+  });
+
+  it('accepts the same track again after a reset', async () => {
+    const t = await started();
+    t.controller.resetCaptions();
+    expect(t.views.at(-1)).toBeNull();
+    expect(t.native.at(-1)).toBe(false);
+    expect(t.controller.sourceLanguage()).toBeNull();
+    t.controller.handle(captions('a'));
+    expect(t.views.at(-1)).not.toBeNull();
+    expect(t.native.at(-1)).toBe(true);
+  });
+
+  it('gives captions back to YouTube while off, and restores them', async () => {
+    const t = await started();
+    t.controller.setEnabled(false);
+    expect(t.views.at(-1)).toBeNull();
+    expect(t.native.at(-1)).toBe(false);
+    t.controller.setEnabled(true);
+    expect(t.views.at(-1)).not.toBeNull();
+    expect(t.native.at(-1)).toBe(true);
+  });
+
+  it('does not hide YouTube captions when captions arrive while off', () => {
+    const t = setup();
+    t.controller.setEnabled(false);
+    t.controller.handle(player('a'));
+    t.controller.handle(captions('a'));
+    expect(t.native).not.toContain(true);
+  });
 });
