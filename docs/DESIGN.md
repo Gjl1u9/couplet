@@ -95,16 +95,32 @@ The Lookup Panel shows the word and its one or two most common senses, each as a
 - While loading, the clicked word shows immediately and a skeleton holds the senses' place.
 - Phonetics are optional: the row simply omits them when the source has none.
 
+## Welcome Page
+
+A language sheet using the shared settings rows, then four Paper sheets, two to a row when the column fits them. Each holds a demonstration above its number, title, and one line of text.
+
+- A demonstration is drawn in HTML and CSS rather than recorded, using the Lookup Panel's real styles, so it stays sharp, adds no media, and follows the design. Its scene keeps video colours in every theme.
+- Each loops every 8 or 10 seconds and has its own Pause button. Under reduced motion, it rests on its finished state with no button.
+
 ## Sign-in Toast
 
 At the player's top right, in dark paper colours, 320px wide, so it clears the subtitle and most Lookup Panels. One line and one button, with the Google mark on a white tile. It fades in over 200ms, or appears at once under reduced motion. It leaves after 10 seconds, unless pointed at, focused, or signing in.
+
+## Player controls
+
+Two buttons in our own frosted pill, just left of YouTube's right controls and apart from them: a translucent ink background over a blur, with a thin white border, at YouTube's control height.
+
+- **Subtitle Switch:** the product icon, which turns Dual Subtitles on and off in one click. Off, it turns grey, a line strikes it, and the label says what a click will do.
+- **Settings:** white sliders with vermilion knobs, so it reads apart from YouTube's own white gear. It opens the Settings Panel.
+
+Neither button changes on hover, so the pill stays still under the pointer. The product's colour marks these two buttons as ours, which is the one use of vermilion over video beyond principle 1.
 
 ## Settings menu
 
 The Settings Panel and the Dashboard's Settings page share one compact menu, in [`settings-menu.css`](../src/lib/ui/settings-menu.css): titled groups of 34px rows at 13px, with 26px selects, 30×18px switches, and 24px segmented controls. Rows use the same labels and order on both.
 
 - Over video it is a popup in the middle of the player, 300px wide, in dark paper colours. It scrolls when the player is too short.
-- Selects are our own control, in [`select-menu.ts`](../src/lib/ui/select-menu.ts): a 132×26px button and a list of 28px rows, with a check on the current one. The list keeps its parents' colours and opens in the top layer, so scrolling and fullscreen cannot clip it.
+- Selects are our own control, in [`select-menu.ts`](../src/lib/ui/select-menu.ts): a 132×26px button and a list of 28px rows, at most 272px tall, with a check on the current one. The list keeps its parents' colours and opens in the top layer, so scrolling and fullscreen cannot clip it.
 - A row is the hit area for its switch or select, so these controls may be smaller than 44px. Segmented options and actions are at least 24px tall.
 
 ## Dashboard: Paper

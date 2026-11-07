@@ -57,16 +57,47 @@ describe('createSettingsPanel', () => {
     expect(
       document.querySelectorAll('.dual-subtitles-settings-button'),
     ).toHaveLength(1);
-    expect(entry()?.parentElement?.firstElementChild).toBe(entry());
+    const group = entry()?.parentElement;
+    expect(group?.className).toBe('dual-subtitles-controls');
+    expect(group?.nextElementSibling?.className).toBe('ytp-right-controls');
     panel.dispose();
     expect(entry()).toBeNull();
+  });
+
+  it('turns subtitles on and off without opening the panel', () => {
+    const { panel, update, find } = setup();
+    panel.ensureButton();
+    const subtitleSwitch = () =>
+      document.querySelector<HTMLElement>('.dual-subtitles-switch-button');
+    expect(subtitleSwitch()?.getAttribute('aria-pressed')).toBe('true');
+    expect(subtitleSwitch()?.getAttribute('aria-label')).toBe(
+      'Turn off dual subtitles',
+    );
+    const struck = () => subtitleSwitch()?.querySelectorAll('line').length;
+    expect(struck()).toBe(0);
+
+    subtitleSwitch()?.click();
+    expect(update).toHaveBeenCalledWith({ enabled: false });
+    panel.refresh();
+    expect(subtitleSwitch()?.getAttribute('aria-pressed')).toBe('false');
+    expect(subtitleSwitch()?.getAttribute('aria-label')).toBe(
+      'Turn on dual subtitles',
+    );
+    expect(struck()).toBe(1);
+    expect(find('.settings-panel')).toBeNull();
+
+    panel.dispose();
+    expect(subtitleSwitch()).toBeNull();
   });
 
   it('adds the button again when the player controls are replaced', () => {
     const { panel, entry } = setup();
     panel.ensureButton();
-    const controls = document.querySelector('.ytp-right-controls');
-    if (controls) controls.innerHTML = '';
+    document.querySelector('.ytp-right-controls')?.replaceWith(
+      Object.assign(document.createElement('div'), {
+        className: 'ytp-right-controls',
+      }),
+    );
     panel.ensureButton();
     expect(entry()).not.toBeNull();
     panel.dispose();

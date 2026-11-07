@@ -36,6 +36,22 @@ export const NATIVE_LANGUAGES = [
   { code: 'ja', name: '日本語' },
   { code: 'ko', name: '한국어' },
   { code: 'es', name: 'Español' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'fr', name: 'Français' },
+  { code: 'it', name: 'Italiano' },
+  { code: 'pt', name: 'Português' },
+  { code: 'ru', name: 'Русский' },
+  { code: 'nl', name: 'Nederlands' },
+  { code: 'pl', name: 'Polski' },
+  { code: 'sv', name: 'Svenska' },
+  { code: 'cs', name: 'Čeština' },
+  { code: 'tr', name: 'Türkçe' },
+  { code: 'ar', name: 'العربية' },
+  { code: 'fa', name: 'فارسی' },
+  { code: 'hi', name: 'हिन्दी' },
+  { code: 'id', name: 'Bahasa Indonesia' },
+  { code: 'th', name: 'ไทย' },
+  { code: 'vi', name: 'Tiếng Việt' },
 ] as const;
 
 export type NativeLanguage = (typeof NATIVE_LANGUAGES)[number]['code'];

@@ -65,7 +65,7 @@ The Learning Language in Settings filters every page, because each language has 
 
 | Feature               | Without it                                                         | What it does                        | Interacts with                      |
 | --------------------- | ------------------------------------------------------------------ | ----------------------------------- | ----------------------------------- |
-| Account               | Lookups cost money, and a daily limit needs to know who is asking  | Signs in or out with Google         | Words stay on the device either way |
+| Account               | Saved words and reviews need to know whose they are                | Signs in or out with Google         | Words stay on the device either way |
 | Learning language     | Another language's words stay out of reach without opening a video | Selects the list and subtitle track | Shared with the Settings Panel      |
 | Native language       | Translations stay in the wrong language                            | Selects translations for new saves  | Saved words keep theirs             |
 | Theme                 | The Dashboard cannot be set apart from the system                  | System, Light, or Dark              | Same value as the rail's switch     |
@@ -88,6 +88,14 @@ The page uses the same compact menu as the Settings Panel, grouped as Account, L
 | Open Dashboard | The toolbar no longer opens it directly               | Opens the Dashboard in a new tab, once signed in    | Closes the popup                   |
 
 **Done when:** a due word reaches Review in two clicks from the toolbar.
+
+## Welcome Page
+
+| Problem without it                                                                                     | What it does                                                                                                                                                                                                                                    | Interacts with                           |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| A new user has wrong languages, and nothing tells them that subtitle words respond to clicks and drags | Opens once after install, with Native and Learning Language selects filled in from the browser, then four looping demonstrations: click a word, drag across a phrase, show nearby lines and drag across them, and start a review from the Popup | The install event, and language settings |
+
+Saving has no demonstration of its own; the review step says it needs a Google sign-in. Updates and browser restarts don't open it, and nothing links back to it yet.
 
 ## Every state
 
@@ -129,7 +137,7 @@ Other dashboards informed the features and the general airy feel. Layout, wordin
 - Words will sync through Supabase, by the rules in [`SYNC.md`](SYNC.md). Until that ships, they stay on the device.
 - The Dashboard requires sign-in, by the user's choice, even while words stay on the device.
 - The toolbar opens a popup instead of the Dashboard, so the account and due count are one click away.
-- Login is Google only. Email would add mail delivery, and throwaway addresses would weaken the daily limit. See [`AUTH.md`](AUTH.md).
+- Login is Google only. Email would add mail delivery. See [`AUTH.md`](AUTH.md).
 - Every video title carries its site's icon, so adding Netflix needs only a new entry in `VideoTitle.tsx`.
 - Language selects replace the browser's own, which could not match Paper or show a current-value check. The same control runs in the Settings Panel and on this page.
 - Each language keeps its own list instead of merging or moving words: a mixed queue would blur statistics and interrupt reviews.

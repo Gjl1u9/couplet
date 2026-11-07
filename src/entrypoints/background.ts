@@ -1,8 +1,8 @@
 import { createAuth } from '../lib/auth/auth';
 import { answerAuthMessage, isAuthMessage } from '../lib/auth/messages';
 import { createSupabase } from '../lib/auth/supabase';
-import { createDeepSeekLookup } from '../lib/lookup/deepseek';
 import { LOOKUP_PORT, servePortLookup } from '../lib/lookup/port';
+import { createProxyLookup } from '../lib/lookup/proxy';
 import { createGoogleTranslate } from '../lib/translation/google';
 import { TRANSLATE_PORT } from '../lib/translation/messages';
 import { servePortTranslate } from '../lib/translation/port';
@@ -34,18 +34,19 @@ export default defineBackground(() => {
       browser.identity.launchWebAuthFlow({ url, interactive: true }),
     redirectUrl: () => browser.identity.getRedirectURL(),
   });
+  const deviceId = async () => {
+    const stored = (await local.get('deviceId')).deviceId;
+    if (typeof stored === 'string') return stored;
+    const created = crypto.randomUUID();
+    await local.set({ deviceId: created });
+    return created;
+  };
   let revision = Date.now();
   const sync = createAccountSync({
     userId: () => auth.userId(),
     openStore: openIndexedDbStore,
     remote: createSupabaseRemote(supabase),
-    deviceId: async () => {
-      const stored = (await local.get('deviceId')).deviceId;
-      if (typeof stored === 'string') return stored;
-      const created = crypto.randomUUID();
-      await local.set({ deviceId: created });
-      return created;
-    },
+    deviceId,
     legacy: {
       read: async () => {
         const items = await local.get([LEGACY_WORDS_KEY, LEGACY_LOG_KEY]);
@@ -90,6 +91,12 @@ export default defineBackground(() => {
     void browser.tabs.create({ url: browser.runtime.getURL(DASHBOARD_PATH) });
   };
 
+  // Only a new install: an update or a browser restart must not open a tab.
+  browser.runtime.onInstalled.addListener(({ reason }) => {
+    if (reason !== 'install') return;
+    void browser.tabs.create({ url: browser.runtime.getURL('/welcome.html') });
+  });
+
   browser.runtime.onMessage.addListener(
     (message: unknown, sender, sendResponse: (response: unknown) => void) => {
       if (sender.id !== browser.runtime.id) return undefined;
@@ -125,7 +132,10 @@ export default defineBackground(() => {
     } else if (port.name === LOOKUP_PORT) {
       servePortLookup(
         port,
-        createDeepSeekLookup(import.meta.env.DEEPSEEK_API_KEY),
+        createProxyLookup({
+          accessToken: () => auth.accessToken(),
+          installId: deviceId,
+        }),
       );
     }
   });

@@ -1,0 +1,911 @@
+/* The Welcome Page. See docs/DESIGN.md. */
+.welcome {
+  width: min(880px, 100% - 32px);
+  margin-inline: auto;
+  padding: 24px 0 40px;
+  color: var(--ink);
+}
+
+.welcome-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.welcome-head img {
+  width: 24px;
+  height: 24px;
+}
+
+.welcome-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin: 28px 0 24px;
+}
+
+/* The text wraps before the button does. */
+.welcome-intro > div {
+  flex: 1 1 320px;
+}
+
+.welcome h1 {
+  margin: 0 0 4px;
+  font-size: 34px;
+  line-height: 42px;
+}
+
+.welcome-lead {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.welcome-languages {
+  margin-bottom: 16px;
+}
+
+.welcome-languages > .muted {
+  margin: 0;
+  padding: 0 14px 12px;
+}
+
+.welcome-languages-loading {
+  height: 68px;
+}
+
+.welcome-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+}
+
+/* The scene runs to the card's edge, so the card has no padding of its own. */
+.welcome-step {
+  overflow: hidden;
+  padding: 0;
+}
+
+.welcome-step-text {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px 16px;
+}
+
+.welcome-step h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 2px;
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.welcome-step p {
+  margin: 0;
+}
+
+.welcome-number {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* The hit area grows to 44px without moving the text. */
+.welcome-pause::after {
+  position: absolute;
+  inset: -10px -8px;
+  content: '';
+}
+
+/* The demonstrations stand in for a video, so they keep its colours in every theme. */
+.demo-scene {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  container-type: inline-size;
+  background: #1f272d;
+}
+
+.demo-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.demo-stage {
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.demo-strip {
+  max-width: 86%;
+  padding: 5px 10px 6px;
+  border-radius: var(--radius-md);
+  background: var(--subtitle-scrim);
+  text-align: center;
+}
+
+.demo-original,
+.demo-translation {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.demo-original {
+  color: var(--subtitle-original);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.demo-translation {
+  color: var(--subtitle-translation);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.demo-word,
+.demo-range,
+.demo-mark-a,
+.demo-mark-b {
+  position: relative;
+  display: inline-block;
+}
+
+/* The underline, as on a selected token. */
+.demo-word::after,
+.demo-range::after,
+.demo-mark-a::after,
+.demo-mark-b::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--subtitle-mark);
+  content: '';
+  transform-origin: left;
+}
+
+/* The line joining the token to the Lookup Panel. */
+.demo-panel-anchor {
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.demo-panel-anchor::before {
+  position: absolute;
+  bottom: 0;
+  left: -1px;
+  width: 2px;
+  height: 18px;
+  background: var(--subtitle-mark);
+  content: '';
+}
+
+.demo-panel {
+  --surface: #181b21;
+  --ink: #eef0f3;
+  --ink-muted: #a7adb7;
+  --line: #2d323b;
+  --chip: rgba(255, 255, 255, 0.12);
+  bottom: 18px;
+  left: 0;
+  white-space: normal;
+  transform: translateX(-50%);
+}
+
+.demo-panel > span,
+.demo-panel .lookup-senses > span,
+.demo-panel .lookup-sense > span {
+  display: block;
+}
+
+.demo-panel .lookup-head {
+  display: flex;
+}
+
+.demo-panel.is-phrase {
+  width: 230px;
+}
+
+.demo-pointer {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  fill: #ffffff;
+  stroke: #15181e;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.demo-range .demo-pointer {
+  left: 100%;
+}
+
+/* Nearby lines: quieter than the couplet, as in the real strip. */
+.demo-strip {
+  position: relative;
+}
+
+.demo-context {
+  margin: 0;
+  overflow: hidden;
+  color: var(--subtitle-context);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+/* The line's own clip would cut off the underline and the pointer. */
+.demo-context:has(.demo-mark-a) {
+  overflow: visible;
+}
+
+/* Spanning two lines, the panel centres on the strip, as the lines have no one anchor. */
+.demo-panel.is-lines {
+  bottom: calc(100% + 18px);
+  left: 50%;
+  width: 280px;
+}
+
+.demo-toggle {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--subtitle-scrim);
+  color: var(--subtitle-translation);
+  transform: translateY(-50%);
+}
+
+.demo-toggle svg:not(.demo-pointer) {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 0 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.demo-toggle-off {
+  position: absolute;
+  opacity: 0;
+}
+
+.demo-toggle-pointer {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 24px;
+  height: 0;
+}
+
+.demo-mark-a .demo-pointer {
+  left: 0;
+}
+
+.is-review .demo-stage {
+  inset: 0;
+  display: block;
+}
+
+/* Review: the browser's toolbar, the Popup, then the Dashboard, in the page's own theme. */
+.demo-toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  background: #15181e;
+}
+
+.demo-address {
+  flex: 1;
+  height: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.demo-toolbar img {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.demo-popup {
+  position: absolute;
+  top: 34px;
+  right: 6px;
+  width: 280px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.demo-popup .popup-head {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.demo-popup .popup-head img {
+  width: 16px;
+  height: 16px;
+}
+
+.demo-popup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+}
+
+.demo-popup-row b {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-size: 16px;
+}
+
+.demo-start {
+  flex: none;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.demo-dashboard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.demo-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 12px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.demo-card-word {
+  margin-bottom: 8px;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 36px;
+}
+
+.demo-card-line {
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.demo-card-cue {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.demo-card-cue mark {
+  background: none;
+  color: inherit;
+  text-decoration: underline 2px var(--accent);
+  text-underline-offset: 3px;
+}
+
+.demo-grades {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.demo-grades span {
+  padding: 8px 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+.demo-review-pointer {
+  position: absolute;
+  top: 0;
+  right: 22px;
+  width: 0;
+  height: 0;
+}
+
+/* Without motion, each scene rests on its finished state. */
+.demo-pointer {
+  opacity: 0;
+}
+
+.welcome-pause {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .welcome-pause {
+    display: inline-flex;
+  }
+
+  .demo-word::after,
+  .demo-word .demo-panel-anchor {
+    animation: demo-word-result 8s infinite both;
+  }
+
+  .demo-word .demo-pointer {
+    animation: demo-word-pointer 8s infinite both;
+  }
+
+  .demo-range::after {
+    animation: demo-range-mark 8s infinite both;
+  }
+
+  .demo-range .demo-panel-anchor {
+    animation: demo-range-result 8s infinite both;
+  }
+
+  .demo-range .demo-pointer {
+    animation: demo-range-pointer 8s infinite both;
+  }
+
+  .demo-toggle-pointer .demo-pointer {
+    animation: demo-toggle-pointer 10s infinite both;
+  }
+
+  .demo-toggle-off {
+    animation: demo-toggle-off 10s infinite both;
+  }
+
+  .demo-toggle-on {
+    animation: demo-toggle-on 10s infinite both;
+  }
+
+  .demo-context {
+    animation: demo-context 10s infinite both;
+  }
+
+  .demo-mark-a .demo-pointer {
+    animation: demo-drag-pointer 10s infinite both;
+  }
+
+  .demo-mark-a::after {
+    animation: demo-mark-a 10s infinite both;
+  }
+
+  .demo-mark-b::after {
+    animation: demo-mark-b 10s infinite both;
+  }
+
+  .demo-mark-a .demo-panel-anchor,
+  .demo-panel.is-lines {
+    animation: demo-lines-result 10s infinite both;
+  }
+
+  .demo-popup {
+    animation: demo-popup 10s infinite both;
+  }
+
+  .demo-dashboard {
+    animation: demo-dashboard 10s infinite both;
+  }
+
+  .demo-review-pointer .demo-pointer {
+    animation: demo-review-pointer 10s infinite both;
+  }
+
+  .is-paused .demo-scene *,
+  .is-paused .demo-scene *::before,
+  .is-paused .demo-scene *::after {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes demo-word-pointer {
+  0% {
+    opacity: 0;
+    transform: translate(70px, 54px);
+  }
+  8% {
+    opacity: 1;
+    transform: translate(70px, 54px);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(-6px, -6px);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-6px, -6px) scale(0.82);
+  }
+  28% {
+    opacity: 1;
+    transform: translate(-6px, -6px);
+  }
+  36% {
+    opacity: 1;
+    transform: translate(16px, 22px);
+  }
+  42%,
+  100% {
+    opacity: 0;
+    transform: translate(16px, 22px);
+  }
+}
+
+@keyframes demo-word-result {
+  0%,
+  26% {
+    opacity: 0;
+  }
+  29%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-range-pointer {
+  0% {
+    left: 0;
+    opacity: 0;
+    transform: translate(-30px, 40px);
+  }
+  8% {
+    left: 0;
+    opacity: 1;
+    transform: translate(-30px, 40px);
+  }
+  18% {
+    left: 0;
+    opacity: 1;
+    transform: translate(-6px, -6px);
+  }
+  20% {
+    left: 0;
+    opacity: 1;
+    transform: translate(-6px, -6px) scale(0.82);
+  }
+  42% {
+    left: 100%;
+    opacity: 1;
+    transform: translate(-6px, -6px) scale(0.82);
+  }
+  45% {
+    left: 100%;
+    opacity: 1;
+    transform: translate(-6px, -6px);
+  }
+  52% {
+    left: 100%;
+    opacity: 1;
+    transform: translate(8px, 22px);
+  }
+  58%,
+  100% {
+    left: 100%;
+    opacity: 0;
+    transform: translate(8px, 22px);
+  }
+}
+
+@keyframes demo-range-mark {
+  0%,
+  20% {
+    opacity: 1;
+    transform: scaleX(0);
+  }
+  42%,
+  92% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes demo-range-result {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  47%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-toggle-pointer {
+  0%,
+  4% {
+    opacity: 0;
+    transform: translate(-40px, 52px);
+  }
+  8% {
+    opacity: 1;
+    transform: translate(-40px, 52px);
+  }
+  17% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  19% {
+    opacity: 1;
+    transform: scale(0.82);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  27%,
+  100% {
+    opacity: 0;
+    transform: translate(10px, 18px);
+  }
+}
+
+@keyframes demo-toggle-off {
+  0%,
+  19% {
+    opacity: 1;
+  }
+  20%,
+  96% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes demo-toggle-on {
+  0%,
+  19% {
+    opacity: 0;
+  }
+  20%,
+  96% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-context {
+  0%,
+  19% {
+    max-height: 0;
+    opacity: 0;
+  }
+  24%,
+  94% {
+    max-height: 18px;
+    opacity: 1;
+  }
+  99%,
+  100% {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes demo-drag-pointer {
+  0%,
+  27% {
+    opacity: 0;
+    transform: translate(-6px, 18px);
+  }
+  32% {
+    opacity: 1;
+    transform: translate(-6px, -4px);
+  }
+  34% {
+    opacity: 1;
+    transform: translate(-6px, -4px) scale(0.82);
+  }
+  44% {
+    opacity: 1;
+    transform: translate(var(--drag-line-end), -4px) scale(0.82);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(var(--drag-end), 16px) scale(0.82);
+  }
+  57% {
+    opacity: 1;
+    transform: translate(var(--drag-end), 16px);
+  }
+  63%,
+  100% {
+    opacity: 0;
+    transform: translate(var(--drag-end), 34px);
+  }
+}
+
+@keyframes demo-mark-a {
+  0%,
+  34% {
+    opacity: 1;
+    transform: scaleX(0);
+  }
+  44%,
+  94% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  98%,
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes demo-mark-b {
+  0%,
+  44% {
+    opacity: 1;
+    transform: scaleX(0);
+  }
+  55%,
+  94% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  98%,
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes demo-lines-result {
+  0%,
+  56% {
+    opacity: 0;
+  }
+  59%,
+  94% {
+    opacity: 1;
+  }
+  98%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-review-pointer {
+  0%,
+  3% {
+    opacity: 0;
+    transform: translate(-70px, 150px);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(-70px, 150px);
+  }
+  16% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(0.82);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  36% {
+    opacity: 1;
+    transform: translate(-30px, 78px);
+  }
+  38% {
+    opacity: 1;
+    transform: translate(-30px, 78px) scale(0.82);
+  }
+  41% {
+    opacity: 1;
+    transform: translate(-30px, 78px);
+  }
+  45%,
+  100% {
+    opacity: 0;
+    transform: translate(-30px, 78px);
+  }
+}
+
+@keyframes demo-popup {
+  0%,
+  19% {
+    opacity: 0;
+  }
+  21%,
+  44% {
+    opacity: 1;
+  }
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-dashboard {
+  0%,
+  41% {
+    opacity: 0;
+  }
+  46%,
+  95% {
+    opacity: 1;
+  }
+  99%,
+  100% {
+    opacity: 0;
+  }
+}

@@ -1527,7 +1527,11 @@ h1,
   white-space: nowrap;
 }
 
-/* The toolbar popup. */
+/* The toolbar popup. Its window follows the page's height, so the page must not hold it open. */
+#root:has(> .popup) {
+  min-height: 0;
+}
+
 .popup {
   width: 300px;
   min-height: 120px;

@@ -16,7 +16,7 @@ import { AccountGroup } from './AccountGroup';
 import type { DashboardServices } from './services';
 
 /** The same control as the Settings Panel, which has no React to share. */
-function Select({
+export function Select({
   label,
   choices,
   value,

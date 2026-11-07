@@ -1,0 +1,57 @@
+# Publishes a GitHub release when a version tag is pushed, with the tag's section of CHANGELOG.md as its notes.
+# How to cut a release is in docs/RELEASING.md.
+name: publish-release
+
+on:
+  push:
+    tags: ['v*']
+
+# Creating a release writes to the repository.
+permissions:
+  contents: write
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # A release is a commit on main that its release pull request put there, never one only on a branch.
+      - name: Check that the tag is on main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      # The tag name comes in through env, never ${{ }} inside a script, so it can't run as shell code.
+      - name: Check that the tag matches the version in package.json
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "$TAG" != "v$version" ]; then
+            echo "The tag $TAG does not match package.json's version $version."
+            exit 1
+          fi
+      - name: Extract the release notes from CHANGELOG.md
+        env:
+          TAG: ${{ github.ref_name }}
+        run: node scripts/extract-release-notes.mjs "$TAG" > "$RUNNER_TEMP/notes.md"
+      - run: npm ci
+      # A release never carries a package that fails the checks.
+      - run: npm run check
+      - name: Package the extension for the Chrome Web Store
+        run: npm run zip:store
+      - name: Check that the package is the store's
+        run: |
+          unzip -p dist/couplet-*-chrome.zip manifest.json | node -e '
+            const manifest = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            if (manifest.key) throw new Error("The store package must not have a key.");
+          '
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" dist/couplet-*-chrome.zip --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"

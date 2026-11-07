@@ -34,8 +34,71 @@ export const ICON_GRIP = [
 export const ICON_CONTEXT_OFF = ['M4 12h16', 'M12 5v.01', 'M12 19v.01'];
 /** The current line between two shorter ones. */
 export const ICON_CONTEXT_ON = ['M8 6h8', 'M4 12h16', 'M8 18h8'];
-/** A long line over a short one: a couplet. */
-export const ICON_COUPLET = ['M4 9h16', 'M7 15h10'];
+/** Sliders, so it never reads as YouTube's own gear. From Tabler Icons (MIT). */
+export const ICON_ADJUSTMENTS = [
+  'M4 6h8',
+  'M16 6h4',
+  'M4 12h2',
+  'M10 12h10',
+  'M4 18h11',
+  'M19 18h1',
+];
+export const ICON_ADJUSTMENTS_KNOBS = [
+  'M14 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
+  'M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
+  'M17 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
+];
+
+/** The product icon, from its small version in prototype/icon.html. Off, it is grey and struck through. */
+export function productMark(active: boolean): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('aria-hidden', 'true');
+  const OFF = '#a7adb7';
+  const rows = [
+    { x: 0, y: 0, width: 16, height: 16, rx: 3.5, fill: '#15181e' },
+    {
+      x: 2,
+      y: 4,
+      width: 5,
+      height: 3,
+      rx: 0.5,
+      fill: active ? '#ffffff' : OFF,
+    },
+    {
+      x: 8,
+      y: 4,
+      width: 6,
+      height: 3,
+      rx: 0.5,
+      fill: active ? '#ff7a59' : OFF,
+    },
+    { x: 2, y: 9, width: 8, height: 2, rx: 0.5, fill: OFF },
+  ];
+  for (const row of rows) {
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    for (const [name, value] of Object.entries(row)) {
+      rect.setAttribute(name, String(value));
+    }
+    svg.append(rect);
+  }
+  if (!active) {
+    const strike = document.createElementNS(SVG_NS, 'line');
+    for (const [name, value] of Object.entries({
+      x1: 2.5,
+      y1: 2.5,
+      x2: 13.5,
+      y2: 13.5,
+      stroke: '#ffffff',
+      'stroke-width': 1.5,
+      'stroke-linecap': 'round',
+    })) {
+      strike.setAttribute(name, String(value));
+    }
+    svg.append(strike);
+  }
+  return svg;
+}
 
 /** Text only ever enters the DOM through this helper, so captions cannot inject HTML. */
 export function element<K extends keyof HTMLElementTagNameMap>(

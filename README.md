@@ -13,13 +13,17 @@ npm install
 npm run dev
 ```
 
-Lookups use the DeepSeek API. For now this is a prototype: development builds read `DEEPSEEK_API_KEY` from `.env` and embed it in the service worker, so never share a development build. Release builds contain no key, and their lookups show an error until lookups go through a server.
+Lookups go through our Cloudflare Worker, which holds the AI key. See [`docs/LOOKUP.md`](docs/LOOKUP.md).
 
 Run the full check before committing. It matches CI:
 
 ```bash
 npm run check
 ```
+
+## Releases
+
+See [`docs/RELEASING.md`](docs/RELEASING.md). User-facing changes go in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Design
 

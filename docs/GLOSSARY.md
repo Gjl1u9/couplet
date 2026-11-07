@@ -4,10 +4,10 @@ The interface, designs, and code all use these names. Each thing has one name.
 
 ## Languages
 
-| Term              | Meaning                                                                                                   |
-| ----------------- | --------------------------------------------------------------------------------------------------------- |
-| Learning Language | The language the user is studying. It selects the subtitle track and the vocabulary list.                 |
-| Native Language   | Selects the translation language and the Dashboard interface. Changing it leaves saved words as they are. |
+| Term              | Meaning                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| Learning Language | The language the user is studying. It selects the subtitle track and the vocabulary list. |
+| Native Language   | Selects the translation language. Changing it leaves saved words as they are.             |
 
 ## Subtitles
 
@@ -27,8 +27,10 @@ The interface, designs, and code all use these names. Each thing has one name.
 | Term              | Meaning                                                                                 |
 | ----------------- | --------------------------------------------------------------------------------------- |
 | Popup             | The small page opened from the extension's toolbar icon.                                |
+| Welcome Page      | The page opened once after install, with language settings and what to try first.       |
 | Sign-in Toast     | The prompt at the player's top right when saving a word without an account.             |
 | Settings Panel    | The subtitle settings panel opened from the player's controls.                          |
+| Subtitle Switch   | The player control that turns Dual Subtitles on and off. `enabled` in settings.         |
 | Panel Theme       | Whether the Lookup Panel is dark or light. `panelTheme` in code.                        |
 | Subtitle Position | Where the user placed the strip, or `null` for the default. `subtitlePosition` in code. |
 | Save Sound        | The chime played when a word is saved. `saveSound` in code.                             |

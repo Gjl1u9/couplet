@@ -13,13 +13,13 @@ Signing out clears this device only, and keeps its words, which stay out of sigh
 
 ## Where it asks
 
-| Place         | Needs an account                       | Sign-in entry                                           |
-| ------------- | -------------------------------------- | ------------------------------------------------------- |
-| Subtitles     | No                                     | None                                                    |
-| Lookup        | No                                     | None. A daily limit by install and IP is still to build |
-| Saving a word | Yes                                    | The Sign-in Toast, at the player's top right            |
-| Dashboard     | Yes                                    | A sign-in page in place of every route                  |
-| Toolbar popup | Only for review and the Dashboard link | Account row                                             |
+| Place         | Needs an account                       | Sign-in entry                                |
+| ------------- | -------------------------------------- | -------------------------------------------- |
+| Subtitles     | No                                     | None                                         |
+| Lookup        | No                                     | None. See [`LOOKUP.md`](LOOKUP.md)           |
+| Saving a word | Yes                                    | The Sign-in Toast, at the player's top right |
+| Dashboard     | Yes                                    | A sign-in page in place of every route       |
+| Toolbar popup | Only for review and the Dashboard link | Account row                                  |
 
 ## Accounts and addresses
 
@@ -33,10 +33,8 @@ Signing out clears this device only, and keeps its words, which stay out of sigh
 
 The Supabase URL and publishable key are public. The Google Client Secret lives only in Supabase. A Supabase secret key must never enter the extension.
 
-Words are not tied to an account until [`SYNC.md`](SYNC.md) ships.
-
 ## Before launch
 
-- Move the Google app from Testing to In production. Until then only its test users can sign in.
-- Publish the home page and privacy policy at the addresses in Branding.
-- Keep the Google Cloud project active after its trial ends.
+- Keep the Google Cloud project active after its trial ends. The trial is due to end around 2026-11-16, and this project holds the OAuth client.
+
+The Google app has been In production since 2026-11-07. Only non-sensitive scopes and no logo mean it needs no verification. Its branding isn't verified, so the consent screen shows the Supabase address rather than Couplet's name until the domain is verified and the branding submitted.

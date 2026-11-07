@@ -58,6 +58,19 @@ async function openWithSave(overrides: Partial<LookupPanelOptions>) {
 }
 
 describe('createLookupPanel', () => {
+  it('explains that lookups are busy, with nothing to retry', async () => {
+    const { panel, anchor, find } = setup({
+      lookUp: () => Promise.reject(new Error('Error: lookup-busy')),
+    });
+    panel.toggle(CUE, anchor);
+    await flush();
+    expect(find('.alert')?.textContent).toBe(
+      'Lookups are busy right now. Try again later.',
+    );
+    expect(find('.text-button')).toBeNull();
+    panel.close();
+  });
+
   it('shows the clicked word and a skeleton while loading', () => {
     const { panel, anchor, find, onOpen } = setup({
       lookUp: () => new Promise(() => undefined),

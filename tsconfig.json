@@ -6,5 +6,6 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "exclude": ["**/node_modules", "dist", "worker"]
 }

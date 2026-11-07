@@ -57,6 +57,18 @@ describe('createSelectMenu', () => {
     expect(trigger()?.textContent).toBe('French');
   });
 
+  it('keeps a long list to its maximum height, however much room there is', () => {
+    const size = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, 0, 132, 620));
+    vi.stubGlobal('innerHeight', 2000);
+    trigger()?.click();
+    const list = document.querySelector<HTMLElement>('.select-list');
+    expect(list?.style.maxHeight).toBe('272px');
+    size.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
   it('does not report the value it already has', () => {
     trigger()?.click();
     menu.element.querySelector<HTMLElement>('[data-code="es"]')?.click();

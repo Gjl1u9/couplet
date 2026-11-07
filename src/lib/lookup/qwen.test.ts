@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createDeepSeekLookup, SYSTEM_PROMPT } from './deepseek';
+import { createQwenLookup, SYSTEM_PROMPT } from './qwen';
 
 const LANGUAGES = { source: 'en', target: 'zh-TW' };
 const signal = new AbortController().signal;
@@ -21,12 +21,9 @@ const answering = (content: unknown, init?: ResponseInit) =>
     ),
   );
 
-describe('createDeepSeekLookup', () => {
+describe('createQwenLookup', () => {
   it('returns the parsed entry', async () => {
-    const lookup = createDeepSeekLookup(
-      'key',
-      answering(JSON.stringify(ENTRY)),
-    );
+    const lookup = createQwenLookup('key', answering(JSON.stringify(ENTRY)));
     await expect(lookup.lookUp('bank', LANGUAGES, signal)).resolves.toEqual(
       ENTRY,
     );
@@ -34,18 +31,14 @@ describe('createDeepSeekLookup', () => {
 
   it('sends only the word and languages after a constant prompt', async () => {
     const fetchFn = answering(JSON.stringify(ENTRY));
-    await createDeepSeekLookup('key', fetchFn).lookUp(
-      'bank',
-      LANGUAGES,
-      signal,
-    );
+    await createQwenLookup('key', fetchFn).lookUp('bank', LANGUAGES, signal);
     const init = fetchFn.mock.calls[0]?.[1];
     expect(new Headers(init?.headers).get('authorization')).toBe('Bearer key');
     const body = JSON.parse(init?.body as string) as {
       messages: { content: string }[];
-      thinking: unknown;
+      enable_thinking: unknown;
     };
-    expect(body.thinking).toEqual({ type: 'disabled' });
+    expect(body.enable_thinking).toBe(false);
     expect(body.messages.map((message) => message.content)).toEqual([
       SYSTEM_PROMPT,
       '{"word":"bank","source":"en","target":"zh-TW"}',
@@ -54,7 +47,7 @@ describe('createDeepSeekLookup', () => {
 
   it('skips the paid request when both languages match', async () => {
     const fetchFn = answering('{}');
-    const lookup = createDeepSeekLookup('key', fetchFn);
+    const lookup = createQwenLookup('key', fetchFn);
     await expect(
       lookup.lookUp('bank', { source: 'en', target: 'en-US' }, signal),
     ).resolves.toBeNull();
@@ -64,13 +57,13 @@ describe('createDeepSeekLookup', () => {
   it('fails without a key instead of sending a request', async () => {
     const fetchFn = answering('{}');
     await expect(
-      createDeepSeekLookup('', fetchFn).lookUp('bank', LANGUAGES, signal),
+      createQwenLookup('', fetchFn).lookUp('bank', LANGUAGES, signal),
     ).rejects.toThrow('還沒設定查字服務');
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
   it('reports an error status', async () => {
-    const lookup = createDeepSeekLookup('key', answering('', { status: 402 }));
+    const lookup = createQwenLookup('key', answering('', { status: 402 }));
     await expect(lookup.lookUp('bank', LANGUAGES, signal)).rejects.toThrow(
       '查字服務回應 402',
     );
@@ -78,7 +71,7 @@ describe('createDeepSeekLookup', () => {
 
   it('rejects answers that are cut off or the wrong shape', async () => {
     for (const content of ['{"lemma":"ba', '{"lemma":"bank"}', null]) {
-      const lookup = createDeepSeekLookup('key', answering(content));
+      const lookup = createQwenLookup('key', answering(content));
       await expect(lookup.lookUp('bank', LANGUAGES, signal)).rejects.toThrow(
         '查字回應格式錯誤',
       );

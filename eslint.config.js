@@ -10,6 +10,7 @@ export default defineConfig(
       '.wxt/',
       'dist/',
       'coverage/',
+      'site/',
       'node_modules/',
       'prototype/sync-simulation.mjs',
       'prototype/sync-e2e/',
@@ -71,6 +72,12 @@ export default defineConfig(
   {
     // 開發用擴充功能是純 JS，直接在瀏覽器執行。
     files: ['tools/recorder-extension/**', '.claude/skills/**'],
+    rules: { 'no-undef': 'off' },
+  },
+  {
+    // Node scripts are plain JavaScript, outside the TypeScript project.
+    files: ['scripts/**/*.mjs'],
+    extends: [tseslint.configs.disableTypeChecked],
     rules: { 'no-undef': 'off' },
   },
   prettier,

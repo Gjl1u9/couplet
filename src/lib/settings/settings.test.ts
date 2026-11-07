@@ -34,7 +34,9 @@ describe('defaults', () => {
     ['zh-CN', 'zh-CN'],
     ['zh', 'zh-CN'],
     ['ja-JP', 'ja'],
-    ['fr-FR', 'en'],
+    ['fi-FI', 'en'],
+    ['fr-FR', 'fr'],
+    ['pt-BR', 'pt'],
   ])('maps the browser language %s to %s', (browser, expected) => {
     expect(defaultNativeLanguage(browser)).toBe(expected);
   });

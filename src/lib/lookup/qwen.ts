@@ -2,12 +2,13 @@ import { sameLanguage } from '../language';
 import { toWordEntry } from './entry';
 import type { LookupService } from './types';
 
-const ENDPOINT = 'https://api.deepseek.com/chat/completions';
-const MODEL = 'deepseek-flash';
+const ENDPOINT =
+  'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions';
+// Chosen by cost and quality in docs/LOOKUP.md. The international endpoint is in Singapore.
+const MODEL = 'qwen3.7-flash';
 const REQUEST_TIMEOUT_MS = 15_000;
 const MAX_OUTPUT_TOKENS = 300;
 
-/** Stays constant, so DeepSeek's prefix cache can bill it at the cache-hit rate. */
 export const SYSTEM_PROMPT = `You are a compact learner's dictionary for language learners watching videos.
 
 Given a word from a subtitle, return its 1-2 most common meanings as JSON.
@@ -46,7 +47,7 @@ function parseEntry(body: CompletionBody) {
   return entry;
 }
 
-export function createDeepSeekLookup(
+export function createQwenLookup(
   apiKey: string,
   fetchFn: typeof fetch = fetch,
 ): LookupService {
@@ -62,7 +63,7 @@ export function createDeepSeekLookup(
         },
         body: JSON.stringify({
           model: MODEL,
-          thinking: { type: 'disabled' },
+          enable_thinking: false,
           response_format: { type: 'json_object' },
           max_tokens: MAX_OUTPUT_TOKENS,
           temperature: 0,

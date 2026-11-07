@@ -24,6 +24,8 @@ export interface SelectMenu {
 const GAP = 4;
 const EDGE = 8;
 const MIN_WIDTH = 160;
+/** Nine and a half rows, so the cut-off row shows the list scrolls. */
+const MAX_LIST_HEIGHT = 272;
 
 let lists = 0;
 
@@ -98,11 +100,14 @@ export function createSelectMenu(options: SelectMenuOptions): SelectMenu {
     list.style.width = `${String(width)}px`;
     list.style.left = `${String(Math.max(EDGE, box.right - width))}px`;
     list.style.maxHeight = 'none';
-    const wanted = list.getBoundingClientRect().height;
+    const wanted = Math.min(
+      list.getBoundingClientRect().height,
+      MAX_LIST_HEIGHT,
+    );
     const below = innerHeight - box.bottom - GAP - EDGE;
     const above = box.top - GAP - EDGE;
     const fitsBelow = wanted <= below || below >= above;
-    list.style.maxHeight = `${String(fitsBelow ? below : above)}px`;
+    list.style.maxHeight = `${String(Math.min(fitsBelow ? below : above, MAX_LIST_HEIGHT))}px`;
     list.style.top = fitsBelow
       ? `${String(box.bottom + GAP)}px`
       : `${String(Math.max(EDGE, box.top - GAP - Math.min(wanted, above)))}px`;

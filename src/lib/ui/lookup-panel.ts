@@ -11,6 +11,7 @@ import {
   ICON_STAR,
   watchDismiss,
 } from './dom';
+import { lookupFailure } from '../lookup/proxy';
 import type { Speaker } from './speech';
 
 export interface LookupPanelOptions {
@@ -226,8 +227,9 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
         senses.replaceChildren(...(entry?.senses.map(senseRow) ?? []));
         place();
       },
-      () => {
+      (error: unknown) => {
         if (!isCurrent()) return;
+        const failure = lookupFailure(error);
         const retry = element('button', 'text-button', 'Try again');
         retry.type = 'button';
         retry.addEventListener('click', () => {
@@ -238,9 +240,9 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
             'div',
             'alert',
             icon(ICON_ALERT),
-            element('span', '', "Couldn't reach the dictionary"),
+            element('span', '', failure.text),
           ),
-          retry,
+          ...(failure.canRetry ? [retry] : []),
         );
         place();
       },

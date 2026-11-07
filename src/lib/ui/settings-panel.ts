@@ -9,11 +9,13 @@ import {
   element,
   icon,
   iconButton,
+  ICON_ADJUSTMENTS,
+  ICON_ADJUSTMENTS_KNOBS,
   ICON_ALERT,
   ICON_CLOSE,
-  ICON_COUPLET,
   ICON_DICTIONARY,
   watchDismiss,
+  productMark,
 } from './dom';
 import {
   createSelectMenu,
@@ -45,6 +47,8 @@ export interface SettingsPanel {
 }
 
 const BUTTON_CLASS = 'dual-subtitles-settings-button';
+const SWITCH_CLASS = 'dual-subtitles-switch-button';
+const GROUP_CLASS = 'dual-subtitles-controls';
 const SIZES: readonly { value: SubtitleSize; label: string }[] = [
   { value: 'small', label: 'S' },
   { value: 'medium', label: 'M' },
@@ -61,6 +65,9 @@ export function createSettingsPanel(
   let panel: HTMLElement | null = null;
   let stopWatching: (() => void) | null = null;
   let button: HTMLButtonElement | null = null;
+  let subtitleSwitch: HTMLButtonElement | null = null;
+  /** Our own frosted pill, beside YouTube's, rather than inside it. */
+  let group: HTMLElement | null = null;
   let menus: SelectMenu[] = [];
   /** A redraw waiting for an open list, which it would otherwise close. */
   let redrawLater = false;
@@ -237,45 +244,116 @@ export function createSettingsPanel(
     else open();
   };
 
+  const syncSwitch = () => {
+    if (!subtitleSwitch) return;
+    const { enabled } = options.getSettings();
+    const label = enabled
+      ? 'Turn off dual subtitles'
+      : 'Turn on dual subtitles';
+    subtitleSwitch.setAttribute('aria-label', label);
+    subtitleSwitch.setAttribute('aria-pressed', String(enabled));
+    subtitleSwitch.title = label;
+    subtitleSwitch.replaceChildren(sizedForControls(productMark(enabled)));
+  };
+
   return {
     toggle,
     close,
     isOpen: () => panel !== null,
-    refresh: draw,
+    refresh() {
+      draw();
+      syncSwitch();
+    },
     ensureButton() {
-      const controls =
-        document.querySelector('#movie_player .ytp-right-controls-left') ??
-        document.querySelector('#movie_player .ytp-right-controls');
-      if (!controls || button?.parentElement === controls) return;
-      button?.remove();
-      button = createButton(toggle);
+      const youtubeControls = document.querySelector(
+        '#movie_player .ytp-right-controls',
+      );
+      if (!youtubeControls || group?.nextElementSibling === youtubeControls) {
+        return;
+      }
+      group?.remove();
+      button = createButton(BUTTON_CLASS, toggle);
+      button.append(settingsIcon());
+      button.setAttribute('aria-label', 'Subtitle settings');
+      button.title = 'Subtitle settings';
+      subtitleSwitch = createButton(SWITCH_CLASS, () => {
+        options.update({ enabled: !options.getSettings().enabled });
+      });
+      group = createGroup(subtitleSwitch, button);
       syncExpanded();
-      controls.prepend(button);
+      syncSwitch();
+      youtubeControls.before(group);
     },
     dispose() {
       close();
-      button?.remove();
+      group?.remove();
+      group = null;
       button = null;
+      subtitleSwitch = null;
     },
   };
 }
 
 /** Lives in YouTube's controls, outside our shadow root, so its styles are inline. */
-function createButton(onClick: () => void): HTMLButtonElement {
-  const svg = icon(ICON_COUPLET);
-  svg.setAttribute('width', '100%');
-  svg.setAttribute('height', '100%');
+function sizedForControls(svg: SVGSVGElement): SVGSVGElement {
+  svg.setAttribute('width', '24');
+  svg.setAttribute('height', '24');
+  // YouTube's buttons change height with the player, but their icons stay this size.
+  svg.style.display = 'block';
+  svg.style.margin = 'auto';
+  return svg;
+}
+
+/** White sliders with vermilion knobs, so it reads apart from YouTube's own white icons. */
+function settingsIcon(): SVGSVGElement {
+  const svg = sizedForControls(icon(ICON_ADJUSTMENTS));
   svg.setAttribute('fill', 'none');
   svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', '1.5');
+  svg.setAttribute('stroke-width', '2');
   svg.setAttribute('stroke-linecap', 'round');
-  svg.style.padding = '20%';
-  svg.style.boxSizing = 'border-box';
-  const button = element('button', `ytp-button ${BUTTON_CLASS}`, svg);
+  svg.setAttribute('stroke-linejoin', 'round');
+  for (const path of icon(ICON_ADJUSTMENTS_KNOBS).querySelectorAll('path')) {
+    path.setAttribute('stroke', '#ff7a59');
+    svg.append(path);
+  }
+  return svg;
+}
+
+function createGroup(...buttons: readonly HTMLElement[]): HTMLElement {
+  const group = element('div', GROUP_CLASS, ...buttons);
+  group.style.cssText = [
+    'display: flex',
+    'flex: none',
+    'align-items: center',
+    'align-self: center',
+    'height: 40px',
+    'margin-right: 8px',
+    'padding: 0 4px',
+    'box-sizing: border-box',
+    'border: 1px solid rgba(255, 255, 255, 0.18)',
+    'border-radius: 20px',
+    'background: rgba(21, 24, 30, 0.45)',
+    'backdrop-filter: blur(12px) saturate(1.2)',
+  ].join(';');
+  return group;
+}
+
+function createButton(
+  className: string,
+  onClick: () => void,
+): HTMLButtonElement {
+  // Not YouTube's `ytp-button`, whose red hover effect would show inside our pill.
+  const button = element('button', className);
   button.type = 'button';
-  button.setAttribute('aria-label', 'Subtitle settings');
-  button.title = 'Subtitle settings';
-  button.style.color = '#fff';
+  button.style.cssText = [
+    'width: 40px',
+    'height: 38px',
+    'padding: 0',
+    'border: 0',
+    'background: none',
+    'color: #fff',
+    'cursor: pointer',
+  ].join(';');
   button.addEventListener('click', (event) => {
     event.stopPropagation();
     onClick();
