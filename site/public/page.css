@@ -6,6 +6,7 @@
   --ink-muted: #6a6354;
   --line: #d9d1be;
   --line-strong: #857c6a;
+  --accent: #c9401f;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,6 +17,7 @@
     --ink-muted: #afa693;
     --line: #443f33;
     --line-strong: #80786a;
+    --accent: #ff8363;
   }
 }
 
@@ -57,10 +59,10 @@ header {
   text-decoration: none;
 }
 
-.brand img {
+.brand .logo {
+  flex: none;
   width: 26px;
   height: 26px;
-  border-radius: 5px;
 }
 
 main {

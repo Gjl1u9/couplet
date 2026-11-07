@@ -15,6 +15,8 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 ### Changed
 
 - Explain with AI now allows 50 explanations a day per account, up from 20.
+- Couplet has a new logo: two overlapping squares, the original and its translation. It shows on the toolbar, in the popup,
+  on the Welcome Page, and on the player's subtitle switch.
 
 ## [0.1.1] - 2026-11-07
 

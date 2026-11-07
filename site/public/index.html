@@ -173,10 +173,10 @@
         white-space: nowrap;
       }
 
-      .brand img {
+      .brand .logo {
+        flex: none;
         width: 26px;
         height: 26px;
-        border-radius: 5px;
       }
 
       .top nav {
@@ -391,8 +391,9 @@
         fill: currentColor;
       }
 
-      .control-row .is-ours {
-        color: #ff8363;
+      /* The Subtitle Switch: the product mark, white and vermilion over video. */
+      .control-row .is-mark {
+        stroke: none;
       }
 
       .control-gap {
@@ -982,7 +983,16 @@
     <header class="top">
       <div class="wrap">
         <a class="brand" href="#top">
-          <img src="/icon/128.png" alt="" />
+          <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+            <path
+              fill="var(--ink)"
+              d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"
+            />
+            <path
+              fill="var(--accent)"
+              d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"
+            />
+          </svg>
           Couplet
         </a>
         <nav aria-label="Page">
@@ -1093,8 +1103,15 @@
                 </svg>
                 <span class="time">1:00 / 4:12</span>
                 <span class="control-gap"></span>
-                <svg class="icon is-ours" viewBox="0 0 24 24">
-                  <path d="M4 9h16M7 15h10" />
+                <svg class="icon is-mark" viewBox="0 0 16 16">
+                  <path
+                    fill="#ffffff"
+                    d="M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z"
+                  />
+                  <path
+                    fill="#ff7a59"
+                    d="M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z"
+                  />
                 </svg>
                 <svg class="icon" viewBox="0 0 24 24">
                   <path
