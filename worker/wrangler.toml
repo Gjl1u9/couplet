@@ -6,7 +6,7 @@ routes = [{ pattern = "api.coupletapp.com", custom_domain = true }]
 
 [vars]
 ABUSE_DAILY_LIMIT = "2000"
-EXPLAIN_DAILY_LIMIT = "20"
+EXPLAIN_DAILY_LIMIT = "50"
 GLOBAL_DAILY_LIMIT = "20000"
 SUPABASE_URL = "https://pfgymrsdimvrhaevndtk.supabase.co"
 

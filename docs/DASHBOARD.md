@@ -57,7 +57,7 @@ The Learning Language in Settings filters every page, because each language has 
 | Sentences                    | The word loses the context it was met in                                      | Up to three, each with translation and video link                        | Nearby lines collapse, and start collapsed                              |
 | Stop reviewing, Review again | A known word keeps returning, and a retired one can never return              | Retires or restores the word, then shows a toast with Undo               | Changes the queue, stages, and subtitle marks                           |
 | Delete                       | A mistaken save stays in the list and statistics forever                      | Removes the word and its reviews after a confirmation                    | Removes it from Home, Review, and subtitle marks                        |
-| Explain with AI              | A sentence stays unclear when the translation and dictionary don't explain it | Two or three sentences on meaning, part of speech, and grammar, 20 a day | Sends up to three lines to the AI service. See [`LOOKUP.md`](LOOKUP.md) |
+| Explain with AI              | A sentence stays unclear when the translation and dictionary don't explain it | Two or three sentences on meaning, part of speech, and grammar, 50 a day | Sends up to three lines to the AI service. See [`LOOKUP.md`](LOOKUP.md) |
 | Export                       | Users cannot take their words elsewhere                                       | Downloads the words shown as CSV, in UTF-8 with a BOM                    | Respects search and filter; formulas are neutralized                    |
 
 **Done when:** a saved word can be found, inspected, retired, restored, deleted, and exported with the keyboard.

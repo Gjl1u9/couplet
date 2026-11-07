@@ -7,6 +7,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+### Changed
+
+- Explain with AI now allows 50 explanations a day per account, up from 20.
+
 ## [0.1.1] - 2026-11-07
 
 ### Changed
