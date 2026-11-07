@@ -7,6 +7,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-07
+
+The first release: learn a language from YouTube videos with dual subtitles, word lookup, and review.
+
 ### Added
 
 - Dual Subtitles on YouTube: the original above a translation into any of 22 languages, with eight languages to learn.
