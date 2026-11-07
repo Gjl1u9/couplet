@@ -11,7 +11,7 @@ export default defineConfig({
   }),
   manifest: {
     // The store shows the name, so it says what the extension does.
-    name: 'Couplet: Learn Languages on YouTube',
+    name: 'Couplet: Dual Subtitles to Learn Languages on YouTube',
     short_name: 'Couplet',
     description: 'Dual subtitles and word review for YouTube',
     // The store's public key, so unpacked builds keep the published extension's ID, which

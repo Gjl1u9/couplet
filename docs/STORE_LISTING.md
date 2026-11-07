@@ -4,7 +4,7 @@ Everything the developer dashboard asks for. Copy each block as it is. Images ar
 
 ## Store listing
 
-**Name:** comes from the manifest: `Couplet: Learn Languages on YouTube`.
+**Name:** comes from the manifest: `Couplet: Dual Subtitles to Learn Languages on YouTube`.
 
 **Summary** (132 characters at most):
 
@@ -42,7 +42,7 @@ Couplet is an independent product, and isn't affiliated with or endorsed by YouT
 **Traditional Chinese** (optional localization):
 
 ```text
-摘要:在 YouTube 上同時看兩行字幕。點一下單字看意思,收藏後在當初聽到的句子裡複習。
+摘要:YouTube 免費雙字幕,原文和翻譯一起看。點一下單字看意思,收藏後在當初聽到的句子裡複習。
 ```
 
 ```text
@@ -53,10 +53,10 @@ Couplet 讓你用平常就在看的影片學語言。原文和翻譯上下並排
 • 點單字看意思、音標和例句,也能聽發音
 • 拖曳選取片語來翻譯,也可以跨上下句
 • 顯示前後句
-• 收藏單字,並保留當時的句子和影片時間點
+• 收藏單字或片語,並保留當時的句子和影片時間點
 • 依排程複習,可直接跳回影片當下
 • 查看連續天數、進度,以及需要加強的單字
-• 請 AI 解釋單字在句子裡的用法,每天 20 次
+• 請 AI 解釋單字或片語在句子裡的用法,每天 50 次
 • 匯出成 CSV
 
 學習語言 8 種,翻譯語言 22 種。

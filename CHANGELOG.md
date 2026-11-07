@@ -16,6 +16,7 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ### Changed
 
+- The extension is now named Couplet: Dual Subtitles to Learn Languages on YouTube.
 - Explain with AI now allows 50 explanations a day per account, up from 20.
 - Couplet has a new logo: two overlapping squares, the original and its translation. It shows on the toolbar, in the popup,
   on the Welcome Page, and on the player's subtitle switch.
