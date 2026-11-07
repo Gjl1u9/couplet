@@ -84,6 +84,8 @@ Couplet 是獨立產品,與 YouTube 或 Google 沒有任何關聯,也未獲其�
 | Small promo tile | `store/promo-small.jpg`           | 440×280  |
 | Marquee promo    | `store/promo-marquee.jpg`         | 1400×560 |
 
+The store icon is rendered from [`brand/store.svg`](../brand/store.svg), and the two promo images from [`brand/promo.html`](../brand/promo.html). Edit the sources, then run `node scripts/build-icons.mjs` and `node scripts/build-promo.mjs`; see [Logo in `DESIGN.md`](DESIGN.md#logo). Screenshot 2 shows the Welcome Page header, so retake it whenever the logo changes. The other screenshots show no logo.
+
 The Dashboard screenshots use sample words and video titles. The YouTube screenshot shows a third-party channel's video, so replace it with a video you have the rights to show, or get the channel's permission.
 
 ## Privacy practices
