@@ -1,3 +1,5 @@
+import { sameLanguage } from '../language';
+import type { Cue } from '../translation/batches';
 import type { Translate } from '../translation/queue';
 import {
   createTranslationQueue,
@@ -11,11 +13,14 @@ import {
   type SessionEffect,
   type SessionState,
 } from '../youtube/session';
-import { SubtitleStore } from './store';
+import { SubtitleStore, type CueContext } from './store';
 
 export interface SubtitleView {
   readonly original: string;
   readonly translation: string | null;
+  /** The neighbouring cues, shown around the current one while paused. */
+  readonly previous?: string | null;
+  readonly next?: string | null;
 }
 
 export type ControllerEvent =
@@ -51,21 +56,21 @@ export interface SubtitleController {
   update: () => number | null;
   seek: () => void;
   dispose: () => void;
+  /** Drops the current captions, so the same video can load another track. */
+  resetCaptions: () => void;
+  /** Translates the current captions again for a new native language. */
+  setTargetLanguage: (language: string) => void;
+  /** Hides our subtitles and gives captions back to YouTube while off. */
+  setEnabled: (enabled: boolean) => void;
+  /** The language of the captions on screen. */
+  sourceLanguage: () => string | null;
+  /** Whether a missing translation is still on its way. */
+  expectsTranslation: () => boolean;
+  /** The cue with this text near the current time, with its neighbours. */
+  contextOf: (text: string) => CueContext | null;
 }
 
 const ASR_MAX_CUES_PER_BATCH = 60;
-
-/** 地區差異通常不用翻譯，但簡體和繁體要分開。 */
-function languageIdentity(code: string): string {
-  const lower = code.toLowerCase();
-  const base = lower.split('-')[0] ?? lower;
-  if (base !== 'zh') return base;
-  return /-(hant|tw|hk|mo)\b/.test(lower) ? 'zh-hant' : 'zh-hans';
-}
-
-function sameLanguage(a: string, b: string): boolean {
-  return languageIdentity(a) === languageIdentity(b);
-}
 
 export function createSubtitleController(
   options: ControllerOptions,
@@ -75,6 +80,14 @@ export function createSubtitleController(
   let queue: TranslationQueue | null = null;
   let lastViewKey: string | null = null;
   let nativeHidden = false;
+  let targetLanguage = options.targetLanguage;
+  let enabled = true;
+  let translationFailed = false;
+  let active: {
+    readonly cues: readonly Cue[];
+    readonly source: string | null;
+    readonly kind: string | null;
+  } | null = null;
 
   const setNativeHidden = (hidden: boolean) => {
     if (hidden === nativeHidden) return;
@@ -86,15 +99,22 @@ export function createSubtitleController(
     queue?.dispose();
     queue = null;
     store = null;
+    active = null;
+    translationFailed = false;
     setNativeHidden(false);
   };
 
   const update = (): number | null => {
     const time = options.getTime();
-    const visible = store !== null && canShowSubtitles(session);
+    const visible = enabled && store !== null && canShowSubtitles(session);
     const cue = visible ? store?.cueAt(time) : null;
     const view: SubtitleView | null = cue
-      ? { original: cue.text, translation: cue.translation }
+      ? {
+          original: cue.text,
+          translation: cue.translation,
+          previous: cue.previous,
+          next: cue.next,
+        }
       : null;
     const key = view ? JSON.stringify(view) : '';
     if (key !== lastViewKey) {
@@ -116,26 +136,35 @@ export function createSubtitleController(
     }
     if (parsed.length === 0) return;
 
-    const current = new SubtitleStore(parsed);
-    store = current;
-    setNativeHidden(true);
+    active = { cues: parsed, source: event.lang, kind: event.kind };
+    showActiveCaptions();
+  };
 
-    const source = event.lang;
-    if (source === null || sameLanguage(source, options.targetLanguage)) return;
+  const showActiveCaptions = () => {
+    if (!active) return;
+    const { cues, source, kind } = active;
+    queue?.dispose();
+    queue = null;
+    translationFailed = false;
+    const current = new SubtitleStore(cues);
+    store = current;
+    setNativeHidden(enabled);
+
+    if (source === null || sameLanguage(source, targetLanguage)) return;
 
     queue = createTranslationQueue({
       cues: current.allCues,
       translate: options.createTranslate(source),
-      ...(event.kind === 'asr'
-        ? { maxCuesPerBatch: ASR_MAX_CUES_PER_BATCH }
-        : {}),
+      ...(kind === 'asr' ? { maxCuesPerBatch: ASR_MAX_CUES_PER_BATCH } : {}),
       onTranslated: (results) => {
+        translationFailed = false;
         for (const { id, translation } of results) {
           current.setTranslation(id, translation);
         }
         update();
       },
       onBatchFailed: (_ids, error) => {
+        translationFailed = true;
         options.onError?.('翻譯失敗', error);
       },
       onComplete: () => undefined,
@@ -188,5 +217,25 @@ export function createSubtitleController(
       teardown();
       update();
     },
+    resetCaptions() {
+      teardown();
+      session = { ...session, captionKeys: [] };
+      update();
+    },
+    setTargetLanguage(language) {
+      if (language === targetLanguage) return;
+      targetLanguage = language;
+      showActiveCaptions();
+      update();
+    },
+    setEnabled(next) {
+      if (next === enabled) return;
+      enabled = next;
+      setNativeHidden(enabled && store !== null);
+      update();
+    },
+    sourceLanguage: () => active?.source ?? null,
+    expectsTranslation: () => queue !== null && !translationFailed,
+    contextOf: (text) => store?.contextFor(options.getTime(), text) ?? null,
   };
 }

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>朱批全域風格</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap"
+    />
+    <link rel="stylesheet" href="./ui.css" />
+  </head>
+  <body class="style-page">
+    <main class="style-themes">
+      <section class="style-sheet" data-theme="light" aria-label="淺色主題">
+        <h1 class="page-title">單字庫</h1>
+        <div class="swatches" aria-label="顏色">
+          <span class="swatch" style="background: var(--ground)"></span>
+          <span class="swatch" style="background: var(--surface)"></span>
+          <span class="swatch" style="background: var(--ink)"></span>
+          <span class="swatch" style="background: var(--ink-muted)"></span>
+          <span class="swatch" style="background: var(--accent)"></span>
+          <span class="swatch" style="background: var(--alert)"></span>
+        </div>
+        <div class="toolbar">
+          <label class="field" for="search-light"
+            ><span class="visually-hidden">搜尋單字</span>
+            <input id="search-light" class="input" placeholder="搜尋單字" />
+          </label>
+          <button class="button">匯出</button>
+          <button class="button button-primary">開始複習</button>
+        </div>
+        <div class="card word-list">
+          <div class="word-row">
+            <div class="word-headword">fluid</div>
+            <div class="pos">名詞</div>
+            <div>
+              <div class="meaning">流體；液體</div>
+              <div class="couplet-original">How <mark>fluids</mark> move.</div>
+              <div class="couplet-translation">流體如何運動。</div>
+            </div>
+          </div>
+          <div class="word-row">
+            <div class="word-headword">equation</div>
+            <div class="pos">名詞</div>
+            <div>
+              <div class="meaning">方程式；等式</div>
+              <div class="couplet-original">
+                The <mark>equations</mark> describe it.
+              </div>
+              <div class="couplet-translation">這些方程描述了它。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="style-sheet" data-theme="dark" aria-label="深色主題">
+        <h1 class="page-title">單字庫</h1>
+        <div class="swatches" aria-label="顏色">
+          <span class="swatch" style="background: var(--ground)"></span>
+          <span class="swatch" style="background: var(--surface)"></span>
+          <span class="swatch" style="background: var(--ink)"></span>
+          <span class="swatch" style="background: var(--ink-muted)"></span>
+          <span class="swatch" style="background: var(--accent)"></span>
+          <span class="swatch" style="background: var(--alert)"></span>
+        </div>
+        <div class="toolbar">
+          <label class="field" for="search-dark"
+            ><span class="visually-hidden">搜尋單字</span>
+            <input id="search-dark" class="input" placeholder="搜尋單字" />
+          </label>
+          <button class="button">匯出</button>
+          <button class="button button-primary">開始複習</button>
+        </div>
+        <div class="card word-list">
+          <div class="word-row">
+            <div class="word-headword">fluid</div>
+            <div class="pos">名詞</div>
+            <div>
+              <div class="meaning">流體；液體</div>
+              <div class="couplet-original">How <mark>fluids</mark> move.</div>
+              <div class="couplet-translation">流體如何運動。</div>
+            </div>
+          </div>
+          <div class="word-row">
+            <div class="word-headword">equation</div>
+            <div class="pos">名詞</div>
+            <div>
+              <div class="meaning">方程式；等式</div>
+              <div class="couplet-original">
+                The <mark>equations</mark> describe it.
+              </div>
+              <div class="couplet-translation">這些方程描述了它。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

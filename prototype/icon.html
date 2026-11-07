@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>產品 icon 方向</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: var(--space-6) var(--space-4);
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      main {
+        display: grid;
+        gap: var(--space-4);
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1,
+      h2 {
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+      }
+
+      .lede,
+      .direction-note {
+        margin-top: var(--space-1);
+        color: var(--ink-muted);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .direction {
+        display: grid;
+        gap: var(--space-5);
+        padding: var(--space-5);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+      }
+
+      .sizes {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: var(--space-5);
+      }
+
+      figure {
+        display: grid;
+        justify-items: start;
+        gap: var(--space-2);
+        margin: 0;
+      }
+
+      figcaption {
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+      }
+
+      .icon {
+        display: block;
+      }
+
+      .icon svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Chrome's store asks for 96px of artwork inside the 128px file. */
+      .store {
+        padding: var(--space-4);
+        background: var(--chip);
+        border-radius: var(--radius-md);
+      }
+
+      .pixels {
+        display: block;
+        width: 112px;
+        height: 112px;
+        image-rendering: pixelated;
+      }
+
+      .toolbars {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--space-3);
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--space-3);
+        width: 100%;
+        height: 40px;
+        padding: 0 var(--space-3);
+        border-radius: var(--radius-md);
+      }
+
+      .toolbar-light {
+        background: #e6e8ec;
+      }
+
+      .toolbar-dark {
+        background: #2b2e34;
+      }
+
+      .neighbor {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+      }
+
+      .toolbar-light .neighbor {
+        background: #a9afb9;
+      }
+
+      .toolbar-dark .neighbor {
+        background: #646b76;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>產品 icon：三個方向</h1>
+        <p class="lede">
+          工具列的 icon
+          不會跟著主題換色，所以每個方向都要同時撐得住淺色和深色背景。
+        </p>
+      </header>
+    </main>
+
+    <script>
+      // Each direction has a master for large sizes and a version drawn on a
+      // 16-unit grid, so its edges land on whole pixels at 16, 32, and 48px.
+      const directions = [
+        {
+          id: 'couplet',
+          name: 'A　對聯',
+          note: '上長下短兩行，就是原文在上、譯文在下。上排一段朱紅，是正在看的那個字。',
+          master: `
+            <rect width="128" height="128" rx="28" fill="#15181e" />
+            <rect x="22" y="37" width="40" height="24" rx="6" fill="#ffffff" />
+            <rect x="70" y="37" width="36" height="24" rx="6" fill="#ff7a59" />
+            <rect x="22" y="75" width="60" height="16" rx="5" fill="#a7adb7" />`,
+          small: `
+            <rect width="16" height="16" rx="3.5" fill="#15181e" />
+            <rect x="2" y="4" width="5" height="3" rx="0.5" fill="#ffffff" />
+            <rect x="8" y="4" width="6" height="3" rx="0.5" fill="#ff7a59" />
+            <rect x="2" y="9" width="8" height="2" rx="0.5" fill="#a7adb7" />`,
+        },
+        {
+          id: 'seal',
+          name: 'B　朱印',
+          note: '一方朱紅印章，兩行字幕刻成留白。邊緣留一點缺口，放大時才看得出是印。',
+          master: `
+            <path
+              fill="#c4371c"
+              d="M14 0H68L78 3 90 0H114A14 14 0 0 1 128 14V80L125 92 128 102V114A14 14 0 0 1 114 128H42L30 125 20 128H14A14 14 0 0 1 0 114V14A14 14 0 0 1 14 0Z"
+            />
+            <rect x="24" y="39" width="80" height="22" rx="3" fill="#ffffff" />
+            <rect x="24" y="73" width="54" height="16" rx="3" fill="#ffd2c6" />`,
+          small: `
+            <rect width="16" height="16" rx="2.5" fill="#c4371c" />
+            <rect x="2" y="4" width="12" height="3" rx="0.5" fill="#ffffff" />
+            <rect x="2" y="9" width="8" height="2" rx="0.5" fill="#ffd2c6" />`,
+        },
+        {
+          id: 'brush',
+          name: 'C　朱筆',
+          note: '紙上一個「字」，底下一筆朱紅。最有批註的感覺，但筆畫多，小尺寸最吃力。',
+          master: `
+            <rect x="1" y="1" width="126" height="126" rx="27" fill="#ffffff" stroke="#d8dce2" stroke-width="2" />
+            <g fill="none" stroke="#15181e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M64 17V27" />
+              <path d="M28 44V33H100V44" />
+              <path d="M42 47H86L64 61V88Q64 96 52 92" />
+              <path d="M24 69H104" />
+            </g>
+            <path d="M18 109Q60 97 110 99Q115 104 108 110Q60 110 18 109Z" fill="#c4371c" />`,
+          small: `
+            <rect x="0.5" y="0.5" width="15" height="15" rx="3" fill="#ffffff" stroke="#d8dce2" />
+            <g fill="none" stroke="#15181e" stroke-width="1">
+              <path d="M8.5 2V3" />
+              <path d="M4.5 5V3.5H12.5V5" />
+              <path d="M5 5.5H12L8.5 7.5V10.5H6" />
+              <path d="M3 8.5H14" />
+            </g>
+            <rect x="3" y="12" width="11" height="2" fill="#c4371c" />`,
+        },
+      ];
+
+      const svg = (body, viewBox, label) =>
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewBox} ${viewBox}"${
+          label ? ` role="img" aria-label="${label}"` : ' aria-hidden="true"'
+        }>${body}</svg>`;
+
+      const icon = (direction, size) => {
+        const small = size <= 48;
+        const art = small ? direction.small : direction.master;
+        return `<span class="icon" style="width:${size}px;height:${size}px">${svg(
+          art,
+          small ? 16 : 128,
+          `${direction.name}，${size}px`,
+        )}</span>`;
+      };
+
+      const toolbar = (direction, theme, label) => `
+        <figure>
+          <div class="toolbar toolbar-${theme}">
+            <span class="neighbor"></span>
+            ${icon(direction, 16)}
+            <span class="neighbor"></span>
+          </div>
+          <figcaption>${label}</figcaption>
+        </figure>`;
+
+      const main = document.querySelector('main');
+
+      for (const direction of directions) {
+        const section = document.createElement('section');
+        section.className = 'direction';
+        section.dataset.direction = direction.id;
+        section.innerHTML = `
+          <div>
+            <h2>${direction.name}</h2>
+            <p class="direction-note">${direction.note}</p>
+          </div>
+          <div class="sizes">
+            <figure>
+              <div class="store">${icon(direction, 96)}</div>
+              <figcaption>128 商店（圖案 96）</figcaption>
+            </figure>
+            <figure>${icon(direction, 48)}<figcaption>48 擴充功能頁</figcaption></figure>
+            <figure>${icon(direction, 32)}<figcaption>32 高解析工具列</figcaption></figure>
+            <figure>${icon(direction, 16)}<figcaption>16 工具列</figcaption></figure>
+            <figure>
+              <canvas class="pixels" width="16" height="16" role="img" aria-label="${direction.name}，16px 逐像素放大"></canvas>
+              <figcaption>16px 逐像素放大</figcaption>
+            </figure>
+          </div>
+          <div class="toolbars">
+            ${toolbar(direction, 'light', '淺色工具列')}
+            ${toolbar(direction, 'dark', '深色工具列')}
+          </div>`;
+        main.append(section);
+
+        const image = new Image();
+        image.onload = () => {
+          section
+            .querySelector('canvas')
+            .getContext('2d')
+            .drawImage(image, 0, 0, 16, 16);
+        };
+        image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+          svg(direction.small, 16).replace(
+            '<svg ',
+            '<svg width="16" height="16" ',
+          ),
+        )}`;
+      }
+    </script>
+  </body>
+</html>

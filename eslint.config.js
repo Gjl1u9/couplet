@@ -4,7 +4,18 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['.output/', '.wxt/', 'dist/', 'coverage/', 'node_modules/'] },
+  {
+    ignores: [
+      '.output/',
+      '.wxt/',
+      'dist/',
+      'coverage/',
+      'site/',
+      'node_modules/',
+      'prototype/sync-simulation.mjs',
+      'prototype/sync-e2e/',
+    ],
+  },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {
@@ -27,7 +38,7 @@ export default defineConfig(
   },
   {
     // YouTube 的 DOM 變動很頻繁，產品程式碼不能自行做大範圍監聽或輪詢。
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -60,7 +71,13 @@ export default defineConfig(
   },
   {
     // 開發用擴充功能是純 JS，直接在瀏覽器執行。
-    files: ['tools/recorder-extension/**'],
+    files: ['tools/recorder-extension/**', '.claude/skills/**'],
+    rules: { 'no-undef': 'off' },
+  },
+  {
+    // Node scripts are plain JavaScript, outside the TypeScript project.
+    files: ['scripts/**/*.mjs'],
+    extends: [tseslint.configs.disableTypeChecked],
     rules: { 'no-undef': 'off' },
   },
   prettier,

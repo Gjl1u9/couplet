@@ -1,0 +1,1297 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>複習卡原型</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--ground);
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      button {
+        color: inherit;
+        font: inherit;
+      }
+
+      button:focus-visible,
+      a:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .column {
+        width: 100%;
+        max-width: 680px;
+        margin-inline: auto;
+        padding-inline: var(--space-4);
+      }
+
+      /* Prototype controls: not part of the design */
+      .proto-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2) var(--space-4);
+        padding: var(--space-2) var(--space-4);
+        border-bottom: 1px dashed var(--line-strong);
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 16px;
+      }
+
+      .proto-bar label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+      }
+
+      .proto-bar select,
+      .proto-bar button {
+        min-height: 28px;
+        padding: 0 var(--space-2);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 12px;
+      }
+
+      .proto-note {
+        margin-left: auto;
+      }
+
+      /* Session head */
+      .session-head {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        min-height: 56px;
+      }
+
+      .session-status {
+        min-width: 0;
+        margin-left: auto;
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+        text-align: right;
+      }
+
+      .progress-count {
+        flex: none;
+        font-size: 12px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        line-height: 16px;
+      }
+
+      .progress {
+        height: 2px;
+        background: var(--line);
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--ink);
+        transition: width 160ms ease-out;
+      }
+
+      .text-button {
+        position: relative;
+        flex: none;
+        min-height: 28px;
+        padding: 0 var(--space-1);
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        color: var(--ink-muted);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 20px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      /* Keeps the 44px hit area without taking 44px of the row. */
+      .text-button::after {
+        content: '';
+        position: absolute;
+        inset: -8px 0;
+      }
+
+      .text-button:hover {
+        background: var(--chip);
+        color: var(--ink);
+      }
+
+      main {
+        flex: 1;
+        padding-block: var(--space-4) var(--space-6);
+      }
+
+      /* Review Card */
+      .card {
+        padding: var(--space-5);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        position: relative;
+        background: var(--surface);
+        outline: none;
+      }
+
+      .card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-bottom: var(--space-5);
+      }
+
+      .card-title {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        gap: var(--space-1);
+      }
+
+      .card-word {
+        margin: 0;
+        min-width: 0;
+        font-size: 32px;
+        font-weight: 600;
+        line-height: 40px;
+        overflow-wrap: anywhere;
+      }
+
+      .card-source {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0 var(--space-2);
+        min-height: 44px;
+        margin-top: var(--space-4);
+        margin-bottom: calc(-1 * var(--space-3));
+        border-top: 1px solid var(--line);
+      }
+
+      .card-actions {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: 44px;
+        margin-right: calc(-1 * var(--space-1));
+        margin-left: auto;
+      }
+
+      .card-actions .confirm {
+        color: var(--alert);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 20px;
+      }
+
+      .card-actions .is-danger {
+        color: var(--alert);
+      }
+
+      .source-title {
+        overflow: hidden;
+        flex: 1 1 96px;
+        min-width: 0;
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .card-source > .text-button:first-child,
+      #leave {
+        margin-left: calc(-1 * var(--space-1));
+      }
+
+      .cue + .cue {
+        margin-top: var(--space-2);
+      }
+
+      .cue-original {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 22px;
+      }
+
+      .cue.is-current .cue-original {
+        color: var(--ink);
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 30px;
+        text-wrap: pretty;
+      }
+
+      /* The one vermilion brush: colour and underline, so it never relies on colour. */
+      .saved-mark {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: underline 2px;
+        text-underline-offset: 4px;
+      }
+
+      /* Toggle first, content below: the toggle stays under the pointer. */
+      .disclosure {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        min-height: 44px;
+        margin-top: var(--space-2);
+        margin-left: calc(-1 * var(--space-2));
+        padding: 0 var(--space-2);
+        border: 0;
+        border-radius: var(--radius-md);
+        background: none;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        cursor: pointer;
+      }
+
+      .disclosure:hover {
+        background: var(--chip);
+      }
+
+      .disclosure .icon {
+        transition: transform 120ms ease-out;
+      }
+
+      .disclosure[aria-expanded='true'] .icon {
+        transform: rotate(90deg);
+      }
+
+      .context-translation {
+        margin: var(--space-1) 0 0;
+        color: var(--ink-muted);
+        font-size: 15px;
+        line-height: 24px;
+      }
+
+      .skeleton {
+        display: block;
+        width: 100%;
+        height: 12px;
+        margin-block: 6px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--skeleton);
+      }
+
+      .skeleton + .skeleton {
+        width: 55%;
+      }
+
+      .translation-error {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        color: var(--alert);
+      }
+
+      .translation-error .text-button {
+        color: var(--ink);
+      }
+
+      /* Lookup Panel: the same styles as src/lib/ui/overlay.css */
+      .lookup-panel {
+        position: absolute;
+        z-index: 1;
+        width: max-content;
+        min-width: 180px;
+        max-width: min(360px, calc(100% - 32px));
+        padding: 8px 16px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: var(--shadow-panel);
+      }
+
+      .lookup-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        min-height: 28px;
+      }
+
+      .lookup-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 8px;
+        min-width: 0;
+      }
+
+      .lookup-word {
+        min-width: 0;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+        overflow-wrap: break-word;
+      }
+
+      .phonetic {
+        color: var(--ink-muted);
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .lookup-senses {
+        margin-top: 8px;
+      }
+
+      .lookup-sense + .lookup-sense {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+      }
+
+      .lookup-meaning {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+      }
+
+      .couplet-original {
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 22px;
+      }
+
+      .couplet-translation {
+        color: var(--ink-muted);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 21px;
+      }
+
+      .icon-button {
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        margin-left: -6px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--ink-muted);
+        cursor: pointer;
+      }
+
+      .icon-button::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        top: 50%;
+        left: 50%;
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        transform: translate(-50%, -50%);
+      }
+
+      .icon-button:hover::before {
+        background: var(--accent-soft);
+      }
+
+      .icon-button:focus-visible {
+        outline: none;
+      }
+
+      .icon-button:focus-visible::before {
+        outline: 2px solid var(--ink);
+      }
+
+      #dictionary {
+        margin-top: -2px;
+        margin-right: -12px;
+        margin-left: 0;
+      }
+
+      .icon-button[aria-expanded='true'] {
+        color: var(--ink);
+      }
+
+      .icon-button.is-playing {
+        color: var(--accent);
+      }
+
+      /* Larger than the 17px icons over video: this page has the room. */
+      .icon {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+      }
+
+      .meaning-chip {
+        padding: 0 6px;
+        border-radius: var(--radius-sm);
+        background: var(--chip);
+      }
+
+      /* Actions stay in one place, so a hand can learn them. */
+      .actions {
+        position: sticky;
+        bottom: 0;
+        border-top: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .actions-row {
+        padding-block: var(--space-3);
+      }
+
+      .button {
+        position: relative;
+        min-height: 56px;
+        padding: var(--space-1) var(--space-3);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        cursor: pointer;
+      }
+
+      .button:hover {
+        background: var(--chip);
+      }
+
+      .button-primary {
+        min-height: 44px;
+        padding-inline: var(--space-5);
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .button-primary:hover {
+        background: var(--ink);
+        opacity: 0.88;
+      }
+
+      .grades {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-2);
+      }
+
+      .grade-label {
+        display: block;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 22px;
+      }
+
+      .grade-interval {
+        display: block;
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+      }
+
+      kbd {
+        position: absolute;
+        top: var(--space-1);
+        right: 6px;
+        color: var(--ink-muted);
+        font: inherit;
+        font-size: 11px;
+        line-height: 14px;
+      }
+
+      /* Finished */
+      .done {
+        padding: var(--space-6) var(--space-5);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+      }
+
+      .done h1 {
+        margin: 0 0 var(--space-2);
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+      }
+
+      .done p {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 15px;
+        line-height: 22px;
+      }
+
+      .tally {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin: var(--space-5) 0;
+        border-block: 1px solid var(--line);
+      }
+
+      .tally div {
+        padding-block: var(--space-3);
+      }
+
+      .tally dt {
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+      }
+
+      .tally dd {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 28px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      @media (max-width: 560px) {
+        .card {
+          padding-inline: var(--space-4);
+        }
+
+        .card-word {
+          font-size: 28px;
+          line-height: 36px;
+        }
+
+        .proto-note {
+          margin-left: 0;
+        }
+      }
+
+      @media (hover: none) {
+        kbd {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="proto-bar" aria-label="原型控制">
+      <strong>原型控制</strong>
+      <label
+        >主題
+        <select id="proto-theme">
+          <option value="system">跟隨系統</option>
+          <option value="light">淺色</option>
+          <option value="dark">深色</option>
+        </select>
+      </label>
+      <label
+        >查字面板
+        <select id="proto-panel">
+          <option value="dark">深色</option>
+          <option value="light">淺色</option>
+        </select>
+      </label>
+      <button id="proto-restart" type="button">重新開始</button>
+      <span class="proto-note" id="proto-note">範例內容是自編的</span>
+    </div>
+
+    <div class="column">
+      <header class="session-head">
+        <button class="text-button" id="leave" type="button">結束複習</button>
+        <span class="session-status" id="status" role="status"></span>
+        <button class="text-button" id="undo" type="button" hidden>復原</button>
+        <span class="progress-count" id="count"></span>
+      </header>
+    </div>
+    <div class="progress" aria-hidden="true">
+      <div class="progress-fill" id="progress" style="width: 0"></div>
+    </div>
+
+    <main class="column" id="stage"></main>
+
+    <footer class="actions" id="actions">
+      <div class="column actions-row">
+        <div class="grades" id="grades"></div>
+      </div>
+    </footer>
+
+    <script>
+      const LADDER = [
+        10 * 60,
+        86400,
+        3 * 86400,
+        7 * 86400,
+        14 * 86400,
+        30 * 86400,
+        60 * 86400,
+      ];
+      const GRADES = [
+        { id: 'again', label: '忘了', past: '忘了' },
+        { id: 'hard', label: '不熟', past: '不熟' },
+        { id: 'good', label: '已記住', past: '已記住' },
+      ];
+
+      /** Mirrors the rule in docs/REVIEW.md. `null` means the word is Retired. */
+      function nextLevel(level, grade) {
+        if (grade === 'again') return 0;
+        if (grade === 'hard') return Math.max(level - 1, 1);
+        return level === 6 ? null : Math.max(level + 1, 2);
+      }
+
+      function formatInterval(seconds) {
+        return seconds < 86400
+          ? `${Math.round(seconds / 60)} 分鐘`
+          : `${Math.round(seconds / 86400)} 天`;
+      }
+
+      const CARDS = [
+        {
+          lemma: 'bank',
+          phonetic: '/bæŋk/',
+          level: 0,
+          form: 'bank',
+          source: { title: 'A Slow Day Along the River', time: '3:24' },
+          cues: [
+            { original: 'We packed some sandwiches and walked for an hour,' },
+            {
+              original: 'then sat on the bank and watched the boats go by.',
+              current: true,
+            },
+            { original: 'It was the quietest afternoon of the whole trip.' },
+          ],
+          translation:
+            '我們帶了些三明治，走了一個小時，然後坐在河岸邊看船經過。那是整趟旅程中最安靜的下午。',
+          senses: [
+            {
+              meanings: ['銀行'],
+              example: 'She works at a bank downtown.',
+              translation: '她在市中心的銀行工作。',
+            },
+            {
+              meanings: ['河岸', '堤岸'],
+              example: 'Trees grow along the bank.',
+              translation: '岸邊長滿了樹。',
+            },
+          ],
+        },
+        {
+          lemma: 'observe',
+          phonetic: '/əbˈzɜːrv/',
+          level: 2,
+          form: 'observing',
+          source: {
+            title:
+              'How Scientists Learned to Watch the Night Sky Without Telescopes',
+            time: '12:08',
+          },
+          cues: [
+            {
+              original: 'For thousands of years, people relied on their eyes.',
+            },
+            {
+              original:
+                'They kept observing the same stars, night after night,',
+              current: true,
+            },
+            { original: 'and slowly the patterns started to appear.' },
+          ],
+          translation: null,
+          pending: true,
+          loaded:
+            '幾千年來，人們都依賴眼睛。他們夜復一夜地觀察同樣的星星，慢慢地，規律開始浮現。',
+          senses: [
+            {
+              meanings: ['觀察'],
+              example: 'We observed the birds for an hour.',
+              translation: '我們觀察了那些鳥一個小時。',
+            },
+          ],
+        },
+        {
+          lemma: 'reluctant',
+          phonetic: null,
+          level: 3,
+          form: 'reluctant',
+          source: null,
+          cues: [
+            {
+              original: 'He was reluctant to tell anyone what had happened.',
+              current: true,
+            },
+          ],
+          translation: '他不太願意告訴任何人發生了什麼事。',
+          senses: [
+            {
+              meanings: ['不情願的'],
+              example: 'She was reluctant to leave.',
+              translation: '她不太想離開。',
+            },
+          ],
+        },
+        {
+          lemma: 'responsibility',
+          phonetic: '/rɪˌspɑːnsəˈbɪləti/',
+          level: 6,
+          form: 'responsibilities',
+          source: { title: 'Starting Over in a New City', time: '0:47' },
+          cues: [
+            {
+              original: 'Moving here meant learning everything from scratch.',
+            },
+            {
+              original:
+                'Suddenly I had all these new responsibilities at work,',
+              current: true,
+            },
+            { original: 'and nobody around to ask for help.' },
+          ],
+          translation: null,
+          failed: true,
+          loaded:
+            '搬來這裡代表一切都要從頭學起。工作上突然多了這些新責任，身邊卻沒有人可以求助。',
+          senses: [
+            {
+              meanings: ['責任', '職責'],
+              example: 'It is your responsibility to lock the door.',
+              translation: '鎖門是你的責任。',
+            },
+          ],
+        },
+      ];
+
+      const $ = (id) => document.getElementById(id);
+      let state;
+
+      function reset() {
+        state = {
+          cards: structuredClone(CARDS),
+          index: 0,
+          revealed: false,
+          dictionary: false,
+          confirmingDelete: false,
+          results: [],
+          history: [],
+        };
+        $('status').textContent = '';
+        $('undo').hidden = true;
+        render();
+      }
+
+      function el(tag, className, ...children) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        node.append(...children);
+        return node;
+      }
+
+      function icon(paths) {
+        const svg = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'svg',
+        );
+        svg.setAttribute('class', 'icon');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('aria-hidden', 'true');
+        for (const d of paths) {
+          const path = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'path',
+          );
+          path.setAttribute('d', d);
+          svg.append(path);
+        }
+        return svg;
+      }
+
+      function textButton(label, onClick, className = '') {
+        const button = el('button', `text-button ${className}`, label);
+        button.type = 'button';
+        button.addEventListener('click', onClick);
+        return button;
+      }
+
+      function markedOriginal(text, form) {
+        const paragraph = el('p', 'cue-original');
+        paragraph.lang = 'en';
+        paragraph.dir = 'auto';
+        const at = text.indexOf(form);
+        if (at < 0) {
+          paragraph.textContent = text;
+          return paragraph;
+        }
+        paragraph.append(
+          text.slice(0, at),
+          el('span', 'saved-mark', form),
+          text.slice(at + form.length),
+        );
+        return paragraph;
+      }
+
+      function renderTranslation(card) {
+        if (card.failed) {
+          return el(
+            'p',
+            'context-translation translation-error',
+            '翻譯載入失敗',
+            textButton('再試一次', () => {
+              card.failed = false;
+              card.translation = card.loaded;
+              render();
+            }),
+          );
+        }
+        if (card.pending) {
+          const row = el(
+            'div',
+            'context-translation',
+            el('span', 'skeleton'),
+            el('span', 'skeleton'),
+          );
+          row.setAttribute('aria-label', '翻譯載入中');
+          return row;
+        }
+        return el('p', 'context-translation', card.translation);
+      }
+
+      function iconButton(id, label, paths, onClick) {
+        const button = el('button', 'icon-button', icon(paths));
+        button.id = id;
+        button.type = 'button';
+        button.setAttribute('aria-label', label);
+        button.addEventListener('click', onClick);
+        return button;
+      }
+
+      const ICON_SPEAK = [
+        'M15 8a5 5 0 0 1 0 8',
+        'M17.7 5a9 9 0 0 1 0 14',
+        'M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5',
+      ];
+      const ICON_DICTIONARY = [
+        'M10 19h-6a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1h6a2 2 0 0 1 2 2a2 2 0 0 1 2 -2h6a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-6a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2',
+        'M12 5v16',
+        'M7 7h1',
+        'M7 11h1',
+        'M16 7h1',
+        'M16 11h1',
+        'M16 15h1',
+      ];
+
+      function renderLookupPanel(card) {
+        const word = el('span', 'lookup-word', card.lemma);
+        word.lang = 'en';
+        const title = el('div', 'lookup-title', word);
+        if (card.phonetic) title.append(el('span', 'phonetic', card.phonetic));
+        const senses = card.senses.map((sense) => {
+          const example = el('div', 'couplet-original', sense.example);
+          example.lang = 'en';
+          return el(
+            'div',
+            'lookup-sense',
+            el(
+              'div',
+              'lookup-meaning',
+              ...sense.meanings.map((meaning) =>
+                el('span', 'meaning-chip', meaning),
+              ),
+            ),
+            example,
+            el('div', 'couplet-translation', sense.translation),
+          );
+        });
+        const panel = el(
+          'aside',
+          'lookup-panel',
+          el('div', 'lookup-head', title),
+          el('div', 'lookup-senses', ...senses),
+        );
+        panel.dataset.theme = $('proto-panel').value;
+        panel.setAttribute('aria-label', `${card.lemma} 的字典`);
+        return panel;
+      }
+
+      /** Directly under the button, with its right edge on the icon's right edge. */
+      function placeLookupPanel() {
+        const panel = document.querySelector('.lookup-panel');
+        if (!panel) return;
+        const card = $('card').getBoundingClientRect();
+        const button = $('dictionary').getBoundingClientRect();
+        panel.style.top = `${button.bottom - card.top}px`;
+        panel.style.right = `${card.right - button.right + 12}px`;
+      }
+
+      function renderCardActions(card) {
+        if (!state.confirmingDelete) {
+          return el(
+            'div',
+            'card-actions',
+            textButton('已學會，不再複習', retire),
+            textButton('永久刪除', () => {
+              state.confirmingDelete = true;
+              render();
+              $('cancel-delete').focus();
+            }),
+          );
+        }
+        const cancel = textButton('取消', cancelDelete);
+        cancel.id = 'cancel-delete';
+        const confirm = el(
+          'span',
+          'confirm',
+          `刪除 ${card.lemma} 和複習進度？`,
+        );
+        confirm.setAttribute('role', 'alert');
+        return el(
+          'div',
+          'card-actions',
+          confirm,
+          cancel,
+          textButton('確定刪除', deleteCard, 'is-danger'),
+        );
+      }
+
+      function renderCard(card) {
+        const node = el('article', 'card');
+        node.id = 'card';
+        node.tabIndex = -1;
+        node.setAttribute('aria-label', '複習卡');
+
+        const word = el('h1', 'card-word', card.form);
+        word.lang = 'en';
+        const speak = iconButton('speak', '播放發音', ICON_SPEAK, () =>
+          pronounce(card.form, speak),
+        );
+        const dictionary = iconButton(
+          'dictionary',
+          '查看字典',
+          ICON_DICTIONARY,
+          toggleDictionary,
+        );
+        dictionary.setAttribute('aria-expanded', String(state.dictionary));
+        node.append(
+          el(
+            'header',
+            'card-head',
+            el('div', 'card-title', word, speak),
+            dictionary,
+          ),
+        );
+
+        for (const cue of card.cues) {
+          node.append(
+            el(
+              'div',
+              `cue${cue.current ? ' is-current' : ''}`,
+              markedOriginal(cue.original, cue.current ? card.form : '\u0000'),
+            ),
+          );
+        }
+
+        const toggle = el(
+          'button',
+          'disclosure',
+          icon(['M9 6l6 6l-6 6']),
+          `${state.revealed ? '隱藏' : '顯示'}翻譯`,
+        );
+        toggle.id = 'toggle';
+        toggle.type = 'button';
+        toggle.setAttribute('aria-expanded', String(state.revealed));
+        toggle.addEventListener('click', toggleReveal);
+        node.append(toggle);
+        if (state.revealed) node.append(renderTranslation(card));
+
+        const source = el('footer', 'card-source');
+        if (card.source) {
+          source.append(
+            textButton(`回到影片 ${card.source.time}`, () => {
+              $('proto-note').textContent =
+                `原型：實際會在新分頁開啟影片，從 ${card.source.time} 前兩秒開始`;
+            }),
+          );
+          const title = el('span', 'source-title', card.source.title);
+          title.title = card.source.title;
+          source.append(title);
+        }
+        source.append(renderCardActions(card));
+        node.append(source);
+        if (state.dictionary) node.append(renderLookupPanel(card));
+        return node;
+      }
+
+      function renderDone() {
+        const tally = el('dl', 'tally');
+        for (const grade of GRADES) {
+          const count = state.results.filter(
+            (result) => result.grade === grade.id,
+          ).length;
+          tally.append(
+            el(
+              'div',
+              '',
+              el('dt', '', grade.label),
+              el('dd', '', String(count)),
+            ),
+          );
+        }
+        const next = state.results
+          .filter((result) => result.seconds !== null)
+          .reduce(
+            (soonest, result) => Math.min(soonest, result.seconds),
+            Infinity,
+          );
+        const home = el('button', 'button button-primary', '回到 Dashboard');
+        home.type = 'button';
+        return el(
+          'section',
+          'done',
+          el('h1', '', '今天複習完了'),
+          el(
+            'p',
+            '',
+            `這次複習了 ${state.results.filter((result) => result.grade !== 'retired').length} 個字。`,
+            next === Infinity ? '' : `下一個字 ${formatInterval(next)}後回來。`,
+          ),
+          tally,
+          home,
+        );
+      }
+
+      function render() {
+        const card = state.cards[state.index];
+        const total = state.cards.length;
+        $('count').textContent = card
+          ? `${state.index + 1} / ${total}`
+          : `${total} / ${total}`;
+        $('progress').style.width = `${(state.index / (total || 1)) * 100}%`;
+        $('actions').hidden = !card;
+        const focused = document.activeElement?.id;
+        $('stage').replaceChildren(card ? renderCard(card) : renderDone());
+        if (!card) return;
+        if (['toggle', 'speak', 'dictionary'].includes(focused)) {
+          $(focused)?.focus();
+        }
+        placeLookupPanel();
+
+        const grades = $('grades');
+        grades.replaceChildren(
+          ...GRADES.map((grade, position) => {
+            const level = nextLevel(card.level, grade.id);
+            const button = el(
+              'button',
+              'button',
+              el('kbd', '', String(position + 1)),
+              el('span', 'grade-label', grade.label),
+              el(
+                'span',
+                'grade-interval',
+                level === null ? '不再排程' : formatInterval(LADDER[level]),
+              ),
+            );
+            button.type = 'button';
+            button.addEventListener('click', () => answer(grade));
+            return button;
+          }),
+        );
+      }
+
+      function toggleReveal() {
+        state.revealed = !state.revealed;
+        const card = state.cards[state.index];
+        render();
+        if (state.revealed && card.pending) {
+          setTimeout(() => {
+            card.pending = false;
+            card.translation = card.loaded;
+            if (state.cards[state.index] === card) render();
+          }, 900);
+        }
+      }
+
+      function toggleDictionary() {
+        state.dictionary = !state.dictionary;
+        render();
+      }
+
+      function cancelDelete() {
+        state.confirmingDelete = false;
+        render();
+        $('card').focus();
+      }
+
+      function deleteCard() {
+        const card = state.cards[state.index];
+        state.cards.splice(state.index, 1);
+        state.history = [];
+        state.revealed = false;
+        state.dictionary = false;
+        state.confirmingDelete = false;
+        $('status').textContent = `已永久刪除 ${card.lemma}`;
+        $('undo').hidden = true;
+        render();
+        $('card')?.focus();
+      }
+
+      function advance(message) {
+        state.index += 1;
+        state.revealed = false;
+        state.dictionary = false;
+        state.confirmingDelete = false;
+        $('status').textContent = message;
+        $('undo').hidden = false;
+        render();
+        $('card')?.focus();
+      }
+
+      function answer(grade) {
+        const card = state.cards[state.index];
+        const level = nextLevel(card.level, grade.id);
+        const seconds = level === null ? null : LADDER[level];
+        state.history.push(state.results.length);
+        state.results.push({ grade: grade.id, seconds });
+        advance(
+          level === null
+            ? `${card.lemma}：${grade.past}，不再排程`
+            : `${card.lemma}：${formatInterval(seconds)}後再看`,
+        );
+      }
+
+      function retire() {
+        const card = state.cards[state.index];
+        state.history.push(state.results.length);
+        state.results.push({ grade: 'retired', seconds: null });
+        advance(`${card.lemma}：已學會，不再複習`);
+      }
+
+      function undo() {
+        if (state.history.length === 0) return;
+        state.results.length = state.history.pop();
+        state.index -= 1;
+        state.revealed = false;
+        state.dictionary = false;
+        state.confirmingDelete = false;
+        $('status').textContent = '已復原';
+        $('undo').hidden = state.history.length === 0;
+        render();
+        $('card').focus();
+      }
+
+      function pronounce(text, button = $('speak')) {
+        if (!('speechSynthesis' in window)) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en';
+        button.classList.add('is-playing');
+        const stop = () => button.classList.remove('is-playing');
+        utterance.onend = stop;
+        utterance.onerror = stop;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+      }
+
+      function applyTheme() {
+        const choice = $('proto-theme').value;
+        const dark =
+          choice === 'dark' ||
+          (choice === 'system' &&
+            matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      }
+
+      document.addEventListener('keydown', (event) => {
+        if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) {
+          return;
+        }
+        const card = state.cards[state.index];
+        const onControl = event.target.closest('button, a, select');
+        if (event.key === 'Escape') {
+          if (state.confirmingDelete) cancelDelete();
+          else if (state.dictionary) toggleDictionary();
+          return;
+        }
+        if (state.confirmingDelete) return;
+        if (event.key === 'z') undo();
+        if (!card) return;
+        if (event.key === ' ' && !onControl) {
+          event.preventDefault();
+          toggleReveal();
+        } else if (['1', '2', '3'].includes(event.key)) {
+          answer(GRADES[Number(event.key) - 1]);
+        } else if (event.key === 'p') {
+          pronounce(card.form);
+        } else if (event.key === 'd') {
+          toggleDictionary();
+        }
+      });
+
+      $('undo').addEventListener('click', undo);
+      $('leave').addEventListener('click', () => {
+        $('proto-note').textContent = '原型：實際會回到 Dashboard，進度已存好';
+      });
+      $('proto-restart').addEventListener('click', reset);
+      $('proto-panel').addEventListener('change', render);
+      document.addEventListener('pointerdown', (event) => {
+        if (
+          state.dictionary &&
+          !event.target.closest('.lookup-panel, #dictionary, .proto-bar')
+        ) {
+          toggleDictionary();
+        }
+      });
+      addEventListener('resize', placeLookupPanel);
+      $('proto-theme').addEventListener('change', applyTheme);
+      matchMedia('(prefers-color-scheme: dark)').addEventListener(
+        'change',
+        applyTheme,
+      );
+
+      applyTheme();
+      reset();
+    </script>
+  </body>
+</html>

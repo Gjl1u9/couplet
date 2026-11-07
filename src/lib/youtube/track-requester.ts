@@ -10,9 +10,14 @@ import type { CaptionTrack } from './captions';
  * 所以結束時要還原，否則移除擴充功能後字幕可能還開著。
  */
 
-interface ActiveTrack {
+export interface ActiveTrack {
   languageCode?: string;
-  kind?: string;
+  kind?: string | undefined;
+  /** 使用者開著 YouTube 自動翻譯時才有。 */
+  translationLanguage?: {
+    languageCode?: string;
+    languageName?: string;
+  } | null;
 }
 
 export interface CaptionPlayer {
@@ -46,20 +51,26 @@ export interface TrackRequester {
 const DEFAULT_RETRY_DELAYS_MS = [500, 1000, 2000, 4000, 8000, 16_000];
 const DEFAULT_INITIAL_DELAY_MS = 1500;
 
-function toOption(track: ActiveTrack | CaptionTrack): ActiveTrack {
+function toOption(track: ActiveTrack): ActiveTrack {
   return {
     ...(track.languageCode ? { languageCode: track.languageCode } : {}),
     ...(track.kind ? { kind: track.kind } : {}),
+    ...(track.translationLanguage
+      ? { translationLanguage: track.translationLanguage }
+      : {}),
   };
 }
 
+/** 翻譯語言也要比對：開著自動翻譯時，reload 拿到的是翻譯後的字幕，不是原文。 */
 function sameTrack(
-  a: ActiveTrack | CaptionTrack | null | undefined,
-  b: ActiveTrack | CaptionTrack | null | undefined,
+  a: ActiveTrack | null | undefined,
+  b: ActiveTrack | null | undefined,
 ): boolean {
   return (
     (a?.languageCode ?? '') === (b?.languageCode ?? '') &&
-    (a?.kind ?? '') === (b?.kind ?? '')
+    (a?.kind ?? '') === (b?.kind ?? '') &&
+    (a?.translationLanguage?.languageCode ?? '') ===
+      (b?.translationLanguage?.languageCode ?? '')
   );
 }
 

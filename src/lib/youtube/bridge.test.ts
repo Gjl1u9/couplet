@@ -1,6 +1,57 @@
 import { describe, expect, it } from 'vitest';
 import type { ControllerEvent } from '../subtitles/controller';
-import { BRIDGE_TAG, parseBridgeMessage, toBridgeMessage } from './bridge';
+import {
+  BRIDGE_TAG,
+  parseBridgeCommand,
+  parseBridgeMessage,
+  toBridgeCommand,
+  toBridgeMessage,
+} from './bridge';
+
+describe('page status events', () => {
+  it('round-trips agent-ready and track-status', () => {
+    const status = {
+      type: 'track-status',
+      videoId: 'a',
+      available: false,
+    } as const;
+    expect(parseBridgeMessage(toBridgeMessage(status))).toEqual(status);
+    expect(
+      parseBridgeMessage(toBridgeMessage({ type: 'agent-ready' })),
+    ).toEqual({ type: 'agent-ready' });
+  });
+
+  it('rejects a malformed track status', () => {
+    expect(
+      parseBridgeMessage({
+        [BRIDGE_TAG]: true,
+        event: { type: 'track-status', videoId: 'a', available: 'no' },
+      }),
+    ).toBeNull();
+  });
+});
+
+describe('learning language command', () => {
+  it('round-trips a valid command', () => {
+    const command = {
+      type: 'set-learning-language',
+      language: 'zh-Hant',
+    } as const;
+    expect(parseBridgeCommand(toBridgeCommand(command))).toEqual(command);
+  });
+
+  it('rejects unrelated and malformed messages', () => {
+    expect(parseBridgeCommand({ language: 'en' })).toBeNull();
+    expect(
+      parseBridgeCommand(
+        toBridgeCommand({
+          type: 'set-learning-language',
+          language: '<script>',
+        }),
+      ),
+    ).toBeNull();
+  });
+});
 
 describe('bridge', () => {
   it.each<[string, ControllerEvent]>([

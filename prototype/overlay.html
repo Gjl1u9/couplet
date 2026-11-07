@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>字幕 Overlay</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap"
+    />
+    <link rel="stylesheet" href="./ui.css" />
+  </head>
+  <body>
+    <main class="overlay-states">
+      <section class="state">
+        <h2 class="state-name">深色畫面</h2>
+        <div class="player scene-dark">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto">
+              The Navier-Stokes equations describe how fluids move.
+            </div>
+            <div class="subtitle-translation" dir="auto">
+              納維-斯托克斯方程描述流體如何運動。
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">亮色畫面</h2>
+        <div class="player scene-bright">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto">
+              The Navier-Stokes equations describe how fluids move.
+            </div>
+            <div class="subtitle-translation" dir="auto">
+              納維-斯托克斯方程描述流體如何運動。
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">選中字詞</h2>
+        <div class="player scene-dark">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto">
+              The Navier-Stokes equations describe how
+              <button class="token is-selected">fluids</button> move.
+            </div>
+            <div class="subtitle-translation" dir="auto">
+              納維-斯托克斯方程描述流體如何運動。
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">譯文載入中</h2>
+        <div class="player scene-dark">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto">
+              The Navier-Stokes equations describe how fluids move.
+            </div>
+            <div
+              class="subtitle-translation is-loading"
+              aria-label="譯文載入中"
+            >
+              <span class="subtitle-skeleton"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">關閉譯文</h2>
+        <div class="player scene-bright">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto">
+              The Navier-Stokes equations describe how fluids move.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">長句換行</h2>
+        <div class="player scene-dark">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto">
+              Even after two centuries, nobody has proved that smooth solutions
+              to these equations always exist in three dimensions.
+            </div>
+            <div class="subtitle-translation" dir="auto">
+              即使過了兩個世紀，仍然沒有人能證明這些方程在三維空間中一定有平滑解。
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">日文</h2>
+        <div class="player scene-bright">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto" lang="ja">
+              毎朝走るのが習慣です。
+            </div>
+            <div class="subtitle-translation" dir="auto">
+              每天早上跑步是我的習慣。
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="state">
+        <h2 class="state-name">阿拉伯文（由右至左）</h2>
+        <div class="player scene-dark">
+          <div class="subtitle subtitle-no-controls">
+            <div class="subtitle-original" dir="auto" lang="ar">
+              نمت في السرير مبكرًا.
+            </div>
+            <div class="subtitle-translation" dir="auto">
+              我很早就上床睡覺。
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

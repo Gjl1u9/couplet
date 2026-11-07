@@ -1,0 +1,27 @@
+# The lookup service. See docs/LOOKUP.md.
+name = "couplet-api"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+routes = [{ pattern = "api.coupletapp.com", custom_domain = true }]
+
+[vars]
+ABUSE_DAILY_LIMIT = "2000"
+EXPLAIN_DAILY_LIMIT = "20"
+GLOBAL_DAILY_LIMIT = "20000"
+SUPABASE_URL = "https://pfgymrsdimvrhaevndtk.supabase.co"
+
+[[durable_objects.bindings]]
+name = "QUOTA"
+class_name = "Quota"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Quota"]
+
+[observability]
+enabled = true
+
+# Request logs would hold network addresses, which the privacy policy says we don't keep.
+[observability.logs]
+enabled = true
+invocation_logs = false

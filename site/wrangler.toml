@@ -1,0 +1,8 @@
+# The public website: the product page and privacy policy.
+name = "couplet-site"
+compatibility_date = "2026-10-01"
+routes = [{ pattern = "coupletapp.com", custom_domain = true }]
+
+[assets]
+directory = "./public"
+not_found_handling = "404-page"

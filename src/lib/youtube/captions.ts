@@ -1,3 +1,4 @@
+import { languageBase } from '../language';
 import type { Cue } from '../translation/batches';
 
 export interface CaptionTrack {
@@ -23,6 +24,29 @@ export function selectSourceTrack(
   const index = audio?.defaultCaptionTrackIndex;
   const preferred = index === undefined ? undefined : tracks[index];
   return preferred ?? tracks.find((t) => t.kind === 'asr') ?? tracks[0] ?? null;
+}
+
+/**
+ * Picks the track for the learning language. Prefers the video's default track, then
+ * human-made captions, because they are more accurate than automatic ones.
+ */
+export function selectLearningTrack(
+  tracklist: CaptionTracklist | null | undefined,
+  language: string,
+): CaptionTrack | null {
+  const base = languageBase(language);
+  const matches = (track: CaptionTrack | undefined): track is CaptionTrack =>
+    track !== undefined && languageBase(track.languageCode) === base;
+  const tracks = tracklist?.captionTracks ?? [];
+  const audio = tracklist?.audioTracks?.[tracklist.defaultAudioTrackIndex ?? 0];
+  const index = audio?.defaultCaptionTrackIndex;
+  const preferred = index === undefined ? undefined : tracks[index];
+  if (matches(preferred)) return preferred;
+  return (
+    tracks.find((t) => matches(t) && t.kind !== 'asr') ??
+    tracks.find(matches) ??
+    null
+  );
 }
 
 interface Json3Segment {
@@ -104,18 +128,21 @@ const NO_SPACE_SCRIPT =
   /[\u0e00-\u0e7f\u3000-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef]/;
 
 /** 保留原始片段的間隔，只有字幕事件交界這種沒有間隔的地方才補空格。 */
+export function joinText(text: string, next: string): string {
+  const needsSpace =
+    text !== '' &&
+    !/\s$/.test(text) &&
+    !/^\s/.test(next) &&
+    !NO_SPACE_SCRIPT.test(text.slice(-1)) &&
+    !NO_SPACE_SCRIPT.test(next.charAt(0));
+  return needsSpace ? `${text} ${next}` : text + next;
+}
+
 function joinWords(words: readonly Word[]): string {
-  let text = '';
-  for (const { text: next } of words) {
-    const needsSpace =
-      text !== '' &&
-      !/\s$/.test(text) &&
-      !/^\s/.test(next) &&
-      !NO_SPACE_SCRIPT.test(text.slice(-1)) &&
-      !NO_SPACE_SCRIPT.test(next.charAt(0));
-    text += needsSpace ? ` ${next}` : next;
-  }
-  return text.trim();
+  return words
+    .map((word) => word.text)
+    .reduce(joinText, '')
+    .trim();
 }
 
 /** 長的字本身就念比較久，不能把念字的時間當成停頓。 */

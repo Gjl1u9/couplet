@@ -1,12 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createTrackRequester, type CaptionPlayer } from './track-requester';
+import {
+  createTrackRequester,
+  type ActiveTrack,
+  type CaptionPlayer,
+} from './track-requester';
 
 const en = { languageCode: 'en' };
 const asr = { languageCode: 'en', kind: 'asr' };
+const zhHant = {
+  languageCode: 'zh-Hant',
+  languageName: 'Chinese (Traditional)',
+};
 
-function setup(
-  initial: { languageCode?: string; kind?: string } | null = null,
-) {
+function setup(initial: ActiveTrack | null = null) {
   const state = {
     ready: true,
     player: null as CaptionPlayer | null,
@@ -14,7 +20,7 @@ function setup(
   };
   const setOption = vi.fn((_module: string, option: string, value: unknown) => {
     if (option === 'track') {
-      state.active = value as { languageCode?: string; kind?: string };
+      state.active = value as ActiveTrack;
     }
   });
   const player: CaptionPlayer = {
@@ -164,6 +170,46 @@ describe('還原 CC 狀態', () => {
       requester.finish();
     }).not.toThrow();
     expect(warn).toHaveBeenCalled();
+  });
+});
+
+describe('使用者開著 YouTube 自動翻譯', () => {
+  const translated = { ...asr, translationLanguage: zhHant };
+
+  it('切到原文字幕軌，因為 reload 只會再請求翻譯後的字幕', () => {
+    const { setOption, requester } = setup(translated);
+    requester.request(asr);
+    expect(setOption.mock.calls).toEqual([
+      ['captions', 'track', { languageCode: 'en', kind: 'asr' }],
+    ]);
+    requester.finish();
+  });
+
+  it('切過去之後重試才發 reload', () => {
+    const { setOption, requester } = setup(translated);
+    requester.request(asr);
+    setOption.mockClear();
+    vi.advanceTimersByTime(100);
+    expect(setOption.mock.calls).toEqual([['captions', 'reload', true]]);
+    requester.finish();
+  });
+
+  it('結束後還原翻譯語言', () => {
+    const { state, requester } = setup(translated);
+    requester.request(asr);
+    requester.finish();
+    expect(state.active).toEqual(translated);
+  });
+
+  it('翻譯語言不同時也要還原', () => {
+    const { state, requester } = setup(translated);
+    requester.request(asr);
+    state.active = {
+      ...asr,
+      translationLanguage: { languageCode: 'ja', languageName: 'Japanese' },
+    };
+    requester.finish();
+    expect(state.active).toEqual(translated);
   });
 });
 

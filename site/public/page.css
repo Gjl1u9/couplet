@@ -1,0 +1,149 @@
+:root {
+  color-scheme: light dark;
+  --ground: #ddd5c2;
+  --surface: #fbf8f0;
+  --ink: #29251d;
+  --ink-muted: #6a6354;
+  --line: #d9d1be;
+  --line-strong: #857c6a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #14120e;
+    --surface: #2a2720;
+    --ink: #ece5d5;
+    --ink-muted: #afa693;
+    --line: #443f33;
+    --line-strong: #80786a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family:
+    'IBM Plex Sans',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+header,
+main,
+footer {
+  width: min(720px, 100% - 32px);
+  margin-inline: auto;
+}
+
+header {
+  padding: 18px 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.brand img {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+}
+
+main {
+  padding: 32px 36px 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+h1,
+h2 {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  font-weight: 600;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 36px;
+  line-height: 44px;
+}
+
+h2 {
+  margin: 32px 0 8px;
+  font-size: 22px;
+  line-height: 30px;
+}
+
+p,
+ul {
+  margin: 0 0 12px;
+}
+
+li + li {
+  margin-top: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 23px;
+}
+
+th,
+td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+}
+
+.updated {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+footer {
+  display: flex;
+  gap: 18px;
+  padding: 24px 0 36px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+a {
+  color: inherit;
+}
+
+@media (max-width: 560px) {
+  main {
+    padding: 24px 18px;
+  }
+
+  h1 {
+    font-size: 30px;
+    line-height: 38px;
+  }
+
+  .scroll {
+    overflow-x: auto;
+  }
+}
