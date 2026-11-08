@@ -16,14 +16,26 @@ class FakeUtterance {
 function fakeSynth(voices: readonly SpeechSynthesisVoice[] = []) {
   const spoken: FakeUtterance[] = [];
   const cancel = vi.fn();
+  const listeners = new Set<() => void>();
+  let listed = voices;
   const synth = {
     cancel,
-    getVoices: () => voices,
+    getVoices: () => listed,
     speak: (utterance: FakeUtterance) => {
       spoken.push(utterance);
     },
+    addEventListener: (_: string, listener: () => void) => {
+      listeners.add(listener);
+    },
+    removeEventListener: (_: string, listener: () => void) => {
+      listeners.delete(listener);
+    },
   } as unknown as SpeechSynthesis;
-  return { synth, spoken, cancel };
+  const listVoices = (next: readonly SpeechSynthesisVoice[]) => {
+    listed = next;
+    for (const listener of [...listeners]) listener();
+  };
+  return { synth, spoken, cancel, listeners, listVoices };
 }
 
 describe('pickVoice', () => {
@@ -71,7 +83,7 @@ describe('createSpeaker', () => {
   });
 
   it('reports the end of playback', () => {
-    const { synth, spoken } = fakeSynth();
+    const { synth, spoken } = fakeSynth([voice('Bells', 'en-US')]);
     const onEnd = vi.fn();
     createSpeaker(synth).speak('casa', 'es', onEnd);
     spoken[0]?.onend?.();
@@ -87,6 +99,80 @@ describe('createSpeaker', () => {
     expect(onEnd).not.toHaveBeenCalled();
     spoken[1]?.onerror?.({ error: 'network' });
     expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('tries the next good voice before the default voice', () => {
+    const natural = voice('Google US English 1 (Natural)', 'en-US');
+    const google = voice('Google US English', 'en-US');
+    const { synth, spoken } = fakeSynth([
+      voice('Bells', 'en-US'),
+      google,
+      natural,
+    ]);
+    createSpeaker(synth).speak('bank', 'en', vi.fn());
+    expect(spoken[0]?.voice).toBe(natural);
+    spoken[0]?.onerror?.({ error: 'synthesis-failed' });
+    expect(spoken[1]?.voice).toBe(google);
+  });
+
+  it('skips a voice that has already failed', () => {
+    const natural = voice('Google US English 1 (Natural)', 'en-US');
+    const google = voice('Google US English', 'en-US');
+    const { synth, spoken } = fakeSynth([natural, google]);
+    const speaker = createSpeaker(synth);
+    speaker.speak('bank', 'en', vi.fn());
+    spoken[0]?.onerror?.({ error: 'synthesis-failed' });
+    speaker.speak('river', 'en', vi.fn());
+    expect(spoken.at(-1)).toMatchObject({ text: 'river', voice: google });
+  });
+
+  describe('before the voices have loaded', () => {
+    const google = voice('Google español', 'es-ES');
+
+    it('waits for the list, so the first click gets a good voice', () => {
+      const { synth, spoken, listVoices, listeners } = fakeSynth();
+      createSpeaker(synth).speak('casa', 'es', vi.fn());
+      expect(spoken).toHaveLength(0);
+      listVoices([google]);
+      expect(spoken[0]?.voice).toBe(google);
+      expect(listeners.size).toBe(0);
+    });
+
+    it('speaks anyway when the list never arrives', () => {
+      vi.useFakeTimers();
+      try {
+        const { synth, spoken, listeners } = fakeSynth();
+        createSpeaker(synth).speak('casa', 'es', vi.fn());
+        vi.advanceTimersByTime(1000);
+        expect(spoken[0]?.voice).toBeNull();
+        expect(listeners.size).toBe(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('drops the wait when stopped, and reports the end', () => {
+      const { synth, spoken, listVoices, listeners } = fakeSynth();
+      const onEnd = vi.fn();
+      const speaker = createSpeaker(synth);
+      speaker.speak('casa', 'es', onEnd);
+      speaker.stop();
+      expect(onEnd).toHaveBeenCalledTimes(1);
+      expect(listeners.size).toBe(0);
+      listVoices([google]);
+      expect(spoken).toHaveLength(0);
+    });
+
+    it('replaces the wait when asked to speak again', () => {
+      const { synth, spoken, listVoices } = fakeSynth();
+      const first = vi.fn();
+      const speaker = createSpeaker(synth);
+      speaker.speak('uno', 'es', first);
+      speaker.speak('dos', 'es', vi.fn());
+      expect(first).toHaveBeenCalledTimes(1);
+      listVoices([google]);
+      expect(spoken.map((utterance) => utterance.text)).toEqual(['dos']);
+    });
   });
 
   it('does not retry speech that was stopped', () => {
