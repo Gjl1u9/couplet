@@ -1,0 +1,13 @@
+#!/bin/sh
+# Formats and lints the staged files before each commit, so a slip shows up here instead of
+# in CI. CI still runs the whole `npm run check`. Installed by `npm install` (see `prepare`).
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$files" ] && exit 0
+
+printf '%s\n' "$files" | tr '\n' '\0' |
+  xargs -0 npx prettier --check --ignore-unknown || exit 1
+
+scripts=$(printf '%s\n' "$files" | grep -E '\.(ts|tsx|js|mjs|cjs)$')
+[ -z "$scripts" ] && exit 0
+printf '%s\n' "$scripts" | tr '\n' '\0' |
+  xargs -0 npx eslint --max-warnings=0 --no-warn-ignored

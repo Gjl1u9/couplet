@@ -14,7 +14,7 @@ Requires Node 22 or later; see `.nvmrc` for the version.
 | `npm run build:dev` | `dist/chrome-mv3-dev` | Rebuild and reload; unminified              |
 | `npm run build`     | `dist/chrome-mv3`     | Rebuild and reload                          |
 
-`dev` and `build:dev` overwrite each other, so use one at a time.
+`dev` and `build:dev` overwrite each other, so use one at a time. The extension's card shows which build is loaded and its commit.
 
 Lookups go through our Cloudflare Worker, which holds the AI key. See [`docs/LOOKUP.md`](docs/LOOKUP.md).
 

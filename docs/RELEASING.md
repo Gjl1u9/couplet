@@ -28,4 +28,4 @@ Download `couplet-<version>-chrome.zip` from the GitHub release and upload it in
 
 ## The package
 
-`npm run zip:store` builds the package without the manifest's `key`, because the store assigns the ID itself and can refuse an upload that carries it. Without the key, the package loaded unpacked gets a different ID, and Google sign-in fails. To test locally, load `dist/chrome-mv3` from `npm run build`. After the first upload, check that the store's ID is `pnjdidlglcbbnfhcnhmhndoakdphhckj`, because the sign-in redirect depends on it.
+The release workflow runs `npm run zip:store`, which builds the package without the manifest's `key`, because the store assigns the ID itself and can refuse an upload that carries it. Without the key, the package loaded unpacked gets a different ID, and Google sign-in fails. Upload the zip from the GitHub release, and test locally with `dist/chrome-mv3` from `npm run build`, which keeps the key. After the first upload, check that the store's ID is `pnjdidlglcbbnfhcnhmhndoakdphhckj`, because the sign-in redirect depends on it.

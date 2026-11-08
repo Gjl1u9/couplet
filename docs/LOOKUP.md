@@ -59,7 +59,7 @@ Occasional Mainland terms such as 自行車 or 地鐵 are an accepted tradeoff, 
 The Worker checks tokens against Supabase's public keys, so it holds no Supabase secret.
 
 ```bash
-npx wrangler deploy --config worker/wrangler.toml
+npm run deploy:worker
 ```
 
-The website deploys the same way, with [`site/wrangler.toml`](../site/wrangler.toml).
+The website deploys with `npm run deploy:site`, from [`site/wrangler.toml`](../site/wrangler.toml).
