@@ -46,7 +46,7 @@ jobs:
         run: npm run zip:store
       - name: Check that the package is the store's
         run: |
-          unzip -p dist/couplet-*-chrome.zip manifest.json | node -e '
+          unzip -p dist/store/couplet-*-chrome.zip manifest.json | node -e '
             const manifest = JSON.parse(require("fs").readFileSync(0, "utf8"));
             if (manifest.key) throw new Error("The store package must not have a key.");
           '
@@ -54,4 +54,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" dist/couplet-*-chrome.zip --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+        run: gh release create "$TAG" dist/store/couplet-*-chrome.zip --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"

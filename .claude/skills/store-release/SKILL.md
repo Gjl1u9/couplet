@@ -38,7 +38,7 @@ Follow `RELEASING.md`. A new feature bumps the minor version.
 - Auto-merge is off for this repo, so merge once CI passes on the head commit: `gh pr merge --merge --match-head-commit <sha>`. The person may have merged already, so read the PR's state first.
 - Before tagging, confirm the merged tree matches the head you checked, and that the tag doesn't exist.
 
-Done when `gh release view v<version>` shows the zip, and its size matches a local `npm run zip:store`.
+Done when `gh release view v<version>` shows the zip.
 
 ## 4. Deploy what changed
 
@@ -54,13 +54,12 @@ Done when the person has submitted, and you have said what stays unavailable unt
 
 ## Builds
 
-| Folder                | Build with          | Use                         | Catch                                      |
-| --------------------- | ------------------- | --------------------------- | ------------------------------------------ |
-| `dist/chrome-mv3-dev` | `npm run dev`       | Testing while changing code | Its pages turn blank when the server stops |
-| `dist/chrome-mv3`     | `npm run build`     | Testing without a server    | Rebuild to see changes                     |
-| `dist/*-chrome.zip`   | `npm run zip:store` | Uploading to the store      | Overwrites `dist/chrome-mv3` without `key` |
+| Folder                | Build with      | Card name         | Use                         | Catch                                      |
+| --------------------- | --------------- | ----------------- | --------------------------- | ------------------------------------------ |
+| `dist/chrome-mv3-dev` | `npm run dev`   | `Couplet (dev)`   | Testing while changing code | Its pages turn blank when the server stops |
+| `dist/chrome-mv3`     | `npm run build` | `Couplet (local)` | Testing without a server    | Rebuild to see changes                     |
 
-`zip:store` leaves a `dist/chrome-mv3` where Google sign-in fails, so run `npm run build` straight after it.
+The store package is the zip on the GitHub release, which CI builds. Loaded unpacked, it has another extension ID, so Google sign-in fails.
 
 ## Loading a build
 
@@ -69,7 +68,7 @@ Done when the person has submitted, and you have said what stays unavailable unt
 - A build's folder name repeats in every checkout, so give the full path.
 - Each Chrome profile keeps its own folder. Load it in the profile the person is watching in, then refresh the YouTube tab.
 - The extension's **Loaded from** line is the truth. Chrome's preference files lag behind it.
-- If a feature seems missing, compare first: `grep -c "<a string from the feature>"` on the build the card names.
+- If a feature seems missing, compare the commit on the card's version line with `git log` first, then `grep -c "<a string from the feature>"` on the build the card names.
 
 ## Store text
 
@@ -85,4 +84,4 @@ Done when the person has submitted, and you have said what stays unavailable unt
 
 ## Testing languages
 
-`--lang` is ignored on macOS, where Chromium follows the system language. To test the default locale, load a copy of the build with the other locales removed.
+`--lang` is ignored on macOS, where Chromium follows the system language. Local builds show a fixed name, so test the store's name and summary on an unzipped copy of the release zip: to test the default locale, remove the other locales from it first.

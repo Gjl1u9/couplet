@@ -29,6 +29,11 @@ import { currentVideoOrigin } from '../lib/youtube/origin';
 import { createPortTranslate } from '../lib/translation/port';
 import { TRANSLATE_PORT } from '../lib/translation/messages';
 import { parseBridgeMessage, toBridgeCommand } from '../lib/youtube/bridge';
+import {
+  DEV_DUMP_REQUEST,
+  DEV_DUMP_RESULT,
+  describeCaptions,
+} from '../lib/youtube/dev-dump';
 import { AUTH_STORAGE_KEY, createAuthClient } from '../lib/auth/messages';
 import { VOCABULARY_REVISION_KEY } from '../lib/sync/messages';
 import { createSignInToast } from '../lib/ui/sign-in-toast';
@@ -371,19 +376,43 @@ export default defineContentScript({
       { capture: true },
     );
 
+    /** Kept only for the development dump below. */
+    let lastCaptions: Parameters<typeof describeCaptions>[0] | null = null;
+
     window.addEventListener('message', (message) => {
       if (message.source !== window) return;
       if (import.meta.env.MODE === 'development') {
-        if (
-          (message.data as { __dualSubtitlesDevReload?: boolean } | null)
-            ?.__dualSubtitlesDevReload
-        ) {
+        const data = message.data as Record<string, unknown> | null;
+        if (data?.__dualSubtitlesDevReload) {
           void browser.runtime.sendMessage({ type: 'dev-reload' });
+          return;
+        }
+        if (data?.[DEV_DUMP_REQUEST]) {
+          const { enabled, learningLanguage } = settings.get();
+          window.postMessage(
+            {
+              [DEV_DUMP_RESULT]: {
+                enabled,
+                learningLanguage,
+                trackAvailable,
+                captions:
+                  lastCaptions &&
+                  describeCaptions(
+                    lastCaptions,
+                    data[DEV_DUMP_REQUEST] === 'body',
+                  ),
+              },
+            },
+            location.origin,
+          );
           return;
         }
       }
       const event = parseBridgeMessage(message.data);
       if (!event || stopIfDisconnected()) return;
+      if (import.meta.env.MODE === 'development' && event.type === 'captions') {
+        lastCaptions = event;
+      }
       settingsPanel.ensureButton();
       if (event.type === 'agent-ready') {
         syncLearningLanguage();
