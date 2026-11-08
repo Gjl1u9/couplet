@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { WordEntry } from '../../src/lib/lookup/types';
-import { handleRequest, type HandlerDeps } from './handler';
+import { createRefusals, handleRequest, type HandlerDeps } from './handler';
 import { consume, refund, type CounterStorage } from './quota';
 
 const ENTRY: WordEntry = {
@@ -73,6 +73,10 @@ function setup(overrides: Partial<HandlerDeps['config']> = {}) {
       },
     },
     now: () => NOW,
+    refusals: createRefusals(),
+    defer: (work) => {
+      void work;
+    },
   };
   return { deps, lookUp, counters, stored, explain };
 }
@@ -140,7 +144,25 @@ describe('handleRequest', () => {
       error: 'service_busy',
       resetAt: '2026-11-08T00:00:00.000Z',
     });
-    expect(lookUp).toHaveBeenCalledTimes(2);
+    // The model started early for the refused one, and was stopped.
+    expect(lookUp).toHaveBeenCalledTimes(3);
+    const stopped = lookUp.mock.calls[2] as unknown as [
+      string,
+      unknown,
+      AbortSignal,
+    ];
+    expect(stopped[2].aborted).toBe(true);
+    // Once refused, the same source no longer reaches the model at all.
+    await handleRequest(request(), deps);
+    expect(lookUp).toHaveBeenCalledTimes(3);
+  });
+
+  it('says where the time went', async () => {
+    const { deps, counters } = setup();
+    const response = await handleRequest(request(), deps);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('server-timing')).toMatch(/quota;dur=/);
+    expect(counters('global').map.get('2026-11-07')).toBe(1);
   });
 
   it('holds an account to the same ceiling', async () => {

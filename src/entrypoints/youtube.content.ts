@@ -9,6 +9,7 @@ import {
   defaultSettings,
   type Settings,
 } from '../lib/settings/settings';
+import { LOOKUP_WARM } from '../lib/lookup/proxy';
 import { createSubtitleController } from '../lib/subtitles/controller';
 import { createOverlay } from '../lib/subtitles/overlay';
 import { createLookupPanel } from '../lib/ui/lookup-panel';
@@ -31,6 +32,9 @@ import { parseBridgeMessage, toBridgeCommand } from '../lib/youtube/bridge';
 import { AUTH_STORAGE_KEY, createAuthClient } from '../lib/auth/messages';
 import { VOCABULARY_REVISION_KEY } from '../lib/sync/messages';
 import { createSignInToast } from '../lib/ui/sign-in-toast';
+
+/** Idle connections stay open about this long, so warming more often does nothing. */
+const WARM_EVERY_MS = 30_000;
 
 const PLAYBACK_EVENTS = [
   'timeupdate',
@@ -58,10 +62,18 @@ export default defineContentScript({
         warn('設定讀寫失敗', error);
       },
     );
+    // Wakes the background script and opens the connection before the click.
+    let warmedAt = -Infinity;
+    const warmLookup = () => {
+      if (performance.now() - warmedAt < WARM_EVERY_MS) return;
+      warmedAt = performance.now();
+      browser.runtime.sendMessage({ type: LOOKUP_WARM }).catch(() => undefined);
+    };
     const overlay = createOverlay({
       sourceLanguage: () => controller.sourceLanguage(),
       expectsTranslation: () => controller.expectsTranslation(),
       isMarked: (token) => isSavedForm(token),
+      onApproach: warmLookup,
       onToken: (cue, element) => {
         // Selecting first moves the strip, so the panel is placed against its final spot.
         overlay.selectToken(element);
