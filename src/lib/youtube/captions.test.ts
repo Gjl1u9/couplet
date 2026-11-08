@@ -251,6 +251,118 @@ describe('parseCaptions：自動字幕', () => {
     ]);
     expect(cues.map((c) => c.text)).toEqual(['Yes.', 'Next']);
   });
+
+  it('splits segments that hold whole lines, as YouTube sometimes sends', () => {
+    const cues = parse([
+      asr(0, 4000, [['Why can you scroll through your phone', 0]]),
+      asr(2000, 4000, [
+        ['\nfor an hour without noticing the time? But when you sit down', 0],
+      ]),
+      asr(6000, 2000, [['\nto study, you stop.', 0]]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual([
+      'Why can you scroll through your phone for an hour without noticing the time?',
+      'But when you sit down to study, you stop.',
+    ]);
+    expect(cues[1]?.start).toBeGreaterThan(2);
+    expect(cues[1]?.start).toBeLessThan(6);
+    expect(cues[1]?.end).toBe(8);
+  });
+
+  it('shares a segment’s time among its words by length', () => {
+    const cues = parse([
+      asr(0, 2000, [['aaa. b', 0]]),
+      asr(4000, 1000, [['c', 0]]),
+    ]);
+    // "aaa." and "b" have 4 and 1 characters, so "b" starts 4/5 into 0–2000 ms.
+    expect(cues.map((c) => [c.text, c.start])).toEqual([
+      ['aaa.', 0],
+      ['b c', 1.6],
+    ]);
+  });
+
+  it('splits CJK sentences inside one segment', () => {
+    const cues = parse([asr(0, 3000, [['今天天氣很好。我們出門吧', 0]])]);
+    expect(cues.map((c) => c.text)).toEqual(['今天天氣很好。', '我們出門吧']);
+  });
+
+  it('attaches punctuation sent as its own segment to the word before it', () => {
+    const cues = parse([
+      asr(0, 3000, [
+        ['health', 0],
+        [' .', 200],
+        [' First', 400],
+        [' ,', 500],
+        [' my', 600],
+        [' view', 700],
+      ]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual(['health.', 'First, my view']);
+  });
+
+  it('finishes a sentence that ends just past the word limit', () => {
+    const words = Array.from(
+      { length: 14 },
+      (_, i): readonly [string, number] => [` w${String(i)}`, i * 100],
+    );
+    const cues = parse([
+      asr(0, 3000, [...words, [' end?', 1400], [' next', 1500]]),
+    ]);
+    expect(cues.map((c) => c.text.split(' ').length)).toEqual([15, 1]);
+    expect(cues[0]?.text.endsWith('end?')).toBe(true);
+  });
+
+  it('breaks long cues by characters, after the last clause', () => {
+    const long = (i: number): readonly [string, number] => [
+      ` internationalization${String(i)}`,
+      i * 100,
+    ];
+    const cues = parse([
+      asr(0, 5000, [long(0), long(1), long(2), [' ok,', 300], long(4)]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual([
+      'internationalization0 internationalization1 internationalization2 ok,',
+      'internationalization4',
+    ]);
+    expect(cues.every((c) => c.text.length <= 100)).toBe(true);
+  });
+
+  it('never grows past the hard limit to finish a sentence', () => {
+    const long = (i: number): readonly [string, number] => [
+      ` internationalization${String(i)}`,
+      i * 100,
+    ];
+    const cues = parse([
+      asr(0, 5000, [
+        long(0),
+        long(1),
+        long(2),
+        long(3),
+        long(4),
+        [' end.', 500],
+      ]),
+    ]);
+    expect(cues.every((c) => c.text.length <= 100)).toBe(true);
+    expect(cues.at(-1)?.text.endsWith('end.')).toBe(true);
+  });
+
+  it('starts a new cue when the speaker changes', () => {
+    const cues = parse([
+      asr(0, 3000, [
+        ['>> Yeah,', 0],
+        [' having', 100],
+        [' a', 200],
+        [' sniff', 300],
+        [' >>', 400],
+        [' Rookie', 500],
+        [' runs', 600],
+      ]),
+    ]);
+    expect(cues.map((c) => c.text)).toEqual([
+      '>> Yeah, having a sniff',
+      '>> Rookie runs',
+    ]);
+  });
 });
 
 describe('selectLearningTrack', () => {
