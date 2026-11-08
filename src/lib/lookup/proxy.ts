@@ -55,6 +55,26 @@ export function createProxyLookup(options: ProxyLookupOptions): LookupService {
   };
 }
 
+/** Sent when the pointer reaches the subtitles, before any word is clicked. */
+export const LOOKUP_WARM = 'lookup-warm';
+
+export const isLookupWarmMessage = (message: unknown): boolean =>
+  (message as { type?: unknown } | null)?.type === LOOKUP_WARM;
+
+/**
+ * Opens the connection to our service ahead of the click, so the lookup skips the
+ * handshake. A preflight-style request, so it costs no quota and reaches no model.
+ */
+export function warmLookup(
+  fetchFn: typeof fetch = fetch,
+  endpoint: string = LOOKUP_ENDPOINT,
+): Promise<void> {
+  return fetchFn(endpoint, { method: 'OPTIONS' }).then(
+    () => undefined,
+    () => undefined,
+  );
+}
+
 /** What the Lookup Panel says when a lookup fails, and whether trying again can help. */
 export function lookupFailure(error: unknown): {
   readonly text: string;

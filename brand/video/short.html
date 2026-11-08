@@ -1,0 +1,1570 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Couplet Short</title>
+    <style>
+      /* The promo film's paper palette, upright for Shorts, Reels, and TikTok. */
+      :root {
+        --paper: #ddd5c2;
+        --sheet: #fbf8f0;
+        --ink: #29251d;
+        --muted: #6a6354;
+        --line: #857c6a;
+        --accent: #c9401f;
+        --serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+        --sans: -apple-system, 'Helvetica Neue', 'PingFang TC', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        margin: 0;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      #stage {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      /* Titles sit above the picture, clear of the feed's own buttons at the bottom. */
+      #band {
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 470px;
+        background: var(--paper);
+      }
+
+      .title {
+        position: absolute;
+        right: 60px;
+        bottom: 62px;
+        left: 60px;
+        margin: 0;
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 88px;
+        font-weight: 600;
+        line-height: 102px;
+        text-align: center;
+        text-wrap: balance;
+      }
+
+      .title .word {
+        display: inline-block;
+        white-space: pre;
+      }
+
+      .title .key {
+        position: relative;
+      }
+
+      .rule {
+        position: absolute;
+        right: 0;
+        bottom: -6px;
+        left: 0;
+        height: 6px;
+        background: var(--accent);
+        transform-origin: left center;
+      }
+
+      #view {
+        position: absolute;
+        inset: 470px 0 0;
+        overflow: hidden;
+      }
+
+      .camera {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: 0 0;
+      }
+
+      .window {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--sheet);
+        box-shadow: 0 30px 80px rgba(41, 37, 29, 0.22);
+      }
+
+      #win-a {
+        width: 1000px;
+      }
+
+      #win-b {
+        width: 580px;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 52px;
+        padding: 0 14px 0 16px;
+        border-bottom: 1px solid #d9d1be;
+      }
+
+      .bar > i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #d9d1be;
+      }
+
+      .address {
+        flex: 1;
+        min-width: 0;
+        margin: 0 10px 0 12px;
+        padding: 5px 16px;
+        overflow: hidden;
+        border-radius: 16px;
+        background: #e6dfcc;
+        color: var(--muted);
+        font:
+          14px/20px -apple-system,
+          'Helvetica Neue',
+          sans-serif;
+        white-space: nowrap;
+      }
+
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .tools svg {
+        display: block;
+        width: 20px;
+        height: 20px;
+      }
+
+      .tools .puzzle {
+        color: var(--muted);
+      }
+
+      .tools .avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #b9a98a;
+      }
+
+      #content {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: #1a2226;
+      }
+
+      #player {
+        position: absolute;
+        inset: 0;
+        isolation: isolate;
+      }
+
+      #scene {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #controls {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 36px 16px 6px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.66));
+        color: #fff;
+        font:
+          14px/20px -apple-system,
+          'Helvetica Neue',
+          sans-serif;
+      }
+
+      #progress {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.35);
+      }
+
+      #played {
+        height: 100%;
+        background: #ff7a59;
+      }
+
+      #row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 38px;
+      }
+
+      #row svg {
+        flex: none;
+        width: 22px;
+        height: 22px;
+      }
+
+      #gap {
+        flex: 1;
+      }
+
+      #overlay {
+        position: absolute;
+        inset: 0;
+      }
+
+      #popup {
+        position: absolute;
+        z-index: 4;
+        top: 48px;
+        width: 300px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--sheet);
+        box-shadow: 0 18px 46px rgba(41, 37, 29, 0.32);
+        transform-origin: top right;
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        border: 0;
+        background: transparent;
+      }
+
+      #pages {
+        position: relative;
+        height: 680px;
+        overflow: hidden;
+      }
+
+      #pages iframe {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+      }
+
+      .cursor {
+        position: absolute;
+        z-index: 6;
+        top: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        transform-origin: 3px 3px;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+      }
+
+      .ring {
+        position: absolute;
+        z-index: 5;
+        top: 0;
+        left: 0;
+        width: 50px;
+        height: 50px;
+        margin: -25px 0 0 -25px;
+        border: 3px solid #ff7a59;
+        border-radius: 50%;
+      }
+
+      #end {
+        position: absolute;
+        z-index: 8;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 240px;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      #lockup {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+
+      #lockup svg {
+        width: 124px;
+        height: 124px;
+      }
+
+      #lockup span {
+        font-family: var(--sans);
+        font-size: 104px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      #tagline {
+        margin: 64px 60px 0;
+        font-family: var(--serif);
+        font-size: 66px;
+        font-weight: 600;
+        line-height: 82px;
+        text-align: center;
+      }
+
+      #tagline span {
+        position: relative;
+        display: inline-block;
+      }
+
+      #install {
+        margin-top: 72px;
+        padding: 26px 54px;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #ffffff;
+        font-family: var(--sans);
+        font-size: 42px;
+        font-weight: 600;
+        line-height: 50px;
+      }
+
+      #site {
+        margin-top: 30px;
+        color: var(--muted);
+        font-family: var(--sans);
+        font-size: 34px;
+        line-height: 42px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="view">
+        <div class="camera" id="camera-a">
+          <div class="window" id="win-a">
+            <div class="bar">
+              <i></i><i></i><i></i>
+              <div class="address">youtube.com/watch?v=hill-town-vlog</div>
+              <div class="tools">
+                <svg class="puzzle" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M9 3h3a2 2 0 0 1 2 2v1a1.5 1.5 0 0 0 3 0V5h2a2 2 0 0 1 2 2v3h-1a1.5 1.5 0 0 0 0 3h1v4a2 2 0 0 1-2 2h-4v-1a1.5 1.5 0 0 0-3 0v1H5a2 2 0 0 1-2-2v-4h1a1.5 1.5 0 0 0 0-3H3V7a2 2 0 0 1 2-2h2V5a2 2 0 0 1 2-2z"
+                  />
+                </svg>
+                <svg id="toolbar-icon" viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    fill="#7a8087"
+                    d="M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z"
+                  />
+                  <path
+                    fill="#df4e35"
+                    d="M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z"
+                  />
+                </svg>
+                <span class="avatar"></span>
+              </div>
+            </div>
+            <div id="content">
+              <div id="player">
+                <svg
+                  id="scene"
+                  viewBox="0 0 800 450"
+                  preserveAspectRatio="xMidYMid slice"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#b9d3dc" />
+                      <stop offset="0.7" stop-color="#e9e2cc" />
+                      <stop offset="1" stop-color="#f3dfbf" />
+                    </linearGradient>
+                    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#8fb3bd" />
+                      <stop offset="1" stop-color="#5f8f9d" />
+                    </linearGradient>
+                  </defs>
+                  <!-- The handheld camera: everything sways a little, as a phone held at a viewpoint. -->
+                  <g id="hand">
+                    <rect
+                      x="-60"
+                      y="-60"
+                      width="920"
+                      height="570"
+                      fill="url(#sky)"
+                    />
+                    <circle id="sun" cx="640" cy="78" r="30" fill="#fbf1d6" />
+                    <g id="clouds" fill="#f7f2e6" opacity="0.85">
+                      <path
+                        d="M90 70h120a18 18 0 0 0-30-16 26 26 0 0 0-48-4 20 20 0 0 0-42 20z"
+                      />
+                      <path
+                        d="M470 110h96a14 14 0 0 0-24-12 20 20 0 0 0-38-4 16 16 0 0 0-34 16z"
+                      />
+                    </g>
+                    <path
+                      d="M-60 168 70 150l90 10 70-14 60 12v30H-60z"
+                      fill="#9fb0a6"
+                    />
+                    <rect
+                      x="-60"
+                      y="176"
+                      width="920"
+                      height="70"
+                      fill="url(#sea)"
+                    />
+                    <g
+                      id="glints"
+                      stroke="#e8f1ef"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    >
+                      <path
+                        d="M380 190h26M520 200h40M610 186h22M700 206h34M450 214h30"
+                      />
+                    </g>
+                    <path id="boat" d="M560 196h22l-4 5h-15z" fill="#f7f2e6" />
+                    <!-- The hillside town, filled in by the script. -->
+                    <g id="town"></g>
+                    <g id="tower">
+                      <rect
+                        x="214"
+                        y="96"
+                        width="34"
+                        height="96"
+                        fill="#efe6d4"
+                      />
+                      <rect
+                        x="210"
+                        y="92"
+                        width="42"
+                        height="8"
+                        fill="#d8ccb3"
+                      />
+                      <path d="M214 92q17-34 34 0z" fill="#b65a3a" />
+                      <rect
+                        x="226"
+                        y="112"
+                        width="10"
+                        height="16"
+                        rx="5"
+                        fill="#3d3a33"
+                      />
+                      <rect
+                        x="226"
+                        y="146"
+                        width="10"
+                        height="16"
+                        rx="5"
+                        fill="#3d3a33"
+                      />
+                    </g>
+                    <!-- The street down the hill, with the tram. -->
+                    <path
+                      d="M-60 318 300 286 860 306v204H-60z"
+                      fill="#b8a487"
+                    />
+                    <path
+                      d="M-60 326 300 294 860 314"
+                      fill="none"
+                      stroke="#8f7c63"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M-60 340 300 306 860 328"
+                      fill="none"
+                      stroke="#8f7c63"
+                      stroke-width="2"
+                    />
+                    <g id="tram">
+                      <rect
+                        x="0"
+                        y="0"
+                        width="150"
+                        height="62"
+                        rx="10"
+                        fill="#e3b33c"
+                      />
+                      <rect
+                        x="0"
+                        y="0"
+                        width="150"
+                        height="16"
+                        rx="8"
+                        fill="#f6f0e2"
+                      />
+                      <rect
+                        x="10"
+                        y="22"
+                        width="24"
+                        height="20"
+                        rx="3"
+                        fill="#3f4b4f"
+                      />
+                      <rect
+                        x="42"
+                        y="22"
+                        width="24"
+                        height="20"
+                        rx="3"
+                        fill="#3f4b4f"
+                      />
+                      <rect
+                        x="74"
+                        y="22"
+                        width="24"
+                        height="20"
+                        rx="3"
+                        fill="#3f4b4f"
+                      />
+                      <rect
+                        x="106"
+                        y="22"
+                        width="34"
+                        height="34"
+                        rx="3"
+                        fill="#3f4b4f"
+                      />
+                      <rect
+                        x="0"
+                        y="50"
+                        width="150"
+                        height="6"
+                        fill="#b8892a"
+                      />
+                      <path
+                        d="M74 0V-22M64 -22h20"
+                        stroke="#3d3a33"
+                        stroke-width="2.5"
+                      />
+                      <circle cx="30" cy="66" r="7" fill="#2d2a25" />
+                      <circle cx="120" cy="66" r="7" fill="#2d2a25" />
+                    </g>
+                    <g
+                      id="gulls"
+                      fill="none"
+                      stroke="#4a4a45"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                    >
+                      <path id="gull-a" d="M0 0q6-6 12 0q6-6 12 0" />
+                      <path id="gull-b" d="M0 0q5-5 10 0q5-5 10 0" />
+                    </g>
+                    <!-- The viewpoint's railing, nearest the camera. -->
+                    <g fill="#2f302c">
+                      <rect x="-60" y="404" width="920" height="7" />
+                      <g id="bars"></g>
+                    </g>
+                  </g>
+                </svg>
+                <div id="controls">
+                  <div id="progress"><div id="played"></div></div>
+                  <div id="row">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path id="toggle" d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M6 15H3V9h3l5-4v14zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"
+                      />
+                    </svg>
+                    <span id="clock">1:02 / 9:48</span>
+                    <span id="gap"></span>
+                    <svg viewBox="0 0 16 16">
+                      <path
+                        fill="#ffffff"
+                        d="M4 1H7A3 3 0 0 1 10 4V6H9A3 3 0 0 0 6 9V10H4A3 3 0 0 1 1 7V4A3 3 0 0 1 4 1Z"
+                      />
+                      <path
+                        fill="#ff7a59"
+                        d="M10 6H12A3 3 0 0 1 15 9V12A3 3 0 0 1 12 15H9A3 3 0 0 1 6 12V10H7A3 3 0 0 0 10 7Z"
+                      />
+                    </svg>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+                    </svg>
+                  </div>
+                </div>
+                <div id="overlay"></div>
+              </div>
+            </div>
+            <div id="popup">
+              <iframe id="popup-frame" title="Popup"></iframe>
+            </div>
+            <div class="ring" id="ring-a"></div>
+            <svg
+              class="cursor"
+              id="cursor-a"
+              viewBox="0 0 30 30"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 3l8.2 22 3.6-8.6L23.6 13z"
+                fill="#ffffff"
+                stroke="#15181e"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="camera" id="camera-b">
+          <div class="window" id="win-b">
+            <div class="bar">
+              <i></i><i></i><i></i>
+              <div class="address" id="address-b">Couplet · Review</div>
+            </div>
+            <div id="pages"></div>
+            <div class="ring" id="ring-b"></div>
+            <svg
+              class="cursor"
+              id="cursor-b"
+              viewBox="0 0 30 30"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 3l8.2 22 3.6-8.6L23.6 13z"
+                fill="#ffffff"
+                stroke="#15181e"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div id="band"></div>
+      <div id="end">
+        <div id="lockup">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path
+              fill="#29251d"
+              d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"
+            />
+            <path
+              fill="#c9401f"
+              d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"
+            />
+          </svg>
+          <span>Couplet</span>
+        </div>
+        <p id="tagline">
+          Watch what you love.<br />
+          <span>Keep<i class="rule" id="tagline-rule"></i></span> the words you
+          meet.
+        </p>
+        <div id="install">Add to Chrome, free</div>
+        <div id="site">coupletapp.com</div>
+      </div>
+    </div>
+
+    <script>
+      const DURATION = 32;
+      const SCALE = 1.6;
+      // Where the picture centres: a little left, clear of the feed's buttons on the right.
+      const CENTRE = 520;
+      // The canvas columns kept clear of the feed's own buttons.
+      const SAFE = { left: 60, right: 950 };
+
+      // Every moment in one place, so the pacing can be changed without hunting.
+      const AT = {
+        cue1: 2.3,
+        wordClick: 5.35,
+        wordEntry: 5.75,
+        wordStar: 7.0,
+        wordClose: 8.0,
+        cue2: 8.4,
+        dragStart: 9.5,
+        dragEnd: 10.1,
+        phraseEntry: 10.55,
+        phraseStar: 11.7,
+        phraseClose: 12.7,
+        toToolbar: 12.9,
+        iconClick: 14.4,
+        startClick: 15.6,
+        toDashboard: 15.9,
+        showTranslation: 17.6,
+        gotIt: 19.0,
+        toHome: 19.4,
+        toProgress: 21.4,
+        toWords: 23.4,
+        explain: 24.6,
+        toEnd: 28.4,
+      };
+
+      const TITLES = [
+        {
+          plain: 'Dual subtitles on YouTube.',
+          key: 'Free.',
+          newLine: true,
+          start: 0.05,
+          leave: 4,
+        },
+        { plain: 'Click', key: 'any word.', start: 4.25, leave: 8.1 },
+        { plain: 'Or a', key: 'whole phrase.', start: 8.35, leave: 12.7 },
+        { plain: 'Review in', key: 'one click.', start: 12.95, leave: 15.75 },
+        {
+          plain: 'Review it',
+          key: 'where you heard it.',
+          start: 16.0,
+          leave: 19.2,
+        },
+        { plain: 'See what', key: 'you know.', start: 19.45, leave: 23.2 },
+        { plain: 'Ask AI', key: 'what it means.', start: 23.45, leave: 28.2 },
+      ];
+
+      // Spans of the film during which the vlog is playing. Opening a word pauses it.
+      const PLAYING = [
+        [0, AT.wordClick],
+        [AT.wordClose + 0.1, AT.dragStart],
+        [AT.phraseClose + 0.1, DURATION],
+      ];
+
+      // The vlog's lines, by when they start in the film. The same lines are saved in short-ui.tsx.
+      const CUES = [
+        {
+          at: 0,
+          original: 'Okay, we finally made it to the top.',
+          translation: '好，我們終於爬到山頂了。',
+        },
+        {
+          at: AT.cue1,
+          original: 'The view up here is absolutely breathtaking.',
+          translation: '這裡的風景真的美得令人屏息。',
+        },
+        {
+          at: AT.cue2,
+          original: "Let's grab a coffee and soak up the view.",
+          translation: '我們去喝杯咖啡，好好享受這片景色。',
+        },
+        {
+          at: AT.phraseClose + 1.4,
+          original: 'The trams up here are older than my grandma.',
+          translation: '這裡的電車比我奶奶還老。',
+        },
+      ];
+
+      // Dashboard pages, each the real page in its own frame, and when each is on screen.
+      const PAGES = [
+        {
+          scene: 'review',
+          address: 'Couplet · Review',
+          from: AT.toDashboard,
+          to: AT.showTranslation,
+        },
+        {
+          scene: 'review-translated',
+          address: 'Couplet · Review',
+          from: AT.showTranslation,
+          to: AT.toHome,
+        },
+        {
+          scene: 'home',
+          address: 'Couplet · Home',
+          from: AT.toHome,
+          to: AT.toProgress,
+        },
+        {
+          scene: 'progress',
+          address: 'Couplet · Progress',
+          from: AT.toProgress,
+          to: AT.toWords,
+        },
+        {
+          scene: 'words-open',
+          address: 'Couplet · Words',
+          from: AT.toWords,
+          to: AT.explain,
+        },
+        {
+          scene: 'words',
+          address: 'Couplet · Words',
+          from: AT.explain,
+          to: AT.toEnd + 1,
+        },
+      ];
+
+      const clamp = (value) => Math.min(1, Math.max(0, value));
+      const easeOut = (value) => 1 - (1 - value) ** 3;
+      const easeInOut = (value) =>
+        value < 0.5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2;
+      const ramp = (t, start, end, ease = easeOut) =>
+        ease(clamp((t - start) / (end - start)));
+      const mix = (from, to, amount) => from + (to - from) * amount;
+      const $ = (id) => document.getElementById(id);
+      const parts = {};
+
+      function buildTitle({ plain, key, newLine }) {
+        const element = document.createElement('h1');
+        element.className = 'title';
+        const word = (text) => {
+          const span = document.createElement('span');
+          span.className = 'word';
+          span.textContent = text;
+          return span;
+        };
+        const plainWords = plain.split(' ');
+        plainWords.forEach((text, at) => {
+          const last = at === plainWords.length - 1;
+          element.append(word(last && (!key || newLine) ? text : `${text} `));
+        });
+        if (key) {
+          if (newLine) element.append(document.createElement('br'));
+          const wrap = document.createElement('span');
+          wrap.className = 'word key';
+          const keyWords = key.split(' ');
+          keyWords.forEach((text, at) => {
+            wrap.append(word(at < keyWords.length - 1 ? `${text} ` : text));
+          });
+          const rule = document.createElement('i');
+          rule.className = 'rule';
+          wrap.append(rule);
+          element.append(wrap);
+        }
+        $('band').append(element);
+        return element;
+      }
+
+      function animateTitle(element, t, { start, leave }) {
+        const all = [...element.querySelectorAll('.word')].filter(
+          (word) => !word.classList.contains('key'),
+        );
+        all.forEach((word, at) => {
+          const shown = ramp(t, start + at * 0.08, start + at * 0.08 + 0.3);
+          word.style.opacity = shown;
+          word.style.transform = `translateY(${mix(26, 0, shown)}px)`;
+        });
+        const rule = element.querySelector('.rule');
+        if (rule) {
+          const from = start + all.length * 0.08 + 0.1;
+          rule.style.transform = `scaleX(${ramp(t, from, from + 0.4, easeInOut)})`;
+        }
+        const gone = ramp(t, leave, leave + 0.22);
+        element.style.opacity = t < start ? 0 : 1 - gone;
+        element.style.transform = `translateY(${mix(0, -18, gone)}px)`;
+      }
+
+      /** The town, the same every frame: a seeded scatter of houses up the hill. */
+      function buildTown() {
+        let seed = 7;
+        const random = () => {
+          seed = (seed * 16807) % 2147483647;
+          return seed / 2147483647;
+        };
+        const walls = [
+          '#efe3cf',
+          '#e8c9a8',
+          '#f3efe6',
+          '#d9a77e',
+          '#c9d6cf',
+          '#f0d9c4',
+          '#e4d3b0',
+        ];
+        const roofs = ['#b65a3a', '#c96f4a', '#a9533a', '#cf7d55'];
+        const svg = (tag, attributes) => {
+          const node = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            tag,
+          );
+          Object.entries(attributes).forEach(([name, value]) =>
+            node.setAttribute(name, value),
+          );
+          return node;
+        };
+        const town = $('town');
+        // Rows from the back of the hill to the front, each lower, larger, and further right.
+        for (let row = 0; row < 7; row += 1) {
+          const baseY = 150 + row * 26;
+          const size = 18 + row * 4;
+          let x = -40 + row * 14 + random() * 20;
+          const end = 420 + row * 50;
+          while (x < end) {
+            const width = size * (0.9 + random() * 0.8);
+            const height = size * (0.8 + random() * 0.6);
+            const y = baseY + (x / 800) * 40 - height;
+            town.append(
+              svg('rect', {
+                x,
+                y,
+                width,
+                height,
+                fill: walls[Math.floor(random() * walls.length)],
+              }),
+            );
+            town.append(
+              svg('path', {
+                d: `M${x - 2} ${y}L${x + width / 2} ${y - height * 0.28}L${x + width + 2} ${y}z`,
+                fill: roofs[Math.floor(random() * roofs.length)],
+              }),
+            );
+            const windows = Math.max(1, Math.floor(width / 9));
+            for (let w = 0; w < windows; w += 1) {
+              if (random() < 0.35) continue;
+              town.append(
+                svg('rect', {
+                  x: x + 3 + w * ((width - 6) / windows),
+                  y: y + height * 0.35,
+                  width: Math.max(2.5, size * 0.13),
+                  height: Math.max(3.5, size * 0.2),
+                  fill: '#4a4239',
+                  opacity: 0.75,
+                }),
+              );
+            }
+            x += width + 1 + random() * 6;
+          }
+        }
+        const bars = $('bars');
+        for (let x = -50; x < 860; x += 34) {
+          bars.append(svg('rect', { x, y: 404, width: 5, height: 60 }));
+        }
+      }
+
+      const icon = (paths) =>
+        `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths
+          .map((d) => `<path d="${d}"></path>`)
+          .join('')}</svg>`;
+      const ICON = {
+        speak: [
+          'M15 8a5 5 0 0 1 0 8',
+          'M17.7 5a9 9 0 0 1 0 14',
+          'M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5',
+        ],
+        star: [
+          'M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245',
+        ],
+      };
+
+      const sense = (meaning, example, translation) => `
+        <div class="lookup-sense">
+          <div class="lookup-meaning"><span class="meaning-chip">${meaning}</span></div>
+          <div class="couplet-original">${example}</div>
+          <div class="couplet-translation">${translation}</div>
+        </div>`;
+
+      /** A cue as the overlay shows it: words are tokens, and punctuation is not. */
+      const cueBox = ({ original, translation }) => {
+        const box = document.createElement('div');
+        box.className = 'box is-raised';
+        const tokens = original
+          .split(' ')
+          .map((word) => {
+            const [, text, tail] = word.match(/^(.*?)([.,!?]*)$/);
+            return `<button class="token" type="button">${text}</button>${tail}`;
+          })
+          .join(' ');
+        box.innerHTML = `
+          <div class="strip">
+            <div class="original" lang="en">${tokens}</div>
+            <div class="translation" lang="zh-Hant">${translation}</div>
+          </div>`;
+        return box;
+      };
+
+      const stylesheet = (root, href) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        return new Promise((resolve, reject) => {
+          link.onload = resolve;
+          link.onerror = reject;
+          root.append(link);
+        });
+      };
+
+      const frame = (iframe, scene) =>
+        new Promise((resolve, reject) => {
+          iframe.onload = () => {
+            iframe.contentWindow.ready.then(resolve, reject);
+          };
+          iframe.src = `short-ui.html?scene=${scene}`;
+        });
+
+      /** Where an element sits, in its window's own pixels. */
+      function placeIn(win, element, offset = { x: 0, y: 0 }) {
+        const box = element.getBoundingClientRect();
+        const origin = win.getBoundingClientRect();
+        return {
+          x: box.left - origin.left + box.width / 2 + offset.x,
+          y: box.top - origin.top + box.height / 2 + offset.y,
+        };
+      }
+
+      /** The product's real styles and pages, so the film shows what ships. */
+      async function mount() {
+        buildTown();
+        const overlay = $('overlay').attachShadow({ mode: 'open' });
+        const loaded = ['tokens', 'lookup-panel', 'overlay'].map((name) =>
+          stylesheet(overlay, `../../src/lib/ui/${name}.css`),
+        );
+        parts.cues = CUES.map((cue) => {
+          const box = cueBox(cue);
+          box.style.display = 'none';
+          return box;
+        });
+        const panels = document.createElement('div');
+        panels.className = 'panels';
+        panels.innerHTML = `
+          <div class="panel lookup-panel word-panel" data-theme="dark">
+            <div class="lookup-head">
+              <div class="lookup-title">
+                <span class="lookup-word">breathtaking</span>
+                <span class="phonetic">/ˈbreθteɪkɪŋ/</span>
+              </div>
+              <div class="lookup-actions">
+                <button class="icon-button save" type="button">${icon(ICON.star)}</button>
+                <button class="icon-button speak" type="button">${icon(ICON.speak)}</button>
+              </div>
+            </div>
+            <div class="lookup-senses" lang="zh-Hant">
+              <div class="loading">
+                <div class="skeleton lookup-skeleton"></div>
+                <div class="skeleton lookup-skeleton is-long"></div>
+              </div>
+              <div class="loaded">
+                ${sense('令人驚嘆的', 'The view was breathtaking.', '景色美得令人屏息。')}
+                ${sense('驚人的', 'She moved with breathtaking speed.', '她的速度快得驚人。')}
+              </div>
+            </div>
+          </div>
+          <div class="panel lookup-panel phrase-panel" data-theme="dark">
+            <div class="lookup-head">
+              <div class="lookup-title"><span class="lookup-phrase">soak up</span></div>
+              <div class="lookup-actions">
+                <button class="icon-button save" type="button">${icon(ICON.star)}</button>
+                <button class="icon-button speak" type="button">${icon(ICON.speak)}</button>
+              </div>
+            </div>
+            <div class="lookup-senses" lang="zh-Hant">
+              <div class="loading"><div class="skeleton lookup-skeleton is-long"></div></div>
+              <div class="loaded"><div class="lookup-meaning"><span class="meaning-chip">吸收</span></div></div>
+            </div>
+          </div>`;
+        const extra = document.createElement('style');
+        // The Large subtitle size, and :hover stands-ins, since a rendered frame has no pointer.
+        extra.textContent = `
+          :host { --subtitle-scale: 0.96 !important; }
+          * { transition: none !important; animation: none !important; }
+          .token { color: inherit; font: inherit; }
+          .token.is-hover::before { background: rgba(255, 255, 255, 0.18); }
+          .panels { position: absolute; inset: 0; }`;
+        overlay.append(extra, ...parts.cues, panels);
+
+        const popupFrame = $('popup-frame');
+        const pageFrames = PAGES.map((page) => {
+          const iframe = document.createElement('iframe');
+          iframe.title = page.scene;
+          $('pages').append(iframe);
+          page.frame = iframe;
+          return frame(iframe, page.scene);
+        });
+        await Promise.all([
+          ...loaded,
+          frame(popupFrame, 'popup'),
+          ...pageFrames,
+        ]);
+        await document.fonts.ready;
+
+        const popupDocument = popupFrame.contentDocument;
+        popupFrame.style.height = `${popupDocument.querySelector('.popup').offsetHeight}px`;
+
+        const winA = $('win-a');
+        const winB = $('win-b');
+        const content = $('content').getBoundingClientRect();
+        const breath = parts.cues[1];
+        const coffee = parts.cues[2];
+        const breathTokens = breath.querySelectorAll('.token');
+        const coffeeTokens = coffee.querySelectorAll('.token');
+        parts.wordToken = breathTokens[breathTokens.length - 1];
+        parts.range = [5, 6].map((at) => coffeeTokens[at]);
+        parts.phraseToken = coffeeTokens[6];
+        parts.wordPanel = panels.querySelector('.word-panel');
+        parts.phrasePanel = panels.querySelector('.phrase-panel');
+        parts.width = content.width;
+        const playerX = CENTRE - 500 * SCALE;
+        parts.visible = {
+          min: Math.max(16, (SAFE.left - playerX) / SCALE),
+          max: Math.min(content.width - 16, (SAFE.right - playerX) / SCALE),
+        };
+
+        // Panels open above the strip, centred on the token, as the product places them.
+        const place = (panel, token, box) => {
+          box.style.display = 'flex';
+          const tokenBox = token.getBoundingClientRect();
+          const strip = box.querySelector('.strip').getBoundingClientRect();
+          panel.placedCenter =
+            tokenBox.left + tokenBox.width / 2 - content.left;
+          panel.style.bottom = `${content.bottom - strip.top + 14}px`;
+          token.style.setProperty(
+            '--leader',
+            `${tokenBox.top - strip.top + 14}px`,
+          );
+        };
+        place(parts.wordPanel, parts.wordToken, breath);
+        parts.word = placeIn(winA, parts.wordToken);
+        setPanel(parts.wordPanel, true, 0);
+        parts.wordStar = placeIn(winA, parts.wordPanel.querySelector('.save'));
+        breath.style.display = 'none';
+        place(parts.phrasePanel, parts.phraseToken, coffee);
+        parts.rangeStart = placeIn(winA, parts.range[0]);
+        parts.rangeEnd = placeIn(winA, parts.range[1]);
+        setPanel(parts.phrasePanel, true, 0);
+        parts.phraseStar = placeIn(
+          winA,
+          parts.phrasePanel.querySelector('.save'),
+        );
+        coffee.style.display = 'none';
+
+        parts.icon = placeIn(winA, $('toolbar-icon'));
+        $('popup').style.left = `${parts.icon.x + 22 - 300}px`;
+        const startButton = popupDocument.querySelector('.popup-review button');
+        // The start button's box is inside the frame, so add the frame's own place.
+        parts.start = {
+          x:
+            popupFrame.getBoundingClientRect().left -
+            winA.getBoundingClientRect().left +
+            startButton.getBoundingClientRect().left +
+            startButton.offsetWidth / 2,
+          y:
+            popupFrame.getBoundingClientRect().top -
+            winA.getBoundingClientRect().top +
+            startButton.getBoundingClientRect().top +
+            startButton.offsetHeight / 2,
+        };
+
+        const inPage = (scene, find) => {
+          const page = PAGES.find((item) => item.scene === scene);
+          const target = [
+            ...page.frame.contentDocument.querySelectorAll('button'),
+          ].find(find);
+          const box = target.getBoundingClientRect();
+          const origin = page.frame.getBoundingClientRect();
+          const win = winB.getBoundingClientRect();
+          return {
+            x: origin.left - win.left + box.left + box.width / 2,
+            y: origin.top - win.top + box.top + box.height / 2,
+          };
+        };
+        parts.showTranslation = inPage('review', (node) =>
+          node.textContent.includes('Show translation'),
+        );
+        parts.gotIt = inPage('review-translated', (node) =>
+          node.textContent.includes('Got it'),
+        );
+        parts.explain = inPage('words-open', (node) =>
+          node.textContent.includes('Explain with AI'),
+        );
+        parts.progressScroll = Math.max(
+          0,
+          Math.min(
+            320,
+            PAGES.find((item) => item.scene === 'progress').frame
+              .contentDocument.documentElement.scrollHeight - 680,
+          ),
+        );
+
+        // Framing: the subtitles fill the width, then the toolbar's end, then the Dashboard.
+        parts.frames = {
+          player: { x: CENTRE - 500 * SCALE, y: 6 },
+          wide: { x: CENTRE - 500 * 1.5, y: 30 },
+          toolbar: { x: SAFE.right + 40 - 1000 * SCALE, y: 6 },
+        };
+        parts.cameraB = { x: 500 - (580 * SCALE) / 2, y: 6 };
+        // The explanation, which the camera leans in to read.
+        const words = PAGES.find((item) => item.scene === 'words').frame;
+        const explanation = words.contentDocument
+          .querySelector('.sentence-explanation')
+          .getBoundingClientRect();
+        const wordsFrame = words.getBoundingClientRect();
+        const winBox = winB.getBoundingClientRect();
+        parts.explanation = {
+          x:
+            wordsFrame.left -
+            winBox.left +
+            explanation.left +
+            explanation.width / 2,
+          y:
+            wordsFrame.top -
+            winBox.top +
+            explanation.top +
+            explanation.height / 2,
+          // As close as the explanation can come while it still fits between the safe columns.
+          scale: Math.min(
+            2.1,
+            (SAFE.right - SAFE.left - 40) / explanation.width,
+          ),
+        };
+
+        // The pointer's routes: each leg arrives at its place by `to`.
+        parts.routeA = [
+          { from: 4.4, to: 5.0, x: parts.word.x - 4, y: parts.word.y + 4 },
+          { from: 6.2, to: 6.85, x: parts.wordStar.x, y: parts.wordStar.y + 2 },
+          {
+            from: 7.55,
+            to: 8.2,
+            x: parts.wordStar.x + 40,
+            y: parts.word.y + 120,
+          },
+          {
+            from: 8.6,
+            to: 9.3,
+            x: parts.rangeStart.x - 22,
+            y: parts.rangeStart.y + 4,
+          },
+          {
+            from: AT.dragStart + 0.05,
+            to: AT.dragEnd - 0.05,
+            x: parts.rangeEnd.x + 14,
+            y: parts.rangeEnd.y + 4,
+          },
+          {
+            from: 11.0,
+            to: 11.55,
+            x: parts.phraseStar.x,
+            y: parts.phraseStar.y + 2,
+          },
+          { from: 12.9, to: 14.15, x: parts.icon.x, y: parts.icon.y + 2 },
+          { from: 14.7, to: 15.4, x: parts.start.x, y: parts.start.y + 2 },
+        ];
+        parts.startA = { x: parts.word.x + 60, y: parts.word.y + 160 };
+        parts.clicksA = [
+          { at: AT.wordClick, ...parts.word },
+          { at: AT.wordStar, ...parts.wordStar },
+          { at: AT.phraseStar, ...parts.phraseStar },
+          { at: AT.iconClick, ...parts.icon },
+          { at: AT.startClick, ...parts.start },
+        ];
+        parts.routeB = [
+          {
+            from: 16.7,
+            to: 17.35,
+            x: parts.showTranslation.x - 30,
+            y: parts.showTranslation.y + 2,
+          },
+          { from: 18.1, to: 18.8, x: parts.gotIt.x, y: parts.gotIt.y + 2 },
+          {
+            from: 23.6,
+            to: 24.35,
+            x: parts.explain.x - 20,
+            y: parts.explain.y + 2,
+          },
+        ];
+        parts.startB = { x: 420, y: 560 };
+        parts.clicksB = [
+          {
+            at: AT.showTranslation,
+            ...parts.showTranslation,
+            x: parts.showTranslation.x - 30,
+          },
+          { at: AT.gotIt, ...parts.gotIt },
+          { at: AT.explain, ...parts.explain, x: parts.explain.x - 20 },
+        ];
+      }
+
+      /** Shows a panel's skeleton or entry, and places it by the product's rule. */
+      function setPanel(panel, entry, opacity) {
+        panel.style.display = 'flex';
+        panel.style.opacity = opacity;
+        panel.style.visibility = opacity > 0 ? 'visible' : 'hidden';
+        panel.querySelector('.loading').style.display = entry
+          ? 'none'
+          : 'block';
+        panel.querySelector('.loaded').style.display = entry ? 'block' : 'none';
+        panel.querySelector('.save').style.display = entry ? 'flex' : 'none';
+        // The product keeps panels inside the player; the film also keeps them inside the crop.
+        const width = panel.offsetWidth;
+        const { min, max } = parts.visible;
+        panel.style.left = `${Math.max(min, Math.min(panel.placedCenter - width / 2, max - width))}px`;
+      }
+
+      function playedSeconds(t) {
+        let seconds = 0;
+        for (const [start, end] of PLAYING) {
+          seconds += clamp((t - start) / (end - start)) * (end - start);
+        }
+        return seconds;
+      }
+
+      function along(route, start, t) {
+        let at = start;
+        for (const leg of route) {
+          if (t < leg.from) break;
+          const moved = ramp(t, leg.from, leg.to, easeInOut);
+          at = { x: mix(at.x, leg.x, moved), y: mix(at.y, leg.y, moved) };
+        }
+        return at;
+      }
+
+      function drawPointer(
+        cursor,
+        ring,
+        at,
+        clicks,
+        t,
+        shown,
+        pressed = false,
+      ) {
+        const nearest = clicks.find(
+          (click) => t >= click.at - 0.1 && t < click.at + 0.45,
+        );
+        const press = pressed
+          ? 0.86
+          : 1 -
+            (nearest
+              ? 0.14 * Math.sin(Math.PI * clamp((t - nearest.at + 0.1) / 0.2))
+              : 0);
+        cursor.style.opacity = shown ? 1 : 0;
+        cursor.style.transform = `translate(${at.x - 3}px, ${at.y - 3}px) scale(${press})`;
+        if (shown && nearest && t >= nearest.at) {
+          const grow = clamp((t - nearest.at) / 0.42);
+          ring.style.opacity = (1 - grow) * 0.85;
+          ring.style.transform = `translate(${nearest.x}px, ${nearest.y}px) scale(${mix(0.35, 1.5, easeOut(grow))})`;
+        } else {
+          ring.style.opacity = 0;
+        }
+      }
+
+      function render(t) {
+        TITLES.forEach((title) => {
+          animateTitle(title.element, t, title);
+        });
+
+        // Window A: a slow push-in, then across to the toolbar.
+        const settle = ramp(t, 0, 4, easeInOut);
+        const across = ramp(t, AT.toToolbar, AT.toToolbar + 1.1, easeInOut);
+        const scale = mix(1.5, SCALE, settle);
+        const { wide, player, toolbar } = parts.frames;
+        const ax = mix(mix(wide.x, player.x, settle), toolbar.x, across);
+        const ay = mix(wide.y, player.y, settle);
+        // The video tab leaves before the Dashboard arrives, so the two never mix.
+        const leave = ramp(
+          t,
+          AT.toDashboard - 0.05,
+          AT.toDashboard + 0.2,
+          easeInOut,
+        );
+        $('camera-a').style.transform =
+          `translate(${ax}px, ${ay - leave * 40}px) scale(${scale})`;
+        $('camera-a').style.opacity = 1 - leave;
+
+        // Window B, the Dashboard tab, rises in its place.
+        const arrive = ramp(t, AT.toDashboard + 0.2, AT.toDashboard + 0.55);
+        const lean = ramp(t, AT.explain + 0.5, AT.explain + 1.4, easeInOut);
+        const leanScale = mix(SCALE, parts.explanation.scale, lean);
+        // Leaning in keeps the explanation's centre at a fixed point of the canvas.
+        const middle = (SAFE.left + SAFE.right) / 2;
+        const bx = mix(
+          parts.cameraB.x,
+          middle - parts.explanation.x * leanScale,
+          lean,
+        );
+        const by = mix(
+          parts.cameraB.y + mix(60, 0, arrive),
+          560 - parts.explanation.y * leanScale,
+          lean,
+        );
+        $('camera-b').style.opacity = arrive;
+        $('camera-b').style.transform =
+          `translate(${bx}px, ${by}px) scale(${leanScale})`;
+
+        // The vlog moves only while it plays, with a hand's sway on top.
+        const video = playedSeconds(t);
+        $('hand').setAttribute(
+          'transform',
+          `translate(${Math.sin(video * 0.9) * 3 + Math.sin(video * 2.3) * 1.2} ${Math.sin(video * 1.3 + 1) * 2.4}) rotate(${Math.sin(video * 0.7) * 0.5} 400 225)`,
+        );
+        // Up the street, left to right, along its slope.
+        const tramX = 210 + video * 14;
+        $('tram').setAttribute(
+          'transform',
+          `translate(${tramX} ${266 + (tramX - 300) * 0.036}) scale(0.5)`,
+        );
+        $('clouds').setAttribute('transform', `translate(${video * 1.6} 0)`);
+        $('glints').setAttribute(
+          'opacity',
+          0.55 + 0.45 * Math.sin(video * 3.1),
+        );
+        $('boat').setAttribute(
+          'transform',
+          `translate(${video * -1.2} ${Math.sin(video * 1.5) * 0.6})`,
+        );
+        $('gull-a').setAttribute(
+          'transform',
+          `translate(${120 + video * 9} ${60 + Math.sin(video * 1.8) * 6})`,
+        );
+        $('gull-b').setAttribute(
+          'transform',
+          `translate(${300 + video * 7} ${88 + Math.sin(video * 2.2 + 1) * 5})`,
+        );
+        $('played').style.width = `${10.5 + video * 0.17}%`;
+        const seconds = Math.floor(62.3 + video);
+        $('clock').textContent =
+          `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')} / 9:48`;
+        const playing = PLAYING.some(([from, to]) => t >= from && t < to);
+        $('toggle').setAttribute(
+          'd',
+          playing ? 'M7 5h4v14H7zM13 5h4v14h-4z' : 'M8 5v14l11-7z',
+        );
+
+        // The current cue: each shows from its start until the next one.
+        let current = 0;
+        CUES.forEach((cue, at) => {
+          if (t >= cue.at) current = at;
+        });
+        parts.cues.forEach((box, at) => {
+          box.style.display = at === current ? 'flex' : 'none';
+        });
+
+        // Clicking a word selects it and opens its panel, which later closes.
+        const wordOpen = t >= AT.wordClick && t < AT.wordClose;
+        parts.wordToken.classList.toggle(
+          'is-hover',
+          t >= AT.wordClick - 0.3 && t < AT.wordClick,
+        );
+        parts.wordToken.classList.toggle('is-selected', wordOpen);
+        setPanel(
+          parts.wordPanel,
+          t >= AT.wordEntry,
+          wordOpen ? ramp(t, AT.wordClick + 0.03, AT.wordClick + 0.13) : 0,
+        );
+
+        // Dragging marks each word the pointer reaches, then the panel opens.
+        const pointerA = along(parts.routeA, parts.startA, t);
+        const selection = t >= AT.dragStart && t < AT.phraseClose;
+        parts.range.forEach((token, at) => {
+          const reached =
+            at === 0 ? t >= AT.dragStart : t >= (AT.dragStart + AT.dragEnd) / 2;
+          token.classList.toggle('is-in-range', selection && reached);
+        });
+        parts.phraseToken.classList.toggle(
+          'is-selected',
+          t >= AT.dragEnd && t < AT.phraseClose,
+        );
+        const phraseOpen = t >= AT.dragEnd + 0.03 && t < AT.phraseClose;
+        setPanel(
+          parts.phrasePanel,
+          t >= AT.phraseEntry,
+          phraseOpen ? ramp(t, AT.dragEnd + 0.03, AT.dragEnd + 0.13) : 0,
+        );
+
+        // Pressing a star fills it, with a small pop.
+        [
+          [parts.wordPanel, AT.wordStar],
+          [parts.phrasePanel, AT.phraseStar],
+        ].forEach(([panel, at]) => {
+          const star = panel.querySelector('.save');
+          const saved = t >= at;
+          star.classList.toggle('is-saved', saved);
+          const pop = clamp((t - at) / 0.34);
+          star.style.transform = `scale(${saved ? 1 + 0.45 * Math.sin(Math.PI * pop) : 1})`;
+        });
+
+        // The toolbar icon opens the Popup.
+        const popupShown = t >= AT.iconClick + 0.05 && t < AT.toDashboard + 0.2;
+        const popupIn = ramp(t, AT.iconClick + 0.05, AT.iconClick + 0.25);
+        $('popup').style.opacity = popupShown ? popupIn : 0;
+        $('popup').style.transform = `scale(${mix(0.96, 1, popupIn)})`;
+
+        const shownA =
+          (t >= 4.4 && t < 8.3) ||
+          (t >= 8.55 && t < 12.2) ||
+          (t >= 12.85 && t < AT.toDashboard);
+        drawPointer(
+          $('cursor-a'),
+          $('ring-a'),
+          pointerA,
+          parts.clicksA,
+          t,
+          shownA,
+          t >= AT.dragStart && t < AT.dragEnd,
+        );
+
+        // Dashboard pages: one at a time, crossfading.
+        let address = PAGES[0].address;
+        PAGES.forEach((page) => {
+          const fadeIn =
+            page.from <= AT.toDashboard
+              ? 1
+              : ramp(t, page.from, page.from + 0.18);
+          const on = t >= page.from && t < page.to + 0.18;
+          page.frame.style.opacity = on ? fadeIn : 0;
+          page.frame.style.zIndex = on ? 1 : 0;
+          if (t >= page.from) address = page.address;
+        });
+        $('address-b').textContent = address;
+        const progress = PAGES.find((page) => page.scene === 'progress').frame;
+        progress.contentWindow.scrollTo(
+          0,
+          parts.progressScroll *
+            ramp(t, AT.toProgress + 0.6, AT.toWords - 0.4, easeInOut),
+        );
+
+        const pointerB = along(parts.routeB, parts.startB, t);
+        const shownB = (t >= 16.6 && t < AT.toHome) || (t >= 23.55 && t < 25.4);
+        drawPointer(
+          $('cursor-b'),
+          $('ring-b'),
+          pointerB,
+          parts.clicksB,
+          t,
+          shownB,
+        );
+
+        // The ending: what it is, why it matters, and where to get it.
+        $('end').style.opacity = ramp(t, AT.toEnd, AT.toEnd + 0.5, easeInOut);
+        const rise = (element, start) => {
+          const value = ramp(t, start, start + 0.5);
+          element.style.opacity = value;
+          element.style.transform = `translateY(${mix(24, 0, value)}px)`;
+        };
+        rise($('lockup'), AT.toEnd + 0.35);
+        rise($('tagline'), AT.toEnd + 0.7);
+        $('tagline-rule').style.transform =
+          `scaleX(${ramp(t, AT.toEnd + 1.2, AT.toEnd + 1.65, easeInOut)})`;
+        rise($('install'), AT.toEnd + 1.4);
+        rise($('site'), AT.toEnd + 1.7);
+      }
+
+      window.ready = (async () => {
+        for (const title of TITLES) title.element = buildTitle(title);
+        await mount();
+        render(Number(new URLSearchParams(location.search).get('t') ?? 6));
+      })();
+      window.render = render;
+      window.DURATION = DURATION;
+    </script>
+  </body>
+</html>

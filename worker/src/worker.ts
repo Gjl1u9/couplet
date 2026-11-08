@@ -2,6 +2,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { createQwenExplain, createQwenLookup } from '../../src/lib/lookup/qwen';
 import type { WordEntry } from '../../src/lib/lookup/types';
 import {
+  createRefusals,
   handleRequest,
   type EntryCache,
   type ExplanationCache,
@@ -98,8 +99,11 @@ const hex = (bytes: ArrayBuffer) =>
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 
+// Lives as long as this instance, which is all a hint needs.
+const refusals = createRefusals();
+
 export default {
-  fetch(request: Request, env: Env): Promise<Response> {
+  fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const issuer = `${env.SUPABASE_URL}/auth/v1`;
     const keys = async () => {
       const response = await fetch(`${issuer}/.well-known/jwks.json`, {
@@ -141,6 +145,10 @@ export default {
           ),
         ),
       now: Date.now,
+      refusals,
+      defer: (work) => {
+        ctx.waitUntil(work);
+      },
     });
   },
 } satisfies ExportedHandler<Env>;

@@ -66,6 +66,17 @@ const ASR_PAUSE_MS = 500;
 const ASR_SPEECH_MS_PER_CHAR = 80;
 const ASR_MIN_WORDS_BEFORE_PAUSE = 4;
 const ASR_MAX_WORDS = 14;
+const ASR_MAX_CHARS = 80;
+/** A sentence that ends within this many words may run past the limits above. */
+const ASR_SENTENCE_LOOKAHEAD = 3;
+/** No cue grows past this, even to finish a sentence. */
+const ASR_HARD_MAX_CHARS = 100;
+const SENTENCE_END = /[.?!。？！]$/;
+const CLAUSE_END = /[,;:，、；：]$/;
+/** Punctuation that YouTube sometimes sends as its own segment, after the word it belongs to. */
+const TRAILING_PUNCTUATION = /^[.,!?;:…%)\]}」』”’"'。，、！？；：）]+$/;
+/** Automatic captions mark a new speaker with `>>`. */
+const SPEAKER_CHANGE = /^>>/;
 
 export function parseCaptions(body: string, kind: string | null): Cue[] {
   const parsed = JSON.parse(body) as { events?: readonly Json3Event[] };
@@ -105,21 +116,74 @@ interface Word {
   readonly eventEndMs: number;
 }
 
-function collectWords(events: readonly Json3Event[]): Word[] {
-  const words: Word[] = [];
+function collectSegments(events: readonly Json3Event[]): Word[] {
+  const segments: Word[] = [];
   for (const event of events) {
     if (event.aAppend || event.tStartMs === undefined) continue;
     const eventEndMs = event.tStartMs + (event.dDurationMs ?? 0);
     for (const seg of event.segs ?? []) {
       const text = seg.utf8 ?? '';
       if (text.trim() === '') continue;
-      words.push({
+      segments.push({
         text,
         startMs: event.tStartMs + (seg.tOffsetMs ?? 0),
         eventEndMs,
       });
     }
   }
+  return segments;
+}
+
+/**
+ * Splits at spaces, line breaks and CJK sentence ends. A piece that followed a space
+ * starts with one, so `joinText` keeps the original spacing.
+ */
+function splitWords(text: string): string[] {
+  const pieces: string[] = [];
+  for (const [, space = '', word = ''] of text.matchAll(/(\s*)(\S+)/g)) {
+    word.split(/(?<=[。？！])/).forEach((part, index) => {
+      pieces.push(index === 0 && space !== '' ? ` ${part}` : part);
+    });
+  }
+  return pieces;
+}
+
+/**
+ * YouTube sends automatic captions one word per segment, but sometimes the same track
+ * comes with whole lines per segment. Splitting every segment makes both look the same.
+ * Words in a longer segment share its time by their length.
+ */
+function collectWords(events: readonly Json3Event[]): Word[] {
+  const segments = collectSegments(events);
+  const words: Word[] = [];
+  segments.forEach((segment, index) => {
+    const pieces = splitWords(segment.text);
+    const nextStartMs = segments[index + 1]?.startMs ?? segment.eventEndMs;
+    const endMs = Math.max(
+      segment.startMs,
+      Math.min(nextStartMs, segment.eventEndMs),
+    );
+    const total = pieces.reduce((sum, piece) => sum + piece.trim().length, 0);
+    let offset = 0;
+    for (const piece of pieces) {
+      const previous = words.at(-1);
+      if (previous && TRAILING_PUNCTUATION.test(piece.trim())) {
+        words[words.length - 1] = {
+          ...previous,
+          text: previous.text + piece.trim(),
+        };
+        continue;
+      }
+      words.push({
+        text: piece,
+        startMs:
+          segment.startMs +
+          Math.round(((endMs - segment.startMs) * offset) / total),
+        eventEndMs: segment.eventEndMs,
+      });
+      offset += piece.trim().length;
+    }
+  });
   return words;
 }
 
@@ -151,6 +215,40 @@ function isPauseBetween(previous: Word, next: Word): boolean {
   return next.startMs - previous.startMs >= spoken + ASR_PAUSE_MS;
 }
 
+const endsSentence = (word: Word) => SENTENCE_END.test(word.text.trimEnd());
+const isSpeakerChange = (word: Word) => SPEAKER_CHANGE.test(word.text.trim());
+
+/** Whether the sentence ends within a few words without making the cue too long. */
+function sentenceEndsSoon(
+  current: readonly Word[],
+  words: readonly Word[],
+  index: number,
+): boolean {
+  let text = joinWords(current);
+  const last = Math.min(index + ASR_SENTENCE_LOOKAHEAD, words.length - 1);
+  for (let at = index + 1; at <= last; at += 1) {
+    const word = words[at];
+    if (!word || isSpeakerChange(word)) return false;
+    text = joinText(text, word.text);
+    if (text.trim().length > ASR_HARD_MAX_CHARS) return false;
+    if (endsSentence(word)) return true;
+  }
+  return false;
+}
+
+/** The last word ending a clause, so a long cue splits where the speaker paused. */
+function lastClauseEnd(current: readonly Word[]): number {
+  for (
+    let at = current.length - 2;
+    at >= ASR_MIN_WORDS_BEFORE_PAUSE - 1;
+    at -= 1
+  ) {
+    const word = current[at];
+    if (word && CLAUSE_END.test(word.text.trimEnd())) return at;
+  }
+  return -1;
+}
+
 /** 自動字幕是逐字的，也沒有標點，所以依停頓和長度重新斷句，翻譯才有完整的語意。 */
 function parseAsr(events: readonly Json3Event[]): Cue[] {
   const cues: Cue[] = [];
@@ -176,19 +274,31 @@ function parseAsr(events: readonly Json3Event[]): Cue[] {
     const previous = current.at(-1);
     if (
       previous &&
-      isPauseBetween(previous, word) &&
-      current.length >= ASR_MIN_WORDS_BEFORE_PAUSE
+      (isSpeakerChange(word) ||
+        (isPauseBetween(previous, word) &&
+          current.length >= ASR_MIN_WORDS_BEFORE_PAUSE))
     ) {
       close(word);
     }
     current.push(word);
     const next = words[index + 1];
-    if (
-      current.length >= ASR_MAX_WORDS ||
-      /[.?!。？！]$/.test(word.text.trimEnd())
-    ) {
+    if (endsSentence(word)) {
       close(next);
+      return;
     }
+    const full =
+      current.length >= ASR_MAX_WORDS ||
+      joinWords(current).length >= ASR_MAX_CHARS;
+    if (!full || sentenceEndsSoon(current, words, index)) return;
+    const clauseEnd = lastClauseEnd(current);
+    if (clauseEnd === -1) {
+      close(next);
+      return;
+    }
+    const rest = current.slice(clauseEnd + 1);
+    current = current.slice(0, clauseEnd + 1);
+    close(rest[0]);
+    current = rest;
   });
   close(undefined);
   return clampToNextStart(cues);

@@ -26,6 +26,15 @@ People have no daily allowance and see no counter. Two ceilings exist only to st
 - A bad or expired token is treated as no account.
 - Addresses are never stored, only their salted hash, and counters from earlier days are removed.
 
+## Latency
+
+A lookup the cache has not seen takes about 1.6 to 2 seconds from Taiwan, almost all of it the model. The model call starts while the ceilings are counted, and all ceilings are counted at once. If one refuses, the call is stopped and everything is given back, and that Worker instance stops starting early calls for that source that day, so a refused script costs no model time. The `server-timing` header gives `quota` and `total` in milliseconds.
+
+The extension saves time before the request:
+
+- A lookup uses the stored token only while it has more than a minute left. Otherwise it goes out without the account, and the token refreshes for the next one, because lookups need no account.
+- When the pointer reaches the subtitles, at most every 30 seconds, the content script wakes the background script, which opens the connection with an `OPTIONS` request and refreshes the token if needed.
+
 ## Model
 
 Lookups use `qwen3.7-flash` through Alibaba Cloud's international endpoint in Singapore. It was compared with DeepSeek Flash, GLM, and other Qwen models on 2026-11-07, using 21 words across seven languages.

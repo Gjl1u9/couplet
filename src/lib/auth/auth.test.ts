@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAuth, type AuthBackend } from './auth';
+import { createAuth, unexpiredToken, type AuthBackend } from './auth';
 
 const session = {
   access_token: 'token',
@@ -101,6 +101,18 @@ describe('createAuth', () => {
     });
     await expect(auth.accessToken()).resolves.toBe('token');
     await expect(auth.userId()).resolves.toBe('u1');
+  });
+
+  it('reads a stored token only while it has time left', () => {
+    const now = 1_800_000_000_000;
+    const stored = (expiresAt: unknown) =>
+      JSON.stringify({ access_token: 'token', expires_at: expiresAt });
+    expect(unexpiredToken(stored(now / 1000 + 3600), now)).toBe('token');
+    expect(unexpiredToken(stored(now / 1000 + 30), now)).toBeNull();
+    expect(unexpiredToken(stored(now / 1000 - 10), now)).toBeNull();
+    expect(unexpiredToken(stored('soon'), now)).toBeNull();
+    expect(unexpiredToken('{', now)).toBeNull();
+    expect(unexpiredToken(undefined, now)).toBeNull();
   });
 
   it('signs out only this device', async () => {

@@ -42,6 +42,34 @@ export interface HandlerDeps {
   /** Salted, so neither addresses nor sentences are stored as they are. */
   readonly hash: (text: string) => Promise<string>;
   readonly now: () => number;
+  /** Ceilings this instance has already seen refuse someone today. */
+  readonly refusals: Refusals;
+  /** Keeps work going after the response, such as writing the cache. */
+  readonly defer: (work: Promise<unknown>) => void;
+}
+
+export interface Refusals {
+  has: (subject: string, day: string) => boolean;
+  add: (subject: string, day: string) => void;
+}
+
+/** Forgets each day as the next begins, so it stays small. */
+export function createRefusals(): Refusals {
+  let current = '';
+  const subjects = new Set<string>();
+  const on = (day: string) => {
+    if (day !== current) {
+      current = day;
+      subjects.clear();
+    }
+    return subjects;
+  };
+  return {
+    has: (subject, day) => on(day).has(subject),
+    add: (subject, day) => {
+      on(day).add(subject);
+    },
+  };
 }
 
 /** Only our own pages, for the website later. The extension is not bound by CORS. */
@@ -193,13 +221,18 @@ export async function handleRequest(
   deps: HandlerDeps,
 ): Promise<Response> {
   const origin = request.headers.get('origin');
-  const json = (status: number, body: unknown) =>
+  const json = (
+    status: number,
+    body: unknown,
+    extra: Record<string, string> = {},
+  ) =>
     new Response(JSON.stringify(body), {
       status,
       headers: {
         'content-type': 'application/json',
         'cache-control': 'no-store',
         ...corsHeaders(origin),
+        ...extra,
       },
     });
 
@@ -226,6 +259,14 @@ export async function handleRequest(
   if (!body) return json(400, { error: 'bad_request' });
   if (sameLanguage(body.source, body.target)) return json(200, { entry: null });
 
+  // A cached word costs nothing, so it costs the user nothing either.
+  const cacheKey = JSON.stringify([
+    body.word.toLocaleLowerCase(),
+    body.source,
+    body.target,
+  ]);
+  // Neither depends on the other, so the cache is read while the token is checked.
+  const cachedEntry = deps.cache.get(cacheKey);
   const authorization = request.headers.get('authorization');
   const token = authorization?.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
@@ -235,58 +276,74 @@ export async function handleRequest(
   if (!userId && !(installId && INSTALL_ID.test(installId))) {
     return json(400, { error: 'bad_request' });
   }
-
-  // A cached word costs nothing, so it costs the user nothing either.
-  const cacheKey = JSON.stringify([
-    body.word.toLocaleLowerCase(),
-    body.source,
-    body.target,
-  ]);
-  const cached = await deps.cache.get(cacheKey);
+  const cached = await cachedEntry;
   if (cached) return json(200, { entry: cached });
 
-  const now = deps.now();
-  const day = new Date(now).toISOString().slice(0, 10);
-  const resetAt = nextUtcMidnight(now);
-  const taken: string[] = [];
-  const giveBack = () =>
-    Promise.all(taken.map((subject) => deps.quota.refund(subject, day)));
-
-  const subject = userId ? `user:${userId}` : `install:${String(installId)}`;
+  const started = deps.now();
+  const day = new Date(started).toISOString().slice(0, 10);
+  const resetAt = nextUtcMidnight(started);
   // Only the kind of account, so use can be watched without logging who asked.
   console.info('lookup', userId ? 'user' : 'anonymous');
   const limit = deps.config.abuseLimit;
-  // People have no daily allowance to run out of, so every ceiling reads as busy.
-  const busy = () => json(503, { error: 'service_busy', resetAt });
-  if (!(await deps.quota.consume(subject, day, limit))) return busy();
-  taken.push(subject);
-
+  const ceilings: { readonly subject: string; readonly limit: number }[] = [
+    {
+      subject: userId ? `user:${userId}` : `install:${String(installId)}`,
+      limit,
+    },
+  ];
   // Reinstalling gives a new install ID, so anonymous lookups also count by network.
   if (!userId) {
     const ip = request.headers.get('cf-connecting-ip') ?? 'unknown';
-    const ipSubject = `ip:${await deps.hash(ip)}`;
-    if (!(await deps.quota.consume(ipSubject, day, limit))) {
-      await giveBack();
-      return busy();
-    }
-    taken.push(ipSubject);
+    ceilings.push({ subject: `ip:${await deps.hash(ip)}`, limit });
   }
-
   // The most this service can spend in a day, whatever happens above.
-  if (!(await deps.quota.consume('global', day, deps.config.globalLimit))) {
-    await giveBack();
-    return busy();
-  }
-  taken.push('global');
+  ceilings.push({ subject: 'global', limit: deps.config.globalLimit });
 
-  try {
-    const entry = await deps.lookup.lookUp(
+  // The model is the slow part, so it starts while the ceilings are counted, unless
+  // one of them already turned this subject away today, so a refused script costs nothing.
+  const stop = new AbortController();
+  const ask = () =>
+    deps.lookup.lookUp(
       body.word,
       { source: body.source, target: body.target },
-      request.signal,
+      AbortSignal.any([request.signal, stop.signal]),
     );
-    if (entry) await deps.cache.put(cacheKey, entry);
-    return json(200, { entry });
+  const knownRefused = ceilings.some(({ subject }) =>
+    deps.refusals.has(subject, day),
+  );
+  const early = knownRefused ? null : ask();
+  // Handled below. Without this, a refusal that stops it would go unhandled.
+  early?.catch(() => undefined);
+
+  const allowed = await Promise.all(
+    ceilings.map(({ subject, limit: ceiling }) =>
+      deps.quota.consume(subject, day, ceiling),
+    ),
+  );
+  const counted = deps.now();
+  const taken = ceilings.filter((_, index) => allowed[index]);
+  const giveBack = () =>
+    Promise.all(taken.map(({ subject }) => deps.quota.refund(subject, day)));
+  if (allowed.includes(false)) {
+    stop.abort();
+    ceilings.forEach(({ subject }, index) => {
+      if (!allowed[index]) deps.refusals.add(subject, day);
+    });
+    await giveBack();
+    // People have no daily allowance to run out of, so every ceiling reads as busy.
+    return json(503, { error: 'service_busy', resetAt });
+  }
+
+  try {
+    const entry = await (early ?? ask());
+    if (entry) deps.defer(deps.cache.put(cacheKey, entry));
+    return json(
+      200,
+      { entry },
+      {
+        'server-timing': `quota;dur=${String(counted - started)}, total;dur=${String(deps.now() - started)}`,
+      },
+    );
   } catch {
     await giveBack();
     return json(502, { error: 'lookup_failed' });

@@ -62,6 +62,33 @@ export interface Auth {
   userId: () => Promise<string | null>;
 }
 
+/** A token with less than this left is about to expire on the way to the server. */
+const TOKEN_MARGIN_MS = 60_000;
+
+/**
+ * The stored session's token while it has time left, read without the network or
+ * Supabase's lock. Null when signed out, or when the token needs a refresh first.
+ */
+export function unexpiredToken(stored: unknown, nowMs: number): string | null {
+  if (typeof stored !== 'string') return null;
+  let session: unknown;
+  try {
+    session = JSON.parse(stored);
+  } catch {
+    return null;
+  }
+  if (typeof session !== 'object' || session === null) return null;
+  const { access_token: token, expires_at: expiresAt } = session as Record<
+    string,
+    unknown
+  >;
+  return typeof token === 'string' &&
+    typeof expiresAt === 'number' &&
+    expiresAt * 1000 - nowMs > TOKEN_MARGIN_MS
+    ? token
+    : null;
+}
+
 const toAccount = (user: AuthUser): Account => {
   const name = user.user_metadata?.full_name;
   return {

@@ -72,6 +72,8 @@ export interface OverlayOptions {
   /** Whether this token is a Saved Word still on the schedule. */
   readonly isMarked?: (token: string) => boolean;
   readonly onToken?: (cue: WordInCue, element: HTMLElement) => void;
+  /** The pointer reached the subtitles, so a lookup may follow. */
+  readonly onApproach?: () => void;
   /** A drag reached a second token. */
   readonly onSelectionStart?: () => void;
   /** The sentence and offset are where the Selection starts, even if it crosses cues. */
@@ -262,6 +264,9 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
   // YouTube's player is draggable, so a native drag would otherwise take over the pointer.
   strip.addEventListener('mousedown', (event) => {
     event.preventDefault();
+  });
+  strip.addEventListener('pointerenter', () => {
+    options.onApproach?.();
   });
   strip.addEventListener('pointerdown', (event) => {
     const token = tokenOf(event);

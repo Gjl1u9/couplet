@@ -1,8 +1,16 @@
-import { createAuth } from '../lib/auth/auth';
-import { answerAuthMessage, isAuthMessage } from '../lib/auth/messages';
+import { createAuth, unexpiredToken } from '../lib/auth/auth';
+import {
+  answerAuthMessage,
+  AUTH_STORAGE_KEY,
+  isAuthMessage,
+} from '../lib/auth/messages';
 import { createSupabase } from '../lib/auth/supabase';
 import { LOOKUP_PORT, servePortLookup } from '../lib/lookup/port';
-import { createProxyLookup } from '../lib/lookup/proxy';
+import {
+  createProxyLookup,
+  isLookupWarmMessage,
+  warmLookup,
+} from '../lib/lookup/proxy';
 import { createGoogleTranslate } from '../lib/translation/google';
 import { TRANSLATE_PORT } from '../lib/translation/messages';
 import { servePortTranslate } from '../lib/translation/port';
@@ -96,6 +104,16 @@ export default defineBackground(() => {
     void browser.tabs.create({ url: browser.runtime.getURL(DASHBOARD_PATH) });
   };
 
+  // Lookups need no account, so one never waits for a token refresh. It goes out without
+  // the account, and the refresh runs for the next one.
+  const lookupToken = async () => {
+    const stored = (await local.get(AUTH_STORAGE_KEY))[AUTH_STORAGE_KEY];
+    const token = unexpiredToken(stored, Date.now());
+    if (!token && stored !== undefined)
+      void auth.accessToken().catch(() => null);
+    return token;
+  };
+
   const explain = createProxyExplain({
     accessToken: () => auth.accessToken(),
   });
@@ -109,6 +127,11 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener(
     (message: unknown, sender, sendResponse: (response: unknown) => void) => {
       if (sender.id !== browser.runtime.id) return undefined;
+      if (isLookupWarmMessage(message)) {
+        void warmLookup();
+        void lookupToken();
+        return undefined;
+      }
       if (isOpenDashboardMessage(message)) {
         openDashboard();
         return undefined;
@@ -146,7 +169,7 @@ export default defineBackground(() => {
       servePortLookup(
         port,
         createProxyLookup({
-          accessToken: () => auth.accessToken(),
+          accessToken: lookupToken,
           installId: deviceId,
         }),
       );
