@@ -8,12 +8,13 @@ Current stage: free tier, with dual subtitles, the Lookup Panel, and the Setting
 
 Requires Node 22 or later; see `.nvmrc` for the version.
 
-```bash
-npm install
-npm run dev
-```
+| Command             | Writes                | After a code change                         |
+| ------------------- | --------------------- | ------------------------------------------- |
+| `npm run dev`       | `dist/chrome-mv3-dev` | Updates itself; blank once the server stops |
+| `npm run build:dev` | `dist/chrome-mv3-dev` | Rebuild and reload; unminified              |
+| `npm run build`     | `dist/chrome-mv3`     | Rebuild and reload                          |
 
-Load `dist/chrome-mv3-dev` as an unpacked extension, and keep `npm run dev` running. That build's pages load from the dev server, so they turn blank when it stops. To test without a server, run `npm run build` and load `dist/chrome-mv3`.
+`dev` and `build:dev` overwrite each other, so use one at a time.
 
 Lookups go through our Cloudflare Worker, which holds the AI key. See [`docs/LOOKUP.md`](docs/LOOKUP.md).
 
