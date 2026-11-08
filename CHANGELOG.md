@@ -7,6 +7,8 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-08
+
 ### Changed
 
 - Word lookups answer sooner: the connection opens when the pointer reaches the subtitles, and a lookup no longer waits
