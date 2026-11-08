@@ -7,6 +7,18 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+### Changed
+
+- Word lookups answer sooner: the connection opens when the pointer reaches the subtitles, and a lookup no longer waits
+  for the account's sign-in to refresh.
+
+### Fixed
+
+- Pronunciation no longer falls back to an unrelated system voice when a listed voice fails, or on the first click on a
+  page.
+- Automatic captions no longer sometimes show a whole paragraph as one subtitle until the page is refreshed. Long lines
+  now break at sentence and clause ends, and punctuation no longer gets a stray space before it.
+
 ## [0.2.0] - 2026-11-07
 
 ### Added
