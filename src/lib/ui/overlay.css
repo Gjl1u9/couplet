@@ -450,7 +450,7 @@ input:focus-visible {
 }
 
 /* Top right of the player, away from the subtitle and the panel being read. */
-.sign-in-toast {
+.player-toast {
   z-index: 3;
   top: 12px;
   right: 12px;
@@ -461,10 +461,10 @@ input:focus-visible {
   padding: 16px 44px 18px 18px;
   border-radius: 8px;
   border-color: var(--line-strong);
-  animation: sign-in-toast-in 200ms ease-out;
+  animation: player-toast-in 200ms ease-out;
 }
 
-@keyframes sign-in-toast-in {
+@keyframes player-toast-in {
   from {
     opacity: 0;
     transform: translateY(-6px);
@@ -472,12 +472,12 @@ input:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sign-in-toast {
+  .player-toast {
     animation: none;
   }
 }
 
-.sign-in-toast[data-theme='dark'] {
+.player-toast[data-theme='dark'] {
   --surface: #2a2720;
   --ink: #ece5d5;
   --ink-muted: #afa693;
@@ -486,7 +486,7 @@ input:focus-visible {
   --chip: #3b362b;
 }
 
-.sign-in-toast-note {
+.player-toast-note {
   width: 100%;
   margin: 0;
   color: var(--ink);
@@ -495,7 +495,7 @@ input:focus-visible {
   line-height: 24px;
 }
 
-.sign-in-toast .close {
+.player-toast .close {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -504,13 +504,30 @@ input:focus-visible {
   color: var(--ink-muted);
 }
 
-.sign-in-toast .close .icon {
+.player-toast .close .icon {
   width: 15px;
   height: 15px;
 }
 
-.sign-in-toast .menu-action {
+.player-toast .menu-action {
   height: 36px;
-  padding: 0 14px 0 8px;
+  padding: 0 14px;
   font-size: 14px;
+}
+
+.sign-in-toast .menu-action {
+  padding-left: 8px;
+}
+
+.track-notice .player-toast-note {
+  display: flex;
+  gap: 8px;
+}
+
+.track-notice .player-toast-note .icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  color: var(--alert);
 }

@@ -38,6 +38,15 @@ describe('marks on Saved Words', () => {
   });
 });
 
+describe('translation only', () => {
+  it('shows the original as plain text when lookups are off', () => {
+    const overlay = createOverlay({ canLookUp: () => false });
+    overlay.render({ original: 'こんにちは 世界', translation: '你好世界' });
+    expect(part('original')?.textContent).toBe('こんにちは 世界');
+    expect(host()?.shadowRoot?.querySelectorAll('.token')).toHaveLength(0);
+  });
+});
+
 describe('createOverlay', () => {
   it('有字幕時才掛到播放器上，顯示原文和譯文', () => {
     const overlay = createOverlay();

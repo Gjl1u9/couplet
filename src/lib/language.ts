@@ -10,6 +10,15 @@ export function sameLanguage(a: string, b: string): boolean {
   return languageIdentity(a) === languageIdentity(b);
 }
 
+/** The language's English name, such as "Japanese" for `ja`, or the code if unknown. */
+export function languageName(code: string): string {
+  try {
+    return new Intl.DisplayNames('en', { type: 'language' }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 /** The language family, so a learning language of `zh` matches `zh-Hant` tracks. */
 export function languageBase(code: string): string {
   const lower = code.toLowerCase();

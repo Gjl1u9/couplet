@@ -49,6 +49,38 @@ export function selectLearningTrack(
   );
 }
 
+/**
+ * How Dual Subtitles treat a video:
+ * - `learning`: a track in the learning language, with lookups.
+ * - `translation`: no such track, so the video's own language is translated, without lookups.
+ * - `native`: the video is in the native language, so YouTube's own captions stay.
+ * - `none`: the video has no captions at all.
+ */
+export type TrackMode = 'learning' | 'translation' | 'native' | 'none';
+
+export interface TrackChoice {
+  readonly mode: TrackMode;
+  /** The track to show; `null` unless the mode is `learning` or `translation`. */
+  readonly track: CaptionTrack | null;
+}
+
+/** Picks what Dual Subtitles show, so any video with captions shows something useful. */
+export function chooseTrack(
+  tracklist: CaptionTracklist | null | undefined,
+  learningLanguage: string,
+  nativeLanguage: string,
+): TrackChoice {
+  const learning = selectLearningTrack(tracklist, learningLanguage);
+  if (learning) return { mode: 'learning', track: learning };
+  const source = selectSourceTrack(tracklist);
+  if (!source) return { mode: 'none', track: null };
+  // A Chinese reader needs no overlay on a Chinese video, whichever script it uses.
+  if (languageBase(source.languageCode) === languageBase(nativeLanguage)) {
+    return { mode: 'native', track: null };
+  }
+  return { mode: 'translation', track: source };
+}
+
 interface Json3Segment {
   readonly utf8?: string;
   readonly tOffsetMs?: number;

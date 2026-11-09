@@ -5,6 +5,8 @@ import {
   type PanelTheme,
   type SubtitleSize,
 } from '../settings/settings';
+import { languageName } from '../language';
+import type { TrackMode } from '../youtube/captions';
 import {
   element,
   icon,
@@ -23,12 +25,18 @@ import {
   type SelectMenu,
 } from './select-menu';
 
+export interface TrackStatus {
+  readonly mode: TrackMode;
+  /** The shown track's language. */
+  readonly language: string | null;
+}
+
 export interface SettingsPanelOptions {
   readonly layer: () => HTMLElement | null;
   readonly getSettings: () => Settings;
   readonly update: (patch: Partial<Settings>) => void;
-  /** `false` when the current video has no track in the learning language. */
-  readonly trackAvailable: () => boolean | null;
+  /** What Dual Subtitles show on the current video, or `null` before it is known. */
+  readonly trackStatus: () => TrackStatus | null;
   /** Lets the user hear the sound they just turned on. */
   readonly previewSaveSound: () => void;
   readonly openDashboard: () => void;
@@ -163,7 +171,7 @@ export function createSettingsPanel(
               if (nativeLanguage) options.update({ nativeLanguage });
             },
           ),
-          ...missingTrackNote(settings, options.trackAvailable()),
+          ...trackNote(settings, options.trackStatus()),
         ),
         menuGroup(
           'Subtitles',
@@ -423,24 +431,26 @@ function buttonRow(
   return element('div', 'setting', element('span', '', label), button);
 }
 
-function missingTrackNote(
+/** Says why the subtitles look the way they do when the video lacks the learning language. */
+function trackNote(
   settings: Settings,
-  available: boolean | null,
+  status: TrackStatus | null,
 ): readonly HTMLElement[] {
-  if (available !== false) return [];
-  const name =
-    LEARNING_LANGUAGES.find((l) => l.code === settings.learningLanguage)
-      ?.name ?? settings.learningLanguage;
-  return [
-    element(
-      'p',
-      'setting-note is-alert',
-      icon(ICON_ALERT),
+  if (!status || status.mode === 'learning') return [];
+  if (status.mode === 'none') {
+    return [
       element(
-        'span',
-        '',
-        `This video has no ${name} subtitles. Change your learning language, or try another video.`,
+        'p',
+        'setting-note is-alert',
+        icon(ICON_ALERT),
+        element('span', '', 'This video has no subtitles.'),
       ),
-    ),
-  ];
+    ];
+  }
+  const learning = languageName(settings.learningLanguage);
+  const text =
+    status.mode === 'native'
+      ? "This video is in your language, so YouTube's own subtitles stay."
+      : `No ${learning} subtitles here, so this shows ${languageName(status.language ?? '')} with a translation. Words can be looked up in ${learning} videos.`;
+  return [element('p', 'setting-note', text)];
 }

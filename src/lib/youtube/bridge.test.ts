@@ -13,7 +13,8 @@ describe('page status events', () => {
     const status = {
       type: 'track-status',
       videoId: 'a',
-      available: false,
+      mode: 'translation',
+      language: 'ja',
     } as const;
     expect(parseBridgeMessage(toBridgeMessage(status))).toEqual(status);
     expect(
@@ -28,14 +29,26 @@ describe('page status events', () => {
         event: { type: 'track-status', videoId: 'a', available: 'no' },
       }),
     ).toBeNull();
+    expect(
+      parseBridgeMessage({
+        [BRIDGE_TAG]: true,
+        event: {
+          type: 'track-status',
+          videoId: 'a',
+          mode: 'everything',
+          language: null,
+        },
+      }),
+    ).toBeNull();
   });
 });
 
-describe('learning language command', () => {
+describe('languages command', () => {
   it('round-trips a valid command', () => {
     const command = {
-      type: 'set-learning-language',
-      language: 'zh-Hant',
+      type: 'set-languages',
+      learningLanguage: 'en',
+      nativeLanguage: 'zh-TW',
     } as const;
     expect(parseBridgeCommand(toBridgeCommand(command))).toEqual(command);
   });
@@ -45,8 +58,9 @@ describe('learning language command', () => {
     expect(
       parseBridgeCommand(
         toBridgeCommand({
-          type: 'set-learning-language',
-          language: '<script>',
+          type: 'set-languages',
+          learningLanguage: 'en',
+          nativeLanguage: '<script>',
         }),
       ),
     ).toBeNull();

@@ -1,6 +1,6 @@
 import { observeClass } from '../dom/observers';
 import { parseBridgeCommand, toBridgeMessage, type PageEvent } from './bridge';
-import { selectLearningTrack, type CaptionTracklist } from './captions';
+import { chooseTrack, type CaptionTracklist } from './captions';
 import {
   createTrackRequester,
   type CaptionPlayer,
@@ -34,17 +34,22 @@ export interface PageAgentDeps {
   readonly getPlayer: () => YouTubePlayer | null;
   readonly post: (event: PageEvent) => void;
   readonly requester: TrackRequester;
-  /** Nothing is selected until a language is known. */
-  readonly learningLanguage?: string;
+  /** Nothing is selected until the languages are known. */
+  readonly languages?: Languages;
   /** 播放器元素換掉時呼叫，用來重新監聽它的 class。 */
   readonly watchPlayer: (player: YouTubePlayer | null) => void;
+}
+
+export interface Languages {
+  readonly learningLanguage: string;
+  readonly nativeLanguage: string;
 }
 
 export interface PageAgent {
   report: () => void;
   onCaptured: (captions: CapturedCaptions) => void;
-  /** Selects tracks for this language from now on, including for the current video. */
-  setLearningLanguage: (language: string) => void;
+  /** Selects tracks for these languages from now on, including for the current video. */
+  setLanguages: (languages: Languages) => void;
 }
 
 /**
@@ -62,7 +67,7 @@ export function createPageAgent(deps: PageAgentDeps): PageAgent {
   let lastReport = '';
   let selected: { videoId: string; key: string | null } | null = null;
   let forwarded = false;
-  let learningLanguage = deps.learningLanguage ?? null;
+  let languages = deps.languages ?? null;
   const pendingCaptions = new Map<string, CapturedCaptions>();
 
   const forward = (captions: CapturedCaptions) => {
@@ -98,12 +103,18 @@ export function createPageAgent(deps: PageAgentDeps): PageAgent {
     // 切換影片時，播放器可能還保留上一支影片的資料。
     if (response?.videoDetails?.videoId !== videoId) return;
 
-    if (learningLanguage === null) return;
-    const track = selectLearningTrack(
+    if (languages === null) return;
+    const { mode, track } = chooseTrack(
       response.captions?.playerCaptionsTracklistRenderer,
-      learningLanguage,
+      languages.learningLanguage,
+      languages.nativeLanguage,
     );
-    post({ type: 'track-status', videoId, available: track !== null });
+    post({
+      type: 'track-status',
+      videoId,
+      mode,
+      language: track?.languageCode ?? null,
+    });
     forwarded = false;
     requester.finish();
     const key = track
@@ -141,16 +152,21 @@ export function createPageAgent(deps: PageAgentDeps): PageAgent {
     }
   };
 
-  const setLearningLanguage = (language: string) => {
-    if (language === learningLanguage) return;
-    learningLanguage = language;
+  const setLanguages = (next: Languages) => {
+    if (
+      next.learningLanguage === languages?.learningLanguage &&
+      next.nativeLanguage === languages.nativeLanguage
+    ) {
+      return;
+    }
+    languages = next;
     selected = null;
     forwarded = false;
     requester.finish();
     report();
   };
 
-  return { report, onCaptured, setLearningLanguage };
+  return { report, onCaptured, setLanguages };
 }
 
 /** 攔截字幕請求。只讀取回應，不影響播放器。 */
@@ -258,7 +274,7 @@ export function startPageAgent(): void {
   window.addEventListener('message', (message) => {
     if (message.source !== window) return;
     const command = parseBridgeCommand(message.data);
-    if (command) agent.setLearningLanguage(command.language);
+    if (command) agent.setLanguages(command);
   });
   // The content script may have started first, so its language could have been missed.
   post({ type: 'agent-ready' });

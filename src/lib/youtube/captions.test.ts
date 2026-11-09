@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   parseCaptions,
+  chooseTrack,
   selectLearningTrack,
   selectSourceTrack,
 } from './captions';
@@ -401,5 +402,39 @@ describe('selectLearningTrack', () => {
     expect(selectLearningTrack({ captionTracks: [traditional] }, 'zh')).toBe(
       traditional,
     );
+  });
+});
+
+describe('chooseTrack', () => {
+  const english = { languageCode: 'en' };
+  const japanese = { languageCode: 'ja', kind: 'asr' };
+  const chinese = { languageCode: 'zh-TW', kind: 'asr' };
+
+  it('prefers the learning language', () => {
+    expect(
+      chooseTrack({ captionTracks: [japanese, english] }, 'en', 'zh-TW'),
+    ).toEqual({ mode: 'learning', track: english });
+  });
+
+  it("falls back to the video's own language, to translate it", () => {
+    expect(chooseTrack({ captionTracks: [japanese] }, 'en', 'zh-TW')).toEqual({
+      mode: 'translation',
+      track: japanese,
+    });
+  });
+
+  it('leaves a video in the native language alone, whatever its script', () => {
+    expect(chooseTrack({ captionTracks: [chinese] }, 'en', 'zh-CN')).toEqual({
+      mode: 'native',
+      track: null,
+    });
+  });
+
+  it('reports a video without captions', () => {
+    expect(chooseTrack({ captionTracks: [] }, 'en', 'zh-TW')).toEqual({
+      mode: 'none',
+      track: null,
+    });
+    expect(chooseTrack(undefined, 'en', 'zh-TW').mode).toBe('none');
   });
 });

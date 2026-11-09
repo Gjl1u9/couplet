@@ -45,7 +45,11 @@ export function createSignInToast(options: SignInToastOptions): SignInToast {
   };
 
   const show = (layer: HTMLElement) => {
-    const note = element('p', 'sign-in-toast-note', 'Sign in to save words');
+    const note = element(
+      'p',
+      'player-toast-note sign-in-toast-note',
+      'Sign in to save words',
+    );
     const label = element('span', '', 'Sign in with Google');
     const button = element(
       'button',
@@ -85,7 +89,7 @@ export function createSignInToast(options: SignInToastOptions): SignInToast {
     });
     const current = element(
       'div',
-      'panel sign-in-toast',
+      'panel player-toast sign-in-toast',
       note,
       button,
       iconButton('close', 'Close', ICON_CLOSE, () => {
