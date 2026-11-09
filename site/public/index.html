@@ -800,6 +800,19 @@
         padding: 22px;
       }
 
+      /* Spans both columns: what any other video gets. */
+      .languages > .is-wide {
+        grid-column: 1 / -1;
+      }
+
+      .languages p {
+        max-width: 640px;
+        margin: 8px 0 0;
+        color: var(--ink-muted);
+        font-size: 15px;
+        line-height: 24px;
+      }
+
       .tags {
         display: flex;
         flex-wrap: wrap;
@@ -1272,11 +1285,15 @@
       <section class="block wrap" id="languages">
         <div class="block-head">
           <h2>Pick what you're learning</h2>
-          <p>Each language keeps its own word list and its own progress.</p>
+          <p>
+            Each keeps its own words and progress. Other videos still get a
+            translation.
+          </p>
         </div>
         <div class="languages">
           <div class="sheet">
             <h3>Learn</h3>
+            <p>Click words, save them, and review them.</p>
             <div class="tags">
               <span>English</span><span>Spanish</span><span>French</span
               ><span>German</span><span>Portuguese</span><span>Italian</span
@@ -1285,6 +1302,7 @@
           </div>
           <div class="sheet">
             <h3>Translate into</h3>
+            <p>The second line, under every subtitle.</p>
             <div class="tags">
               <span lang="zh-Hant">繁體中文</span>
               <span lang="zh-Hans">简体中文</span>
@@ -1309,6 +1327,15 @@
               <span lang="th">ไทย</span>
               <span lang="vi">Tiếng Việt</span>
             </div>
+          </div>
+          <div class="sheet is-wide">
+            <h3>Just watching?</h3>
+            <p>
+              Any video with subtitles gets two lines, whatever its language:
+              what's said, and your language under it. Follow a Japanese vlog or
+              a Korean show without studying either. Videos in your own language
+              keep YouTube's subtitles.
+            </p>
           </div>
         </div>
       </section>
@@ -1348,9 +1375,11 @@
               </svg>
             </summary>
             <p>
-              YouTube videos with subtitles in the language you're learning,
-              including auto-generated ones. If a video has none, the extension
-              tells you.
+              Any YouTube video with subtitles, including auto-generated ones.
+              In the language you're learning, you can click words and save
+              them. In any other language, you get the translation to read
+              along. If a video has no subtitles at all, the extension tells
+              you.
             </p>
           </details>
           <details>
