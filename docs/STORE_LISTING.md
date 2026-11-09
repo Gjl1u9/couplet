@@ -161,7 +161,7 @@ No test account is needed. Any Google account can sign in.
 5. Click the extension's toolbar icon, then Start review or Open Dashboard, to see Review, Words, and Progress.
 6. In Words, open a word and press Explain with AI. It's limited to 50 a day per account.
 
-Subtitles appear only on videos that have subtitles in the chosen learning language. The extension says so in its settings panel when a video has none.
+Subtitles appear on videos that have subtitles. A video without the learning language shows its own language with a translation, a video in the native language keeps YouTube's own subtitles, and the extension says so when a video has none.
 ```
 
 ## Before submitting

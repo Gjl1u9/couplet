@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultSettings, type Settings } from '../settings/settings';
-import { createSettingsPanel } from './settings-panel';
+import { createSettingsPanel, type TrackStatus } from './settings-panel';
 
-function setup(trackAvailable: boolean | null = true) {
+function setup(
+  trackStatus: TrackStatus | null = { mode: 'learning', language: 'en' },
+) {
   document.body.innerHTML =
     '<div id="movie_player"><div class="ytp-right-controls"><button id="existing"></button></div></div><div id="layer"></div><video></video>';
   const layer = document.querySelector<HTMLElement>('#layer');
@@ -19,7 +21,7 @@ function setup(trackAvailable: boolean | null = true) {
     layer: () => layer,
     getSettings: () => settings,
     update,
-    trackAvailable: () => trackAvailable,
+    trackStatus: () => trackStatus,
     previewSaveSound,
     openDashboard,
     onOpen,
@@ -171,10 +173,31 @@ describe('createSettingsPanel', () => {
     panel.dispose();
   });
 
-  it('warns when the video has no track in the learning language', () => {
-    const { panel, find } = setup(false);
+  it('says a video without the learning language is translated from its own', () => {
+    const { panel, find } = setup({ mode: 'translation', language: 'ja' });
     panel.toggle();
-    expect(find('.setting-note.is-alert')?.textContent).toContain('English');
+    const note = find('.setting-note')?.textContent;
+    expect(note).toContain('No English subtitles here');
+    expect(note).toContain('Japanese');
+    expect(find('.setting-note.is-alert')).toBeNull();
+    panel.dispose();
+  });
+
+  it("says YouTube's own subtitles stay on a video in the native language", () => {
+    const { panel, find } = setup({ mode: 'native', language: null });
+    panel.toggle();
+    expect(find('.setting-note')?.textContent).toContain(
+      "YouTube's own subtitles",
+    );
+    panel.dispose();
+  });
+
+  it('warns when the video has no subtitles', () => {
+    const { panel, find } = setup({ mode: 'none', language: null });
+    panel.toggle();
+    expect(find('.setting-note.is-alert')?.textContent).toBe(
+      'This video has no subtitles.',
+    );
     panel.dispose();
   });
 

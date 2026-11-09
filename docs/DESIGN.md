@@ -59,6 +59,17 @@ The Subtitle Strip is one background fitted to its longest line, holding the ori
 - While a translation loads, its line shows a skeleton, so the original stays in place.
 - `dir="auto"` decides text direction.
 
+### Which subtitles show
+
+The learning language decides what can be learned, not whether anything shows, so a video with captions shows something useful to people learning and to people who only want a translation. [`chooseTrack`](../src/lib/youtube/captions.ts) takes the first that fits:
+
+1. **Learning:** a track in the learning language, with lookups, selection, and saving.
+2. **Translation:** otherwise, the video's own language with a translation, as plain text with nothing to click. Learning stays in the learning language, so saved words never mix languages and no other language needs a dictionary or word segmentation. The video's language is its default track, or else its automatic captions.
+3. **Native:** a video in the native language, in any script, shows nothing of ours, and YouTube's own captions stay as the user left them.
+4. **None:** a video without captions shows the Track Notice.
+
+The Settings Panel says which case applies under the language rows, except for Learning. Only None is an alert.
+
 ### Context Lines
 
 The previous and next cues can appear above and below the couplet, inside the strip. They are off by default, because the video comes first. A button outside the strip's right edge turns them on and off; it appears on hover or focus, and the choice is saved. Its icon changes with the state, and its `aria-label` says what it will do. They are `subtitle-context`, 88% of the translation's size, and originals only, so the strip stays small. Their words are tokens like any other.
@@ -105,6 +116,10 @@ A language sheet using the shared settings rows, then four Paper sheets, two to 
 ## Sign-in Toast
 
 At the player's top right, in dark paper colours, 320px wide, so it clears the subtitle and most Lookup Panels. One line and one button, with the Google mark on a white tile. It fades in over 200ms, or appears at once under reduced motion. It leaves after 10 seconds, unless pointed at, focused, or signing in.
+
+## Track Notice
+
+Only a video with no captions at all shows nothing, so only then does the Track Notice say why. It shares the Sign-in Toast's place and paper: an `alert` icon with "This video has no subtitles", and a close button, with nothing to choose, because no setting would help. It appears once per video, never while the Settings Panel is open, and leaves after 8 seconds unless pointed at or focused. It closes when the video changes.
 
 ## Player controls
 

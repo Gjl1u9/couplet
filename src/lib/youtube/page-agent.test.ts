@@ -48,7 +48,7 @@ function setup(initial: Partial<FakeState> = {}) {
   const requester = { request: vi.fn(), finish: vi.fn() };
   const watchPlayer = vi.fn();
   const agent = createPageAgent({
-    learningLanguage: 'en',
+    languages: { learningLanguage: 'en', nativeLanguage: 'zh-TW' },
     getPlayer: () => player,
     post: (event) => posted.push(event),
     requester,
@@ -447,18 +447,45 @@ describe('learning language', () => {
     const { agent, requester } = noLanguage([{ languageCode: 'en' }]);
     agent.report();
     expect(requester.request).not.toHaveBeenCalled();
-    agent.setLearningLanguage('en');
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
     expect(requester.request).toHaveBeenCalledWith({ languageCode: 'en' });
   });
 
-  it('reports when the video has no track in that language', () => {
+  it("translates the video's own language when the learning language is missing", () => {
     const { agent, posted, requester } = noLanguage([{ languageCode: 'fr' }]);
-    agent.setLearningLanguage('ja');
+    agent.setLanguages({ learningLanguage: 'ja', nativeLanguage: 'zh-TW' });
+    expect(requester.request).toHaveBeenCalledWith({ languageCode: 'fr' });
+    expect(posted).toContainEqual({
+      type: 'track-status',
+      videoId: 'a',
+      mode: 'translation',
+      language: 'fr',
+    });
+  });
+
+  it("leaves a video in the native language to YouTube's own captions", () => {
+    const { agent, posted, requester } = noLanguage([
+      { languageCode: 'zh-TW' },
+    ]);
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
     expect(requester.request).not.toHaveBeenCalled();
     expect(posted).toContainEqual({
       type: 'track-status',
       videoId: 'a',
-      available: false,
+      mode: 'native',
+      language: null,
+    });
+  });
+
+  it('reports a video without captions', () => {
+    const { agent, posted, requester } = noLanguage([]);
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
+    expect(requester.request).not.toHaveBeenCalled();
+    expect(posted).toContainEqual({
+      type: 'track-status',
+      videoId: 'a',
+      mode: 'none',
+      language: null,
     });
   });
 
@@ -467,10 +494,10 @@ describe('learning language', () => {
       { languageCode: 'en' },
       { languageCode: 'fr' },
     ]);
-    agent.setLearningLanguage('en');
-    agent.setLearningLanguage('en');
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
     expect(requester.request).toHaveBeenCalledTimes(1);
-    agent.setLearningLanguage('fr');
+    agent.setLanguages({ learningLanguage: 'fr', nativeLanguage: 'zh-TW' });
     expect(requester.request).toHaveBeenLastCalledWith({ languageCode: 'fr' });
   });
 
@@ -479,11 +506,11 @@ describe('learning language', () => {
       { languageCode: 'en' },
       { languageCode: 'fr' },
     ]);
-    agent.setLearningLanguage('en');
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
     agent.onCaptured(captions());
-    agent.setLearningLanguage('fr');
+    agent.setLanguages({ learningLanguage: 'fr', nativeLanguage: 'zh-TW' });
     agent.onCaptured(captions({ lang: 'fr' }));
-    agent.setLearningLanguage('en');
+    agent.setLanguages({ learningLanguage: 'en', nativeLanguage: 'zh-TW' });
     agent.onCaptured(captions());
     expect(captionsPosted(posted).map((e) => e.lang)).toEqual([
       'en',

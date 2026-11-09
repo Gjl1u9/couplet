@@ -1,4 +1,5 @@
 import type { ControllerEvent } from '../subtitles/controller';
+import type { TrackMode } from './captions';
 
 /**
  * 頁面環境和內容腳本之間的訊息。頁面上的任何程式都能發送 window 訊息，
@@ -14,39 +15,54 @@ export type PageEvent =
   | {
       readonly type: 'track-status';
       readonly videoId: string;
-      readonly available: boolean;
+      readonly mode: TrackMode;
+      /** The shown track's language, or `null` when no track is shown. */
+      readonly language: string | null;
     };
 
 /** The content script's instruction to the page agent. */
-export interface LearningLanguageCommand {
-  readonly type: 'set-learning-language';
-  readonly language: string;
+export interface LanguagesCommand {
+  readonly type: 'set-languages';
+  readonly learningLanguage: string;
+  readonly nativeLanguage: string;
 }
+
+const TRACK_MODES: readonly TrackMode[] = [
+  'learning',
+  'translation',
+  'native',
+  'none',
+];
 
 const COMMAND_TAG = '__dualSubtitlesCommand';
 const LANGUAGE_CODE = /^[a-z]{2,3}(-[a-z0-9]{2,8})*$/i;
 
 export function toBridgeCommand(
-  command: LearningLanguageCommand,
+  command: LanguagesCommand,
 ): Record<string, unknown> {
   return { [COMMAND_TAG]: true, command };
 }
 
-export function parseBridgeCommand(
-  data: unknown,
-): LearningLanguageCommand | null {
+const isLanguageCode = (value: unknown): value is string =>
+  typeof value === 'string' && LANGUAGE_CODE.test(value);
+
+export function parseBridgeCommand(data: unknown): LanguagesCommand | null {
   if (typeof data !== 'object' || data === null) return null;
   const record = data as Record<string, unknown>;
   if (record[COMMAND_TAG] !== true) return null;
-  const command = record.command as Partial<LearningLanguageCommand> | null;
+  const command = record.command as Partial<LanguagesCommand> | null;
   if (
-    command?.type !== 'set-learning-language' ||
-    typeof command.language !== 'string' ||
-    !LANGUAGE_CODE.test(command.language)
+    command?.type !== 'set-languages' ||
+    !isLanguageCode(command.learningLanguage) ||
+    !isLanguageCode(command.nativeLanguage)
   ) {
     return null;
   }
-  return { type: command.type, language: command.language };
+  return {
+    type: command.type,
+    learningLanguage: command.learningLanguage,
+    nativeLanguage: command.nativeLanguage,
+  };
 }
 
 export function toBridgeMessage(event: PageEvent): Record<string, unknown> {
@@ -66,13 +82,18 @@ export function parseBridgeMessage(data: unknown): PageEvent | null {
 
   if (e.type === 'agent-ready') return { type: 'agent-ready' };
   if (e.type === 'track-status') {
-    if (typeof e.videoId !== 'string' || typeof e.available !== 'boolean') {
+    if (
+      typeof e.videoId !== 'string' ||
+      !TRACK_MODES.includes(e.mode as TrackMode) ||
+      !(e.language === null || isLanguageCode(e.language))
+    ) {
       return null;
     }
     return {
       type: 'track-status',
       videoId: e.videoId,
-      available: e.available,
+      mode: e.mode as TrackMode,
+      language: e.language,
     };
   }
   if (e.type === 'player') {

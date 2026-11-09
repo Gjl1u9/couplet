@@ -67,6 +67,8 @@ export function clampPosition(
 
 export interface OverlayOptions {
   readonly sourceLanguage?: () => string | null;
+  /** `false` shows the original as plain text, with nothing to click or select. */
+  readonly canLookUp?: () => boolean;
   /** Whether a missing translation is still loading, so its line keeps its place. */
   readonly expectsTranslation?: () => boolean;
   /** Whether this token is a Saved Word still on the schedule. */
@@ -127,6 +129,10 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
       draw(text) {
         if (text === current) return false;
         current = text;
+        if (options.canLookUp?.() === false) {
+          line.replaceChildren(text);
+          return true;
+        }
         let offset = 0;
         line.replaceChildren(
           ...tokenizeCaption(text, options.sourceLanguage?.() ?? null).map(

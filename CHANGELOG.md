@@ -7,6 +7,20 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-09
+
+### Added
+
+- Videos without subtitles in your learning language now show the video's own language with a translation, so any video
+  with subtitles is easier to follow. Words in them aren't clickable: looking up and saving stay with your learning
+  language.
+- A note at the player's top right says when a video has no subtitles at all, instead of showing nothing.
+
+### Changed
+
+- On a video in your native language, Couplet leaves YouTube's own subtitles as they are.
+- The settings panel says which subtitles a video shows when it lacks your learning language.
+
 ## [0.2.1] - 2026-11-08
 
 ### Changed

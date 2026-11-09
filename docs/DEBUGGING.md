@@ -29,7 +29,7 @@ await new Promise((resolve) => {
 });
 ```
 
-The result names the settings, whether the video has a track in the learning language, and for the captions the page agent forwarded:
+The result names the settings, `trackStatus` (which of the four cases in [`DESIGN.md`](DESIGN.md#which-subtitles-show) applies, and the shown track's language), and for the captions the page agent forwarded:
 
 - `kind`: `asr` for automatic captions.
 - `segments` and `multiWordSegments`: YouTube sends automatic captions one word per segment, or sometimes whole lines per segment. Mostly multi-word segments means the line-level form.

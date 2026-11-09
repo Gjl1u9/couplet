@@ -13,7 +13,10 @@ import { LOOKUP_WARM } from '../lib/lookup/proxy';
 import { createSubtitleController } from '../lib/subtitles/controller';
 import { createOverlay } from '../lib/subtitles/overlay';
 import { createLookupPanel } from '../lib/ui/lookup-panel';
-import { createSettingsPanel } from '../lib/ui/settings-panel';
+import {
+  createSettingsPanel,
+  type TrackStatus,
+} from '../lib/ui/settings-panel';
 import { createSaveSound } from '../lib/ui/sound';
 import { createSpeaker } from '../lib/ui/speech';
 import { OPEN_DASHBOARD_MESSAGE } from '../lib/dashboard/open';
@@ -37,6 +40,7 @@ import {
 import { AUTH_STORAGE_KEY, createAuthClient } from '../lib/auth/messages';
 import { VOCABULARY_REVISION_KEY } from '../lib/sync/messages';
 import { createSignInToast } from '../lib/ui/sign-in-toast';
+import { createTrackNotice } from '../lib/ui/track-notice';
 
 /** Idle connections stay open about this long, so warming more often does nothing. */
 const WARM_EVERY_MS = 30_000;
@@ -76,6 +80,8 @@ export default defineContentScript({
     };
     const overlay = createOverlay({
       sourceLanguage: () => controller.sourceLanguage(),
+      // A video shown only for its translation has no lookups.
+      canLookUp: () => trackStatus?.mode !== 'translation',
       expectsTranslation: () => controller.expectsTranslation(),
       isMarked: (token) => isSavedForm(token),
       onApproach: warmLookup,
@@ -266,14 +272,16 @@ export default defineContentScript({
       },
     });
 
-    let trackAvailable: boolean | null = null;
+    let trackStatus: TrackStatus | null = null;
+    /** The video `trackStatus` describes. */
+    let trackVideoId: string | null = null;
     const settingsPanel = createSettingsPanel({
       layer: () => overlay.panelLayer(),
       getSettings: () => settings.get(),
       update: (patch) => {
         settings.update(patch);
       },
-      trackAvailable: () => trackAvailable,
+      trackStatus: () => trackStatus,
       previewSaveSound: () => {
         saveSound.play();
       },
@@ -282,26 +290,44 @@ export default defineContentScript({
       },
       onOpen: () => {
         lookupPanel.close();
+        trackNotice.close();
       },
     });
 
+    const trackNotice = createTrackNotice({
+      layer: () => overlay.panelLayer(),
+    });
+    /** Each video is announced once, so the notice never nags. */
+    const announcedMissing = new Set<string>();
+    const announceMissingTrack = () => {
+      if (!settings.get().enabled || trackStatus?.mode !== 'none') return;
+      if (trackVideoId === null || settingsPanel.isOpen()) return;
+      if (announcedMissing.has(trackVideoId)) return;
+      announcedMissing.add(trackVideoId);
+      trackNotice.show();
+    };
+
     /** The page agent loads no track while the extension is off. */
-    let postedLanguage: string | null = null;
-    const syncLearningLanguage = () => {
-      const { enabled, learningLanguage } = settings.get();
+    let postedLanguages: string | null = null;
+    const syncLanguages = () => {
+      const { enabled, learningLanguage, nativeLanguage } = settings.get();
       if (!enabled) return;
-      if (learningLanguage !== postedLanguage) {
-        if (postedLanguage !== null) {
+      // Either language can change which track a video shows.
+      const key = `${learningLanguage}|${nativeLanguage}`;
+      if (key !== postedLanguages) {
+        if (postedLanguages !== null) {
           lookupPanel.close();
           controller.resetCaptions();
-          trackAvailable = null;
+          trackStatus = null;
+          trackNotice.close();
         }
-        postedLanguage = learningLanguage;
+        postedLanguages = key;
       }
       window.postMessage(
         toBridgeCommand({
-          type: 'set-learning-language',
-          language: learningLanguage,
+          type: 'set-languages',
+          learningLanguage,
+          nativeLanguage,
         }),
         location.origin,
       );
@@ -313,13 +339,17 @@ export default defineContentScript({
         appliedNative = next.nativeLanguage;
         lookupPanel.close();
       }
-      if (!next.enabled) lookupPanel.close();
+      if (!next.enabled) {
+        lookupPanel.close();
+        trackNotice.close();
+      }
       controller.setTargetLanguage(next.nativeLanguage);
       controller.setEnabled(next.enabled);
       overlay.setDisplay(next);
       overlay.setContextVisible(next.showContext);
-      syncLearningLanguage();
+      syncLanguages();
       settingsPanel.refresh();
+      announceMissingTrack();
     };
     settings.subscribe(applySettings);
     overlay.setDisplay(settings.get());
@@ -341,6 +371,7 @@ export default defineContentScript({
       lookupPanel.close();
       settingsPanel.dispose();
       signInToast.dispose();
+      trackNotice.close();
       controller.dispose();
       overlay.dispose();
       return true;
@@ -394,7 +425,7 @@ export default defineContentScript({
               [DEV_DUMP_RESULT]: {
                 enabled,
                 learningLanguage,
-                trackAvailable,
+                trackStatus,
                 captions:
                   lastCaptions &&
                   describeCaptions(
@@ -415,15 +446,26 @@ export default defineContentScript({
       }
       settingsPanel.ensureButton();
       if (event.type === 'agent-ready') {
-        syncLearningLanguage();
+        syncLanguages();
         return;
       }
       if (event.type === 'track-status') {
-        trackAvailable = event.available;
+        trackStatus = { mode: event.mode, language: event.language };
+        trackVideoId = event.videoId;
+        if (event.mode !== 'none') trackNotice.close();
         settingsPanel.refresh();
+        announceMissingTrack();
         return;
       }
-      if (event.type === 'player') lookupPanel.close();
+      if (event.type === 'player') {
+        lookupPanel.close();
+        // The player reports null while loading, which is not a new video.
+        if (event.videoId !== null && event.videoId !== trackVideoId) {
+          trackStatus = null;
+          trackVideoId = null;
+          trackNotice.close();
+        }
+      }
       controller.handle(event);
       refresh();
     });
