@@ -1,5 +1,5 @@
 // Renders a film in brand/video into a video, one exact frame at a time.
-// Run with: node scripts/build-video.mjs [--film teaser|short] [--stills out-dir]
+// Run with: node scripts/build-video.mjs [--film teaser|short|short-free] [--stills out-dir]
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
@@ -29,6 +29,16 @@ const FILMS = {
     stills: [
       0, 1.5, 3, 5.5, 6.1, 7.2, 9.8, 10.8, 11.8, 13.5, 14.3, 15.0, 15.7, 16.2,
       17.0, 18.0, 19.1, 20.5, 22.0, 23.2, 24.2, 25.4, 27.5, 28.8, 30.5,
+    ],
+  },
+  // The second upright film: free and one click to add, from install to progress.
+  'short-free': {
+    page: 'brand/video/short-free.html',
+    output: 'brand/video/couplet-short-free.mp4',
+    size: { width: 1080, height: 1920 },
+    stills: [
+      0.3, 1.5, 2.0, 2.6, 3.2, 3.8, 4.3, 5.0, 6.0, 8.0, 10.6, 11.6, 14.2, 15.5,
+      16.3, 17.9, 19.4, 20.8, 22.4, 23.6, 25.5, 28.6, 30.5,
     ],
   },
 };

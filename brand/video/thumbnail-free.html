@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Couplet Short: Free thumbnail</title>
+    <style>
+      /* The free Short's cover: the claim, then a lookup straight from the film. */
+      :root {
+        --paper: #ddd5c2;
+        --ink: #29251d;
+        --muted: #6a6354;
+        --line: #857c6a;
+        --accent: #c9401f;
+        --serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+        --sans: -apple-system, 'Helvetica Neue', 'PingFang TC', sans-serif;
+      }
+
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        margin: 0;
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      h1 {
+        position: absolute;
+        top: 150px;
+        right: 60px;
+        left: 60px;
+        margin: 0;
+        font-family: var(--serif);
+        font-size: 124px;
+        font-weight: 600;
+        line-height: 136px;
+        text-align: center;
+      }
+
+      h1 span {
+        position: relative;
+        display: inline-block;
+      }
+
+      h1 span::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: -4px;
+        left: 0;
+        height: 10px;
+        background: var(--accent);
+      }
+
+      /* A frame of the film itself, cropped to the subtitle and its panel. */
+      #shot {
+        position: absolute;
+        top: 690px;
+        left: 0;
+        width: 1080px;
+        height: 790px;
+        overflow: hidden;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      #shot iframe {
+        position: absolute;
+        top: -560px;
+        left: 0;
+        width: 1080px;
+        height: 1920px;
+        border: 0;
+      }
+
+      #lockup {
+        position: absolute;
+        top: 1560px;
+        right: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        font-family: var(--sans);
+        font-size: 76px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      #lockup svg {
+        width: 92px;
+        height: 92px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dual subtitles<br />for YouTube.<br /><span>Free.</span></h1>
+    <div id="shot">
+      <iframe id="film" title="Film" src="short-free.html?t=11.9"></iframe>
+    </div>
+    <div id="lockup">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path
+          fill="#29251d"
+          d="M15 4H31A11 11 0 0 1 42 15V22H33A11 11 0 0 0 22 33V42H15A11 11 0 0 1 4 31V15A11 11 0 0 1 15 4Z"
+        />
+        <path
+          fill="#c9401f"
+          d="M42 22H49A11 11 0 0 1 60 33V49A11 11 0 0 1 49 60H33A11 11 0 0 1 22 49V42H31A11 11 0 0 0 42 31Z"
+        />
+      </svg>
+      Couplet
+    </div>
+    <script>
+      const film = document.getElementById('film');
+      window.ready = new Promise((resolve, reject) => {
+        film.onload = () => {
+          film.contentWindow.ready.then(resolve, reject);
+        };
+      });
+    </script>
+  </body>
+</html>

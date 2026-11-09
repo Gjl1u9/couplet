@@ -52,3 +52,12 @@ The person chose its story: Dual Subtitles and "Free" from the first frame, a tr
 - **Safe area:** the feed's buttons cover the right edge and its caption covers the bottom, so the picture centres a little left and `SAFE` bounds panels and the Explain with AI lean-in.
 - **Readable on a phone:** the subtitles use the Large size, and the camera crops the 16:9 player to its middle so they fill the width.
 - **Accurate:** a phrase shows Google's translation of the selection alone (`吸收`), as the Lookup Panel does; the AI explanation then gives the meaning in context.
+
+## The free Short
+
+[`brand/video/short-free.html`](../../../brand/video/short-free.html) is a second upright film, 31.5 seconds, built from the Short's scenes. Add `--film short-free` to both commands above; it renders `brand/video/couplet-short-free.mp4`.
+
+The person wanted it to stress free and light, with its own opening, and without quoting the package size.
+
+- **Opening:** "Dual subtitles for YouTube. Free, in one click." over our own landing page: one click on "Add to Chrome, free" turns it to "Added to Chrome", and the camera pushes in on the toolbar as the icon arrives. It is our page, never a copy of the Chrome Web Store.
+- **Then:** "On the videos you already watch.", one word, one phrase, the Popup, Review, and Progress. Home and Explain with AI are left out to keep it short.
