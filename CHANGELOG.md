@@ -7,6 +7,8 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-11
+
 ### Changed
 
 - Home shows Known words as a ring that fills as more of your saved words become known, with the count beside it.
