@@ -58,6 +58,28 @@ export function streakDays(log: readonly ReviewEvent[], now: number): number {
   return streak;
 }
 
+/** The most days in a row with a review, ever. */
+export function longestStreak(log: readonly ReviewEvent[]): number {
+  const days = [...new Set(log.map((event) => startOfDay(event.at)))].sort(
+    (a, b) => a - b,
+  );
+  let longest = 0;
+  let run = 0;
+  let last: number | null = null;
+  for (const day of days) {
+    run = last !== null && nextDay(last) === day ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    last = day;
+  }
+  return longest;
+}
+
+/** Reviews since local midnight. */
+export function reviewsToday(log: readonly ReviewEvent[], now: number): number {
+  const today = startOfDay(now);
+  return log.filter((event) => event.at >= today && event.at <= now).length;
+}
+
 const WEEK_MS = 7 * 86_400_000;
 
 export function reviewsLastWeek(

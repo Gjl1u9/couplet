@@ -6,8 +6,10 @@ import {
   forecast,
   hardWords,
   intervalCounts,
+  longestStreak,
   reviewsByDay,
   reviewsLastWeek,
+  reviewsToday,
   reviewTrail,
   stageCounts,
   stageOf,
@@ -76,6 +78,24 @@ describe('streakDays', () => {
   it('is zero after a missed day', () => {
     expect(streakDays([event(daysAgo(2))], NOW)).toBe(0);
     expect(streakDays([], NOW)).toBe(0);
+  });
+});
+
+describe('longestStreak', () => {
+  it('finds the longest run of days, even one that has ended', () => {
+    const log = [0, 1, 5, 6, 7, 8, 12, 12].map((days) => event(daysAgo(days)));
+    expect(longestStreak(log)).toBe(4);
+  });
+
+  it('is zero with no reviews', () => {
+    expect(longestStreak([])).toBe(0);
+  });
+});
+
+describe('reviewsToday', () => {
+  it('counts only reviews since midnight', () => {
+    const log = [event(daysAgo(0)), event(daysAgo(0)), event(daysAgo(1))];
+    expect(reviewsToday(log, NOW)).toBe(2);
   });
 });
 

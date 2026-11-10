@@ -7,14 +7,17 @@ import { formatDue } from './format';
 import { Icon, ICONS } from './Icon';
 import {
   forecast,
+  longestStreak,
   reviewsLastWeek,
+  reviewsToday,
   stageCounts,
   stageLabel,
   stageOf,
   streakDays,
 } from './stats';
 
-const RECENT_SHOWN = 4;
+/** Enough for one video's saves; the rest are a click away in Words. */
+const RECENT_SHOWN = 8;
 
 const plural = (count: number, one: string) =>
   `${String(count)} ${one}${count === 1 ? '' : 's'}`;
@@ -108,6 +111,15 @@ export function HomePage({
     .map((word) => word.review.dueAt)
     .sort((a, b) => a - b)[0];
   const known = stageCounts(words).known;
+  const streak = streakDays(streakLog, now);
+  const best = longestStreak(streakLog);
+  // Kept after a streak breaks, so the work behind it still shows.
+  let streakNote = 'Your first review starts one';
+  if (best > 0) {
+    streakNote =
+      streak >= best ? 'Your best yet' : `Best: ${plural(best, 'day')}`;
+  }
+  const today = reviewsToday(log, now);
   const recent = [...words]
     .sort((a, b) => b.savedAt - a.savedAt)
     .slice(0, RECENT_SHOWN);
@@ -137,8 +149,9 @@ export function HomePage({
       <dl className="grid stats">
         <div className="card span-2">
           <dt className="muted">Review streak</dt>
-          <dd className="stat-value">
-            {plural(streakDays(streakLog, now), 'day')}
+          <dd>
+            <span className="stat-value">{plural(streak, 'day')}</span>
+            <span className="muted stat-note">{streakNote}</span>
           </dd>
         </div>
         <div className="card span-2">
@@ -149,7 +162,12 @@ export function HomePage({
         </div>
         <div className="card span-2">
           <dt className="muted">Reviews, last 7 days</dt>
-          <dd className="stat-value">{reviewsLastWeek(log, now)}</dd>
+          <dd>
+            <span className="stat-value">{reviewsLastWeek(log, now)}</span>
+            <span className="muted stat-note">
+              {today > 0 ? `${String(today)} today` : 'None today yet'}
+            </span>
+          </dd>
         </div>
       </dl>
       <div className="grid home-recent">

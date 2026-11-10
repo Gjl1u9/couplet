@@ -184,6 +184,41 @@ describe('Dashboard pages', () => {
       );
     });
 
+    it('puts one line of context under the streak and the week', async () => {
+      const day = 86_400_000;
+      const at = (daysAgo: number) => Date.now() - daysAgo * day;
+      const review = (time: number) => ({
+        wordId: 'en:bank',
+        encounterId: 'e',
+        grade: 'good' as const,
+        levelBefore: 0,
+        levelAfter: 1,
+        at: time,
+      });
+      const old = [9, 8, 7].map((days) => review(at(days)));
+      await show(
+        <HomePage
+          words={[word('bank')]}
+          log={[review(Date.now() - 1000)]}
+          streakLog={[...old, review(Date.now() - 1000)]}
+        />,
+      );
+      const notes = [...document.querySelectorAll('.stat-note')].map(
+        (note) => note.textContent,
+      );
+      expect(notes).toEqual(['Best: 3 days', '1 today']);
+    });
+
+    it('shows eight recent words', async () => {
+      const many = 'abcdefghij'.split('').map((letter) => word(letter));
+      await show(<HomePage words={many} log={[]} streakLog={[]} />);
+      expect(document.querySelectorAll('.home-recent li')).toHaveLength(8);
+      expect(q('.stats')?.textContent).toContain('None today yet');
+      expect(q('.stats')?.textContent).toContain(
+        'Your first review starts one',
+      );
+    });
+
     it('fills the ring by the share of saved words known', async () => {
       await show(
         <HomePage
