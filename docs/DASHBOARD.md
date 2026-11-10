@@ -17,11 +17,11 @@ The Learning Language in Settings filters every page, because each language has 
 
 ## Home
 
-| Feature        | Without it                                  | What it does                                                              | Interacts with                     |
-| -------------- | ------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------- |
-| Ready count    | The user has to work out what to do         | States what is due and starts Review                                      | Falls as words are graded          |
-| Three numbers  | Progress cannot be felt at a glance         | Review streak, Known words of those saved, and reviews in the last 7 days | Read the Vocabulary and review log |
-| Recently saved | A word just saved cannot be checked quickly | The four newest saves, linking to their details                           | Opens the word in Words            |
+| Feature        | Without it                                  | What it does                                                                        | Interacts with                     |
+| -------------- | ------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------- |
+| Ready count    | The user has to work out what to do         | States what is due and starts Review                                                | Falls as words are graded          |
+| Three numbers  | Progress cannot be felt at a glance         | Review streak, Known words as a ring of those saved, and reviews in the last 7 days | Read the Vocabulary and review log |
+| Recently saved | A word just saved cannot be checked quickly | The four newest saves, linking to their details                                     | Opens the word in Words            |
 
 **Done when:** a new user sees how to start, and a user with due words starts Review in one click.
 
