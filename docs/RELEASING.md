@@ -6,6 +6,16 @@ A release is a tag `v<version>` on `main`, with [Semantic Versioning](https://se
 
 Each change a user would notice adds a line under `## [Unreleased]`, written for someone meeting the release, under Added, Changed, Fixed, or Removed.
 
+## Merging pull requests
+
+Pull requests are squash-merged, so each one is a single commit on `main` titled after the pull request. Its body lists what changed, as the pull request did, and the branch's own commits stay readable in the pull request.
+
+```bash
+gh pr merge <number> --squash --match-head-commit <sha>
+```
+
+Branch from the latest `main`, and merge `main` into the branch when it falls behind. A branch started on another unmerged branch must be rebased onto `main` once that one is squash-merged, because its commits no longer match the squashed one.
+
 ## Cutting a release
 
 1. On a branch `chore/release-<version>`, set the version, which the extension's manifest takes from `package.json`:
