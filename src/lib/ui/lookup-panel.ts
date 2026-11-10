@@ -9,11 +9,13 @@ import {
   meaningChip,
   ICON_ALERT,
   ICON_KNOWN,
+  ICON_SPARKLES,
   ICON_SPEAK,
   ICON_STAR,
   watchDismiss,
 } from './dom';
 import { lookupFailure } from '../lookup/proxy';
+import { explainFailure, type Explanation } from '../lookup/explain';
 import type { Speaker } from './speech';
 
 export interface LookupPanelOptions {
@@ -35,6 +37,13 @@ export interface LookupPanelOptions {
   readonly speaker: Speaker;
   /** Resolves false to leave the word unsaved or not known, such as when sign-in is declined. */
   readonly beforeSave?: () => Promise<boolean>;
+  /**
+   * Explains the word or phrase in its line, asked only when the user clicks Explain
+   * with AI. Without it the panel has no Explain.
+   */
+  readonly explain?: (entry: WordEntry, cue: WordInCue) => Promise<Explanation>;
+  /** Resolves false to leave it unexplained, such as when sign-in is declined. */
+  readonly beforeExplain?: () => Promise<boolean>;
   /** Clicks here leave the panel open, such as on the sign-in toast. */
   readonly keepsOpen?: (path: readonly EventTarget[]) => boolean;
   readonly onSaved?: () => void;
@@ -69,6 +78,12 @@ export function senseRow(sense: Sense): HTMLElement {
   for (const part of parts) part.dir = 'auto';
   row.append(...parts);
   return row;
+}
+
+function aiIcon(): SVGSVGElement {
+  const svg = icon(ICON_SPARKLES);
+  svg.setAttribute('class', 'icon ai-icon');
+  return svg;
 }
 
 const EDGE_GAP_PX = 16;
@@ -134,19 +149,149 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
   };
 
   /**
+   * Explain with AI, beside I know this: asks once when clicked, and Hide explanation
+   * folds the answer away until it is asked for again in the same panel.
+   */
+  const explainControls = (
+    cue: WordInCue,
+    entry: WordEntry,
+    isCurrent: () => boolean,
+  ) => {
+    const explain = options.explain;
+    if (!explain) return null;
+    let open = false;
+    let pending = false;
+    let result: Explanation | null = null;
+    let failure: ReturnType<typeof explainFailure> | null = null;
+    const box = element('div', 'lookup-explain');
+    box.hidden = true;
+    const button = element('button', 'known-action explain-action');
+    button.type = 'button';
+
+    const render = () => {
+      button.setAttribute('aria-expanded', String(open));
+      button.replaceChildren(
+        aiIcon(),
+        ...(open
+          ? [element('span', '', 'Hide explanation')]
+          : [
+              element('span', '', 'Explain with AI'),
+              element('span', 'beta', 'Beta'),
+            ]),
+      );
+      box.hidden = !open;
+      box.classList.toggle('is-alert', open && !pending && failure !== null);
+      box.removeAttribute('role');
+      box.removeAttribute('aria-label');
+      box.removeAttribute('aria-busy');
+      if (!open) {
+        box.replaceChildren();
+      } else if (pending) {
+        box.setAttribute('aria-busy', 'true');
+        box.setAttribute('aria-label', 'Loading explanation');
+        box.replaceChildren(
+          element(
+            'div',
+            'explain-skeleton',
+            element('span', ''),
+            element('span', ''),
+            element('span', ''),
+          ),
+        );
+      } else if (result) {
+        const text = element('p', 'explain-text', result.text);
+        text.dir = 'auto';
+        box.replaceChildren(
+          text,
+          element(
+            'p',
+            'explain-note',
+            `AI can make mistakes · ${String(result.remaining)} left today`,
+          ),
+        );
+      } else if (failure) {
+        box.setAttribute('role', 'alert');
+        const retry = element('button', 'text-button', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', () => {
+          ask();
+        });
+        box.replaceChildren(
+          element('p', '', failure.text),
+          ...(failure.canRetry ? [retry] : []),
+        );
+      }
+      place();
+    };
+
+    const ask = () => {
+      pending = true;
+      failure = null;
+      render();
+      explain(entry, cue).then(
+        (value) => {
+          if (!isCurrent()) return;
+          pending = false;
+          result = value;
+          render();
+        },
+        (error: unknown) => {
+          if (!isCurrent()) return;
+          pending = false;
+          failure = explainFailure(error);
+          render();
+        },
+      );
+    };
+
+    let asking = false;
+    button.addEventListener('click', () => {
+      if (open) {
+        open = false;
+        render();
+        return;
+      }
+      if (result || pending) {
+        open = true;
+        render();
+        return;
+      }
+      if (asking) return;
+      asking = true;
+      (options.beforeExplain?.() ?? Promise.resolve(true)).then(
+        (allowed) => {
+          asking = false;
+          if (!allowed || !isCurrent()) return;
+          open = true;
+          ask();
+        },
+        () => {
+          asking = false;
+        },
+      );
+    });
+    render();
+    return { button, box };
+  };
+
+  /**
    * The save star, and for a word the I know this action under its senses. Saving and
    * knowing exclude each other: knowing takes a saved word off the schedule, and saving
-   * a known word puts it back.
+   * a known word puts it back. Explain with AI joins them in the foot. `below` is what
+   * goes under the senses: the explanation, then the foot.
    */
   const wordControls = (
     cue: WordInCue,
     entry: WordEntry,
+    isCurrent: () => boolean,
     { saveLabel = 'Save word', canKnow = true } = {},
   ) => {
     let status: WordStatus = 'none';
     /** Where Undo returns to: the status before I know this was pressed. */
     let beforeKnown: WordStatus = 'saved';
-    const foot = canKnow ? element('div', 'lookup-foot') : null;
+    const explain = explainControls(cue, entry, isCurrent);
+    const foot = canKnow || explain ? element('div', 'lookup-foot') : null;
+    const explainButton = explain ? [explain.button] : [];
 
     const knowButton = element(
       'button',
@@ -180,9 +325,11 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
         saved ? 'Remove from saved words' : saveLabel,
       );
       foot?.replaceChildren(
-        ...(status === 'known'
-          ? [knownNote, undoButton, knownHint]
-          : [knowButton]),
+        ...(!canKnow
+          ? explainButton
+          : status === 'known'
+            ? [knownNote, undoButton, ...explainButton, knownHint]
+            : [knowButton, ...explainButton]),
       );
       place();
     };
@@ -235,7 +382,8 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
       },
       () => undefined,
     );
-    return { save, foot };
+    const below = [...(explain ? [explain.box] : []), ...(foot ? [foot] : [])];
+    return { save, below };
   };
 
   const load = (cue: WordInCue) => {
@@ -282,9 +430,9 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
           word.textContent = entry.lemma;
           phonetic.textContent = entry.phonetic;
           phonetic.hidden = !entry.phonetic;
-          const controls = wordControls(cue, entry);
+          const controls = wordControls(cue, entry, isCurrent);
           speak.before(controls.save);
-          if (controls.foot) senses.after(controls.foot);
+          senses.after(...controls.below);
         }
         senses.hidden = !entry;
         senses.replaceChildren(...(entry?.senses.map(senseRow) ?? []));
@@ -316,6 +464,7 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
     if (!panel) return;
     generation += 1;
     const current = generation;
+    const isCurrent = () => current === generation;
     const text = cue.word;
     const heading = element('span', 'lookup-phrase', text);
     heading.dir = 'auto';
@@ -346,12 +495,14 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
       (translation) => {
         if (current !== generation) return;
         if (translation?.trim() && text.length <= MAX_WORD_LENGTH) {
-          speak.before(
-            wordControls(cue, phraseEntry(text, translation), {
-              saveLabel: 'Save phrase',
-              canKnow: false,
-            }).save,
+          const controls = wordControls(
+            cue,
+            phraseEntry(text, translation),
+            isCurrent,
+            { saveLabel: 'Save phrase', canKnow: false },
           );
+          speak.before(controls.save);
+          body.after(...controls.below);
         }
         body.hidden = translation === null;
         body.replaceChildren(

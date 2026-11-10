@@ -18,6 +18,7 @@ import {
   type Settings,
 } from '../lib/settings/settings';
 import { LOOKUP_WARM } from '../lib/lookup/proxy';
+import { createExplainClient } from '../lib/lookup/explain';
 import { createSubtitleController } from '../lib/subtitles/controller';
 import { createOverlay } from '../lib/subtitles/overlay';
 import { createLookupPanel } from '../lib/ui/lookup-panel';
@@ -289,6 +290,9 @@ export default defineContentScript({
     });
 
     const saveSound = createSaveSound();
+    const explain = createExplainClient((message) =>
+      browser.runtime.sendMessage(message),
+    );
     const lookupPanel = createLookupPanel({
       layer: () => overlay.panelLayer(),
       lookUp: (word) => lookup.lookUp(word, lookupLanguages(), neverAborted),
@@ -303,6 +307,19 @@ export default defineContentScript({
       },
       wordStatus: (entry) => vocabulary.status(entry.lemma, sourceLanguage()),
       beforeSave: () => signInToast.require(),
+      // The same words, lines, and languages the Words page sends for this saved line, so
+      // either one asking first fills the service's cache for the other.
+      explain: (entry, cue) => {
+        const input = encounterInput(entry, cue);
+        return explain({
+          word: input.form,
+          cues: input.cues.map((line) => line.original),
+          current: input.currentCue,
+          source: input.source,
+          target: input.target,
+        });
+      },
+      beforeExplain: () => signInToast.require('Sign in to use explanations'),
       keepsOpen: (path) =>
         path.some(
           (target) =>
