@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSaveSound } from './sound';
+import { createGradeSounds, createSaveSound } from './sound';
 
 function fakeContext() {
   const oscillators: {
@@ -51,5 +51,32 @@ describe('createSaveSound', () => {
         oscillator.start.mock.calls[0]?.[0] as number,
       );
     }
+  });
+});
+
+describe('createGradeSounds', () => {
+  const pitches = (oscillators: { frequency?: { value: number } }[]) =>
+    oscillators.map((oscillator) => oscillator.frequency?.value ?? 0);
+
+  it('rises for Got it and falls for Forgot', () => {
+    const good = fakeContext();
+    createGradeSounds(() => good.context).play('good');
+    const [goodFirst = 0, goodLast = 0] = pitches(
+      good.oscillators as unknown as { frequency: { value: number } }[],
+    );
+    expect(goodLast).toBeGreaterThan(goodFirst);
+
+    const again = fakeContext();
+    createGradeSounds(() => again.context).play('again');
+    const [againFirst = 0, againLast = 0] = pitches(
+      again.oscillators as unknown as { frequency: { value: number } }[],
+    );
+    expect(againLast).toBeLessThan(againFirst);
+  });
+
+  it('plays one note for Unsure', () => {
+    const { context, oscillators } = fakeContext();
+    createGradeSounds(() => context).play('hard');
+    expect(oscillators).toHaveLength(1);
   });
 });

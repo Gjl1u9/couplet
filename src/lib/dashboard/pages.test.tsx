@@ -90,6 +90,7 @@ function setup() {
     saveSettings: () => Promise.resolve(),
     onSettingsChange: () => () => undefined,
     previewSaveSound,
+    playGradeSound: () => undefined,
     explain,
     onVocabularyChange: () => () => undefined,
   };
@@ -411,10 +412,10 @@ describe('Dashboard pages', () => {
     it('retires, and offers restore on a Retired word', async () => {
       const { services, retire, restore, revert } = setup();
       await render('en:bank', services);
-      await click(named('Stop reviewing'));
+      await click(named('I know this'));
       expect(retire).toHaveBeenCalledWith('en:bank');
       expect(q('.toast')?.textContent).toContain(
-        "bank won't come up for review again",
+        "bank is Known and won't come up for review again",
       );
       await click(q('.toast button'));
       expect(revert).toHaveBeenCalledWith(
@@ -435,12 +436,13 @@ describe('Dashboard pages', () => {
       expect(restore).toHaveBeenCalledWith('en:bank');
     });
 
-    it('asks before deleting', async () => {
+    it('asks before removing, saying what goes', async () => {
       const { services, remove } = setup();
       await render('en:bank', services);
-      await click(named('Delete'));
+      await click(named('Remove'));
       expect(remove).not.toHaveBeenCalled();
-      expect(q('.confirm')?.textContent).toContain('Delete bank');
+      expect(q('.confirm')?.textContent).toContain('Remove bank from Words?');
+      expect(q('.confirm')?.textContent).toContain('Save it again');
       await click(q('.detail-actions .is-danger'));
       expect(remove).toHaveBeenCalledWith('en:bank');
     });

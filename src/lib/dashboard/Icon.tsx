@@ -1,3 +1,5 @@
+import { ICON_CONTEXT_OFF, ICON_CONTEXT_ON, ICON_KNOWN } from '../ui/dom';
+
 export const ICONS = {
   home: [
     'M5 12h-2l9 -9l9 9h-2',
@@ -28,6 +30,10 @@ export const ICONS = {
   ],
   moon: ['M12 3a9 9 0 1 0 9 9a7 7 0 0 1 -9 -9'],
   check: ['M5 12l5 5l9 -10'],
+  /** A check in a circle, as I know this has on video. */
+  known: ICON_KNOWN,
+  contextOn: ICON_CONTEXT_ON,
+  contextOff: ICON_CONTEXT_OFF,
   trash: [
     'M4 7h16',
     'M10 11v6',

@@ -9,8 +9,7 @@ import {
 import { formatDue, formatInterval, shortLabel } from './format';
 import { ReviewCard, type ReviewCardHandle } from './ReviewCard';
 import type { DashboardServices } from './services';
-import { Toast } from './Toast';
-import { stoppedMessage } from './WordParts';
+import { AnswerPill, type PillMessage } from './AnswerPill';
 import { reduceSession, startSession, type SessionOutcome } from './session';
 
 const GRADES: readonly { readonly id: Grade; readonly label: string }[] = [
@@ -87,16 +86,24 @@ function Done({
 export function ReviewPage({
   services,
   learningLanguage,
+  sounds,
 }: {
   readonly services: DashboardServices;
   readonly learningLanguage: string;
+  /** The Sounds setting: each answer plays its own short sound. */
+  readonly sounds: boolean;
 }) {
   const [session, dispatch] = useReducer(reduceSession, startSession([]));
   const [loaded, setLoaded] = useState(false);
-  const [status, setStatus] = useState('');
-  const [notice, setNotice] = useState<string | null>(null);
-  const dismissNotice = useCallback(() => {
-    setNotice(null);
+  const [pill, setPill] = useState<PillMessage | null>(null);
+  const pillCount = useRef(0);
+  /** Says what just happened, above the grade buttons. The newest replaces the last. */
+  const say = useCallback((message: Omit<PillMessage, 'id'>) => {
+    pillCount.current += 1;
+    setPill({ ...message, id: pillCount.current });
+  }, []);
+  const dismissPill = useCallback(() => {
+    setPill(null);
   }, []);
   const [nextDue, setNextDue] = useState<number | null>(null);
   const [contextCollapsed, setContextCollapsed] =
@@ -129,10 +136,10 @@ export function ReviewPage({
 
   useEffect(() => {
     refresh().catch(() => {
-      setStatus("Couldn't load your words");
+      say({ text: "Couldn't load your words", alert: true });
       setLoaded(true);
     });
-  }, [refresh, session.outcomes.length]);
+  }, [refresh, say, session.outcomes.length]);
 
   useEffect(() => {
     if (nextDue === null) return undefined;
@@ -154,10 +161,9 @@ export function ReviewPage({
   const once = (action: () => Promise<void>) => {
     if (busy.current) return;
     busy.current = true;
-    setNotice(null);
     action()
       .catch(() => {
-        setStatus("Couldn't save. Try again.");
+        say({ text: "Couldn't save. Try again.", alert: true });
       })
       .finally(() => {
         busy.current = false;
@@ -167,6 +173,7 @@ export function ReviewPage({
   const answer = (grade: Grade) => {
     if (!word || !encounter) return;
     once(async () => {
+      if (sounds) services.playGradeSound(grade);
       const next = await services.vocabulary.grade(
         word.id,
         encounter.id,
@@ -175,7 +182,7 @@ export function ReviewPage({
       if (!next) {
         // Deleted in another tab, so there is nothing left to grade.
         dispatch({ type: 'deleted' });
-        setStatus(`${shortLabel(word.lemma)} was deleted`);
+        say({ word: shortLabel(word.lemma), text: 'was removed elsewhere' });
         return;
       }
       const eventAt = next.review.lastReviewedAt;
@@ -184,11 +191,13 @@ export function ReviewPage({
         outcome: grade,
         step: { word, eventAt, stamp: next.reviewStamp ?? null },
       });
-      setStatus(
-        next.review.retired
-          ? `${shortLabel(word.lemma)}: finished`
-          : `${shortLabel(word.lemma)}: back in ${formatInterval((next.review.dueAt - (eventAt ?? 0)) / 1000)}`,
-      );
+      say({
+        word: shortLabel(word.lemma),
+        text: next.review.retired
+          ? 'finished'
+          : `back in ${formatInterval((next.review.dueAt - (eventAt ?? 0)) / 1000)}`,
+        undo: true,
+      });
     });
   };
 
@@ -201,8 +210,11 @@ export function ReviewPage({
         outcome: 'retired',
         step: { word, eventAt: null, stamp: next?.reviewStamp ?? null },
       });
-      setStatus('');
-      setNotice(stoppedMessage(word.lemma));
+      say({
+        word: shortLabel(word.lemma),
+        text: "Known. Won't be reviewed again",
+        undo: true,
+      });
     });
   };
 
@@ -211,7 +223,7 @@ export function ReviewPage({
     once(async () => {
       await services.vocabulary.remove(word.id);
       dispatch({ type: 'deleted' });
-      setStatus(`Deleted ${shortLabel(word.lemma)}`);
+      say({ text: 'Removed', word: shortLabel(word.lemma), wordLast: true });
     });
   };
 
@@ -226,11 +238,11 @@ export function ReviewPage({
       );
       if (result === 'changed') {
         dispatch({ type: 'undo-refused' });
-        setStatus('Changed on another device');
+        say({ text: 'Changed on another device' });
         return;
       }
       dispatch({ type: 'undone' });
-      setStatus('Undone');
+      say({ text: 'Undone' });
     });
   };
 
@@ -285,14 +297,6 @@ export function ReviewPage({
         <a className="text-button" href="#/">
           End review
         </a>
-        <span className="review-status" role="status">
-          {status}
-        </span>
-        {undoStep && notice === null ? (
-          <button className="text-button" type="button" onClick={undo}>
-            Undo
-          </button>
-        ) : null}
         {total > 0 ? (
           <span className="muted review-count">
             {Math.min(session.index + 1, total)} / {total}
@@ -305,18 +309,27 @@ export function ReviewPage({
         />
       </div>
       {word && encounter ? (
-        <>
-          <ReviewCard
-            key={`${word.id}-${String(session.index)}`}
-            word={word}
-            encounter={encounter}
-            services={services}
-            onRetire={retire}
-            onDelete={remove}
-            contextCollapsed={contextCollapsed}
-            onToggleContext={toggleContext}
-            handleRef={card}
-          />
+        <ReviewCard
+          key={`${word.id}-${String(session.index)}`}
+          word={word}
+          encounter={encounter}
+          services={services}
+          onRetire={retire}
+          onRemove={remove}
+          contextCollapsed={contextCollapsed}
+          onToggleContext={toggleContext}
+          handleRef={card}
+        />
+      ) : loaded ? (
+        <Done outcomes={session.outcomes} nextDue={nextDue} />
+      ) : null}
+      <div className="review-foot">
+        <AnswerPill
+          message={pill}
+          onUndo={undoStep ? undo : null}
+          onDismiss={dismissPill}
+        />
+        {word && encounter ? (
           <div className="grades">
             {GRADES.map((grade, at) => {
               const seconds = intervalSeconds(word.review.level, grade.id);
@@ -350,11 +363,8 @@ export function ReviewPage({
               ))}
             </dl>
           </div>
-        </>
-      ) : loaded ? (
-        <Done outcomes={session.outcomes} nextDue={nextDue} />
-      ) : null}
-      <Toast message={notice} onUndo={undo} onDismiss={dismissNotice} />
+        ) : null}
+      </div>
     </div>
   );
 }

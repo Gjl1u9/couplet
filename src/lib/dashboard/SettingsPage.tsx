@@ -188,7 +188,7 @@ export function SettingsPage({
             }}
           />
           <label className="setting">
-            Save sound
+            Sounds
             <input
               className="switch"
               type="checkbox"

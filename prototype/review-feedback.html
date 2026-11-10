@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Review: answer feedback</title>
+    <link rel="stylesheet" href="../src/lib/ui/tokens.css" />
+    <link rel="stylesheet" href="../src/lib/dashboard/dashboard.css" />
+    <style>
+      /* Prototype only: a sound and a pill for each answer, I know this, and Remove. */
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      .proto-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        width: min(720px, 100% - 32px);
+        margin: 16px auto 0;
+        color: var(--ink-muted);
+        font-size: 12px;
+      }
+
+      .proto-bar b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .proto-bar button {
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .proto-bar button[aria-pressed='true'] {
+        border-color: var(--ink);
+        font-weight: 600;
+      }
+
+      .proto-bar .gap {
+        width: 12px;
+      }
+
+      .page.review {
+        width: min(720px, 100% - 32px);
+        margin: 16px auto;
+        min-height: calc(100dvh - 120px);
+      }
+
+      .review-actions .action:not(.is-danger) .icon {
+        color: var(--stage-known);
+      }
+
+      /* Remove waits for the confirmation to be red. */
+      .action.is-quiet {
+        border-color: var(--line);
+        color: var(--ink-muted);
+      }
+
+      .action.is-quiet .icon {
+        color: currentColor !important;
+      }
+
+      .confirm-text {
+        flex-basis: 100%;
+        margin: 0;
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 20px;
+        text-align: right;
+      }
+
+      .confirm-text small {
+        display: block;
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      /* The answer pill. One at a time: the newest replaces the last. */
+      .answer-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 100%;
+        padding: 5px 5px 5px 14px;
+        border-radius: 999px;
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 13px;
+        line-height: 20px;
+        pointer-events: auto;
+        animation: pill-in 160ms ease-out;
+      }
+
+      .answer-pill.no-undo {
+        padding-right: 14px;
+      }
+
+      .answer-pill strong {
+        font-weight: 600;
+      }
+
+      .answer-pill button {
+        flex: none;
+        min-height: 26px;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--surface) 18%, transparent);
+        color: inherit;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .answer-pill button:hover {
+        background: var(--surface);
+        color: var(--ink);
+      }
+
+      .answer-pill.is-leaving {
+        opacity: 0;
+        transition: opacity 200ms ease-in;
+      }
+
+      @keyframes pill-in {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .answer-pill {
+          animation: none;
+        }
+      }
+
+      /* Placement A: just above the grade buttons, where the eyes already are. */
+      .pill-slot.is-above-grades {
+        position: absolute;
+        bottom: calc(100% - 4px);
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      /* Placement B: top centre, where the Toast is today. */
+      .pill-slot.is-top {
+        position: fixed;
+        z-index: 9;
+        top: 16px;
+        left: 16px;
+        right: 16px;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      /* Nearby lines, A: a text button beside Show translation, with the icon the
+         subtitles' own context switch uses, and its key. */
+      .tools-start {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 20px;
+      }
+
+      .context-button .icon {
+        transition: none;
+      }
+
+      .context-button kbd {
+        margin-left: 2px;
+        color: var(--ink-muted);
+      }
+
+      .context-button[aria-expanded='true'] {
+        color: var(--ink);
+      }
+
+      /* Nearby lines, B: a bordered chip under the current line. */
+      .context-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 32px;
+        margin-top: 10px;
+        padding: 0 10px 0 8px;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--ink-muted);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .context-chip:hover,
+      .context-chip[aria-expanded='true'] {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+
+      .context-chip .icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* The nearby lines, when shown, sit quieter than the current one. */
+      .cue.is-nearby {
+        margin-top: 6px;
+      }
+
+      .sound-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .notes {
+        width: min(720px, 100% - 32px);
+        margin: 0 auto 48px;
+        color: var(--ink-muted);
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .notes li + li {
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="proto-bar">
+      <b>Prototype</b>
+      <span>Pill:</span>
+      <button type="button" data-place="is-above-grades" aria-pressed="true">
+        Above the grades
+      </button>
+      <button type="button" data-place="is-top" aria-pressed="false">
+        Top centre
+      </button>
+      <span class="gap"></span>
+      <span>Sounds:</span>
+      <button type="button" id="sound-toggle" aria-pressed="true">On</button>
+      <span class="gap"></span>
+      <span>Hear:</span>
+      <button type="button" data-hear="again">Forgot</button>
+      <button type="button" data-hear="hard">Unsure</button>
+      <button type="button" data-hear="good">Got it</button>
+      <span class="gap"></span>
+      <button type="button" id="theme">Dark</button>
+      <span class="gap"></span>
+      <span>Nearby lines:</span>
+      <button type="button" data-context="now" aria-pressed="false">Now</button>
+      <button type="button" data-context="tools" aria-pressed="true">
+        A · beside Show translation
+      </button>
+      <button type="button" data-context="chip" aria-pressed="false">
+        B · chip under the line
+      </button>
+    </div>
+
+    <div class="page review">
+      <div class="review-head">
+        <a class="text-button" href="#">End review</a>
+        <span class="review-status" role="status"></span>
+        <span class="muted review-count" id="count">1 / 4</span>
+      </div>
+      <div class="review-bar" aria-hidden="true"><span id="bar"></span></div>
+      <article class="card review-card" id="card"></article>
+      <div class="grades" id="grades">
+        <div class="pill-slot is-above-grades" id="slot" role="status"></div>
+      </div>
+    </div>
+
+    <ul class="notes">
+      <li>
+        Each answer plays its own sound, made in the page like the save sound:
+        Got it rises, Unsure is one even note, and Forgot falls softly, never a
+        wrong-answer buzz. One Sounds switch covers them and the save sound.
+      </li>
+      <li>
+        The pill replaces the status at the top right. It leaves after 2.5
+        seconds, stays while pointed at, and the next answer replaces it. Undo
+        sits in it, as Z does.
+      </li>
+      <li>
+        I know this replaces Stop reviewing, as on YouTube, and shows the same
+        pill instead of the large Toast.
+      </li>
+      <li>
+        Nearby lines: A puts a labelled button beside Show translation, with the
+        icon the subtitles' own context switch uses and its key, C. B puts a
+        bordered chip under the line. Now is today's bare chevron, for
+        comparison.
+      </li>
+      <li>
+        Remove replaces Delete, here and in Words. It stays grey until the
+        confirmation, and says what goes and how the word can come back.
+      </li>
+    </ul>
+
+    <script>
+      const svg = (paths) =>
+        `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths
+          .map((d) => `<path d="${d}"/>`)
+          .join('')}</svg>`;
+      const ICON = {
+        play: svg(['M8 5v14l11 -7z']),
+        speak: svg([
+          'M15 8a5 5 0 0 1 0 8',
+          'M17.7 5a9 9 0 0 1 0 14',
+          'M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5',
+        ]),
+        known: svg([
+          'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0',
+          'M8.5 12.2l2.4 2.4l4.6 -5',
+        ]),
+        trash: svg([
+          'M4 7h16',
+          'M10 11v6',
+          'M14 11v6',
+          'M6 7l1 13h10l1 -13',
+          'M9 7v-3h6v3',
+        ]),
+        right: svg(['M9 6l6 6l-6 6']),
+        down: svg(['M6 9l6 6l6 -6']),
+        up: svg(['M6 15l6 -6l6 6']),
+        contextOn: svg(['M8 6h8', 'M4 12h16', 'M8 18h8']),
+        contextOff: svg(['M4 12h16', 'M12 5v.01', 'M12 19v.01']),
+      };
+      let contextStyle = 'tools';
+      let contextOpen = false;
+
+      const WORDS = [
+        {
+          form: 'spot',
+          before: 'Here are two photos of the same street.',
+          cue: 'Can you spot the difference between these two?',
+          after: 'Take your time, it is harder than it looks.',
+          level: 1,
+        },
+        {
+          form: 'crucial',
+          before: 'And this is where it gets interesting.',
+          cue: 'Sleep is crucial for memory.',
+          after: 'Without it, new memories fade quickly.',
+          level: 3,
+        },
+        {
+          form: 'loneliness',
+          before: 'Almost everyone feels it at some point.',
+          cue: 'Loneliness is a universal experience.',
+          after: 'But it can become a problem.',
+          level: 0,
+        },
+        {
+          form: 'affect',
+          before: 'Feeling alone is not just unpleasant.',
+          cue: 'It can affect your health.',
+          after: 'Some studies compare it to smoking.',
+          level: 2,
+        },
+      ];
+      const LADDER = [
+        '1 day',
+        '3 days',
+        '1 week',
+        '2 weeks',
+        '1 month',
+        '3 months',
+        '6 months',
+      ];
+      const GRADES = [
+        { id: 'again', label: 'Forgot', next: () => '10 minutes' },
+        { id: 'hard', label: 'Unsure', next: (w) => LADDER[w.level] },
+        {
+          id: 'good',
+          label: 'Got it',
+          next: (w) => LADDER[Math.min(w.level + 1, LADDER.length - 1)],
+        },
+      ];
+
+      /* ---------- Sounds: synthesised, short, quiet ---------- */
+      const SOUNDS = {
+        // Rises, like the save sound's family.
+        good: [
+          { f: 1046.5, at: 0, len: 0.09, type: 'sine', gain: 0.11 },
+          { f: 1568, at: 0.07, len: 0.16, type: 'sine', gain: 0.11 },
+        ],
+        // One even note: noted, nothing more.
+        hard: [{ f: 880, at: 0, len: 0.14, type: 'sine', gain: 0.08 }],
+        // Falls softly and low, so it reads "again" rather than "wrong".
+        again: [
+          { f: 587.3, at: 0, len: 0.1, type: 'triangle', gain: 0.09 },
+          { f: 440, at: 0.08, len: 0.18, type: 'triangle', gain: 0.08 },
+        ],
+      };
+      let audio = null;
+      let soundsOn = true;
+      function play(id) {
+        if (!soundsOn) return;
+        audio ??= new AudioContext();
+        void audio.resume();
+        for (const n of SOUNDS[id]) {
+          const from = audio.currentTime + n.at;
+          const osc = audio.createOscillator();
+          const g = audio.createGain();
+          osc.type = n.type;
+          osc.frequency.value = n.f;
+          g.gain.setValueAtTime(0.0001, from);
+          g.gain.exponentialRampToValueAtTime(n.gain, from + 0.008);
+          g.gain.exponentialRampToValueAtTime(0.0001, from + n.len);
+          osc.connect(g);
+          g.connect(audio.destination);
+          osc.start(from);
+          osc.stop(from + n.len);
+        }
+      }
+
+      /* ---------- Pill ---------- */
+      const slot = document.getElementById('slot');
+      let timer;
+      let held = false;
+      function pill(html, onUndo) {
+        clearTimeout(timer);
+        const el = document.createElement('div');
+        el.className = onUndo ? 'answer-pill' : 'answer-pill no-undo';
+        el.innerHTML = `<span>${html}</span>`;
+        if (onUndo) {
+          const undo = document.createElement('button');
+          undo.type = 'button';
+          undo.textContent = 'Undo';
+          undo.addEventListener('click', () => {
+            onUndo();
+          });
+          el.append(undo);
+        }
+        el.addEventListener('mouseenter', () => {
+          held = true;
+          clearTimeout(timer);
+        });
+        el.addEventListener('mouseleave', () => {
+          held = false;
+          leaveSoon();
+        });
+        slot.replaceChildren(el);
+        leaveSoon();
+      }
+      function leaveSoon() {
+        clearTimeout(timer);
+        if (held) return;
+        timer = setTimeout(() => {
+          const el = slot.firstElementChild;
+          if (!el) return;
+          el.classList.add('is-leaving');
+          setTimeout(() => el.remove(), 200);
+        }, 2500);
+      }
+
+      /* ---------- Session ---------- */
+      let index = 0;
+      const history = [];
+      const card = document.getElementById('card');
+      const grades = document.getElementById('grades');
+
+      function renderCard() {
+        const w = WORDS[index % WORDS.length];
+        document.getElementById('count').textContent =
+          `${(index % WORDS.length) + 1} / ${WORDS.length}`;
+        document.getElementById('bar').style.width =
+          `${((index % WORDS.length) / WORDS.length) * 100}%`;
+        const at = w.cue.indexOf(w.form);
+        const cue =
+          at < 0
+            ? w.cue
+            : `${w.cue.slice(0, at)}<mark>${w.form}</mark>${w.cue.slice(at + w.form.length)}`;
+        const dots = LADDER.map(
+          (_, i) => `<span class="${i < w.level + 1 ? 'is-on' : ''}"></span>`,
+        ).join('');
+        card.innerHTML = `
+          <div class="review-source">
+            <a class="text-button" href="#">${ICON.play} Back to video 3:12</a>
+            <span class="review-title">Why loneliness is bad for you</span>
+          </div>
+          <div class="review-word-row">
+            <h1 class="review-word" lang="en">${w.form}</h1>
+            <button class="icon-button" type="button" aria-label="Play pronunciation">${ICON.speak}</button>
+          </div>
+          <span class="level" role="img"><span class="level-dots">${dots}</span>${LADDER[w.level]} interval</span>
+          <div class="cues" lang="en">${cuesHtml(w, cue)}</div>
+          <div class="review-tools">
+            <span class="tools-start">
+              <button class="text-button disclosure" type="button" aria-expanded="false">${ICON.right}Show translation</button>
+              ${
+                contextStyle === 'tools'
+                  ? `<button class="text-button context-button" type="button" aria-expanded="${contextOpen}" data-toggle-context>${contextOpen ? ICON.contextOff : ICON.contextOn}${contextOpen ? 'Hide nearby lines' : 'Nearby lines'}<kbd>C</kbd></button>`
+                  : ''
+              }
+            </span>
+          </div>
+          <div class="review-actions" id="actions"></div>`;
+        renderActions(w);
+      }
+
+      function cuesHtml(w, cue) {
+        const nearby = (text) => `<p class="cue is-nearby">${text}</p>`;
+        let current = `<p class="cue is-current">${cue}`;
+        if (contextStyle === 'now') {
+          current += ` <button class="icon-button" type="button" aria-label="${contextOpen ? 'Hide' : 'Show'} nearby lines" aria-expanded="${contextOpen}" data-toggle-context>${contextOpen ? ICON.up : ICON.down}</button>`;
+        }
+        current += '</p>';
+        const chip =
+          contextStyle === 'chip'
+            ? `<button class="context-chip" type="button" aria-expanded="${contextOpen}" data-toggle-context>${contextOpen ? ICON.contextOff : ICON.contextOn}${contextOpen ? 'Hide nearby lines' : '2 nearby lines'}</button>`
+            : '';
+        return contextOpen
+          ? `${nearby(w.before)}${current}${nearby(w.after)}${chip}`
+          : `${current}${chip}`;
+      }
+
+      card.addEventListener('click', (event) => {
+        if (!event.target.closest('[data-toggle-context]')) return;
+        contextOpen = !contextOpen;
+        renderCard();
+        card.querySelector('[data-toggle-context]')?.focus();
+      });
+
+      function renderActions(w) {
+        const actions = card.querySelector('#actions');
+        actions.innerHTML = `
+          <button class="action" type="button" id="know" title="Takes this word off your review schedule. It stays in Words as Known.">${ICON.known} I know this</button>
+          <button class="action is-quiet" type="button" id="remove">${ICON.trash} Remove</button>`;
+        actions.querySelector('#know').addEventListener('click', () => {
+          history.push(index);
+          index += 1;
+          renderCard();
+          pill(
+            `<strong>${w.form}</strong> · Known. Won't be reviewed again`,
+            undoLast,
+          );
+        });
+        actions.querySelector('#remove').addEventListener('click', () => {
+          actions.innerHTML = `
+            <p class="confirm-text" role="alert">Remove <strong>${w.form}</strong> from Words?
+              <small>Its progress and saved lines are cleared. Save it again from any video to bring it back.</small></p>
+            <button class="action" type="button" id="cancel">Cancel</button>
+            <button class="action is-danger" type="button" id="confirm">${ICON.trash} Remove</button>`;
+          const cancel = actions.querySelector('#cancel');
+          cancel.focus();
+          cancel.addEventListener('click', () => renderActions(w));
+          actions.querySelector('#confirm').addEventListener('click', () => {
+            index += 1;
+            renderCard();
+            pill(`Removed <strong>${w.form}</strong>`, null);
+          });
+        });
+      }
+
+      function undoLast() {
+        const previous = history.pop();
+        if (previous === undefined) return;
+        index = previous;
+        renderCard();
+        pill('Undone', null);
+      }
+
+      function answer(grade) {
+        const w = WORDS[index % WORDS.length];
+        play(grade.id);
+        history.push(index);
+        index += 1;
+        renderCard();
+        pill(`<strong>${w.form}</strong> · back in ${grade.next(w)}`, undoLast);
+      }
+
+      for (const [at, grade] of GRADES.entries()) {
+        const button = document.createElement('button');
+        button.className = 'grade';
+        button.type = 'button';
+        button.innerHTML = `<kbd>${at + 1}</kbd><b>${grade.label}</b><small></small>`;
+        button.addEventListener('click', () => answer(grade));
+        grades.append(button);
+      }
+      function renderIntervals() {
+        const w = WORDS[index % WORDS.length];
+        grades.querySelectorAll('.grade small').forEach((small, at) => {
+          small.textContent = GRADES[at].next(w);
+        });
+      }
+      const draw = renderCard;
+      renderCard = () => {
+        draw();
+        renderIntervals();
+      };
+
+      document.addEventListener('keydown', (event) => {
+        if (event.target.closest?.('input, textarea')) return;
+        const grade = GRADES[Number(event.key) - 1];
+        if (grade && !card.querySelector('.confirm-text')) answer(grade);
+        if (event.key === 'z' || event.key === 'Z') undoLast();
+        if (event.key === 'c' || event.key === 'C') {
+          contextOpen = !contextOpen;
+          renderCard();
+        }
+      });
+
+      /* ---------- Prototype controls ---------- */
+      document.querySelectorAll('[data-place]').forEach((button) => {
+        button.addEventListener('click', () => {
+          document
+            .querySelectorAll('[data-place]')
+            .forEach((b) =>
+              b.setAttribute('aria-pressed', String(b === button)),
+            );
+          slot.className = `pill-slot ${button.dataset.place}`;
+          pill('<strong>spot</strong> · back in 3 days', undoLast);
+        });
+      });
+      document.querySelectorAll('[data-hear]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const was = soundsOn;
+          soundsOn = true;
+          play(button.dataset.hear);
+          soundsOn = was;
+        });
+      });
+      const soundToggle = document.getElementById('sound-toggle');
+      soundToggle.addEventListener('click', () => {
+        soundsOn = !soundsOn;
+        soundToggle.textContent = soundsOn ? 'On' : 'Off';
+        soundToggle.setAttribute('aria-pressed', String(soundsOn));
+      });
+      document.querySelectorAll('[data-context]').forEach((button) => {
+        button.addEventListener('click', () => {
+          document
+            .querySelectorAll('[data-context]')
+            .forEach((b) =>
+              b.setAttribute('aria-pressed', String(b === button)),
+            );
+          contextStyle = button.dataset.context;
+          renderCard();
+        });
+      });
+      const theme = document.getElementById('theme');
+      theme.addEventListener('click', () => {
+        const dark = document.documentElement.dataset.theme !== 'dark';
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        theme.textContent = dark ? 'Light' : 'Dark';
+      });
+
+      renderCard();
+    </script>
+  </body>
+</html>

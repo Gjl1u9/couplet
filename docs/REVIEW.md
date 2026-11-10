@@ -8,7 +8,7 @@ A word saved from a video comes back later in the sentence where the user met it
 
 ## Save flow
 
-Saving must not interrupt the video. The star fills, the Save Sound plays, and the video and Lookup Panel stay as they are.
+Saving must not interrupt the video. The star fills, the save chime plays, and the video and Lookup Panel stay as they are.
 
 Saving needs an account, and looking up does not. Without one, the star opens the Sign-in Toast instead of filling. Signing in saves that word at once, even if the panel has closed. Closing the toast or leaving it for 10 seconds leaves the word unsaved. Removing a word never asks.
 
@@ -55,10 +55,10 @@ From top to bottom:
 
 1. **Source row:** at the top, 「Back to video」 with the timestamp, the video title, and the dictionary button at the corner. The jump opens the video in a new tab about two seconds before the cue. It does not grade the Card, and the Card stays where it was.
 2. **Card title:** the word as written in the subtitle, such as `observing`, in the largest type on the page, followed by the Pronunciation button, which speaks this form. The Level Track sits below it.
-3. **Context:** the previous, current, and next cue in the original language. The current cue is emphasized and holds the marked word; neighbours are muted. A button at the end of the current cue collapses and restores the neighbours, and that choice carries across Cards.
+3. **Context:** the previous, current, and next cue in the original language. The current cue is emphasized and holds the marked word; neighbours are muted. 「Nearby lines」 beside the translation toggle collapses and restores the neighbours, and that choice carries across Cards. It has the icon of the subtitles' own context switch and shows its key, `C`, because a bare arrow after the cue went unnoticed.
 4. **Toggle:** directly under the context, with its content opening below it, so it stays under the pointer. Its text says what it will do: 「Show translation」 or 「Hide translation」. Its arrow points right when closed and down when open. It starts closed on every Card.
 5. **Translation:** one paragraph for the whole context, behind the toggle.
-6. **Actions:** 「Stop reviewing」 and 「Delete」, at the bottom.
+6. **Actions:** 「I know this」 and 「Remove」, at the bottom.
 
 The three grade buttons, each showing its next interval, stay fixed to the bottom of the window. The user can grade without opening anything, so a known word takes one key.
 
@@ -70,7 +70,7 @@ A button at the Card's top-right corner opens the panel directly under it, with 
 
 - It has the Lookup Panel's styles and content, and follows the Panel Theme setting: lemma, Phonetics, senses, and examples.
 - It has Pronunciation in Words. On the Card, Pronunciation stays beside the title.
-- It has no save button. On video the filled star removes a word at once, which here would bypass the confirmation on 「Delete」.
+- It has no save button. On video the filled star removes a word at once, which here would bypass the confirmation on 「Remove」.
 - Clicking the button again, clicking outside, or pressing Esc closes it. It also closes when the Card changes.
 
 The panel floats over page content, so it keeps `shadow-panel`, as it does over video.
@@ -79,21 +79,23 @@ The panel floats over page content, so it keeps `shadow-panel`, as it does over 
 
 A button stays only if removing it causes a problem nothing else solves.
 
-| Button         | Without it                                                                                                                   |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Forgot         | A forgotten word has no way back to level 0 or a same-day retry. It returns days later and is forgotten again.               |
-| Unsure         | A half-remembered word must either restart at 10 minutes or advance as if known, so honest grading is punished.              |
-| Got it         | Intervals never grow and nothing graduates, so the queue only gets longer.                                                   |
-| Back to video  | The Card has text and a browser voice only. The speaker's real voice and the scene that made the word stick are lost.        |
-| Stop reviewing | A word the user already knows still takes 6 reviews over 114 days to leave.                                                  |
-| Delete         | A word saved by mistake stays in the Vocabulary list and statistics forever, or the user must leave the review to remove it. |
-| Pronunciation  | Listening needs a trip back to the video, and words saved before this feature have no video.                                 |
-| Undo           | A mispressed key cannot be reversed: a word can vanish for 60 days or lose all its progress.                                 |
-| End review     | The session has no way back to the Dashboard except browser navigation.                                                      |
+| Button        | Without it                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Forgot        | A forgotten word has no way back to level 0 or a same-day retry. It returns days later and is forgotten again.               |
+| Unsure        | A half-remembered word must either restart at 10 minutes or advance as if known, so honest grading is punished.              |
+| Got it        | Intervals never grow and nothing graduates, so the queue only gets longer.                                                   |
+| Back to video | The Card has text and a browser voice only. The speaker's real voice and the scene that made the word stick are lost.        |
+| I know this   | A word the user already knows still takes 6 reviews over 114 days to leave.                                                  |
+| Remove        | A word saved by mistake stays in the Vocabulary list and statistics forever, or the user must leave the review to remove it. |
+| Pronunciation | Listening needs a trip back to the video, and words saved before this feature have no video.                                 |
+| Undo          | A mispressed key cannot be reversed: a word can vanish for 60 days or lose all its progress.                                 |
+| End review    | The session has no way back to the Dashboard except browser navigation.                                                      |
 
 ### Other behaviour
 
-Each grade shows what happened and a 「Undo」 button in the session head, because a keyboard grade is easy to press by accident. Grades are not coloured, so the buttons do not suggest an answer.
+Each grade shows what happened in a pill just above the grade buttons, such as 「**bank** · back in 3 days」 with 「Undo」, because a keyboard grade is easy to press by accident and the eyes are already there. It leaves after 2.5 seconds unless pointed at, and the next answer replaces it; `Z` still undoes after it leaves. Grades are not coloured, so the buttons do not suggest an answer.
+
+Each grade also plays its own short sound while Sounds is on: Got it rises, Unsure is one even note, and Forgot falls softly. Forgot is never a wrong-answer buzz, because forgetting is part of learning and a punishing sound makes people press Unsure instead.
 
 A line under the grade buttons always lists the shortcuts, and each grade button shows its number. Touch screens hide both. Keyboard: Space toggles, `D` opens the dictionary, `1` `2` `3` grade, `P` plays Pronunciation, `C` collapses the neighbouring cues, `Z` undoes, Esc closes.
 
@@ -140,23 +142,23 @@ A Retired word stays in the Vocabulary, with its star filled, but never enters t
 | Way out   | Trigger                                                   | Reason in data |
 | --------- | --------------------------------------------------------- | -------------- |
 | Mastered  | Got it at level 6                                         | `mastered`     |
-| By choice | 「Stop reviewing」 on the Card or in the Vocabulary list  | `manual`       |
+| By choice | 「I know this」 on the Card, in Words, or on video        | `manual`       |
 | Way back  | 「Review again」 in the Vocabulary list: level 0, due now | `null`         |
 
 Meeting a Retired word in a video does not bring it back automatically.
 
-The label states the effect, because a word at level 5 or above is already Known and still on the schedule. A hover hint says this before the click. Afterwards a toast says 「bank won't come up for review again. It stays in Words as Known.」 with 「Undo」, for 8 seconds or while pointed at or focused. It does not ask first, because Undo makes the action safe and a question on every word would slow a review.
+It says 「I know this」, as the Lookup Panel does, because both Retire the word and one name is easier to learn than two. A hover hint says what follows before the click. Afterwards the pill says 「**bank** · Known. Won't be reviewed again」 with 「Undo」; in Words, a toast says 「bank is Known and won't come up for review again.」. It does not ask first, because Undo makes the action safe and a question on every word would slow a review.
 
 ### Removing a word
 
 Retiring and removing are different actions with different labels:
 
-| Action             | Word and history | Undo                         | Confirmation |
-| ------------------ | ---------------- | ---------------------------- | ------------ |
-| 「Stop reviewing」 | Kept             | 「Undo」 or 「Review again」 | None         |
-| 「Delete」         | Deleted          | None                         | Required     |
+| Action          | Word and history | Undo                         | Confirmation |
+| --------------- | ---------------- | ---------------------------- | ------------ |
+| 「I know this」 | Kept             | 「Undo」 or 「Review again」 | None         |
+| 「Remove」      | Removed          | None                         | Required     |
 
-「Delete」 asks in place: 「Delete bank and its progress?」, with 「Cancel」 focused and 「Delete」 beside it. Esc cancels, and grade keys do nothing meanwhile. It deletes every Encounter and `ReviewEvent` of the word.
+「Remove」 is grey until it asks, in place: 「Remove bank from Words? Its progress and saved lines are cleared. Save it again from any video to bring it back.」, with 「Cancel」 focused and a red 「Remove」 beside it. Esc cancels, and grade keys do nothing meanwhile. It deletes every Encounter and `ReviewEvent` of the word. The question doesn't promise the word is gone for good, because saving it again on video brings it back.
 
 The Dashboard pages are specified in [`DASHBOARD.md`](DASHBOARD.md).
 

@@ -12,11 +12,11 @@ import type { DashboardServices } from './services';
 import { VideoTitle } from './VideoTitle';
 import { Toast } from './Toast';
 import {
-  DeleteConfirm,
+  KNOWN_HINT,
+  knownMessage,
+  RemoveConfirm,
   MarkedCue,
   restoredMessage,
-  STOP_REVIEWING_HINT,
-  stoppedMessage,
   TranslationText,
   useEncounterTranslation,
 } from './WordParts';
@@ -314,12 +314,12 @@ function WordDetail({
           </span>
         ) : null}
         {confirming ? (
-          <DeleteConfirm
+          <RemoveConfirm
             word={word}
             onCancel={() => {
               setConfirming(false);
             }}
-            onDelete={() => {
+            onRemove={() => {
               onNotice(null);
               run(services.vocabulary.remove(word.id));
             }}
@@ -329,7 +329,7 @@ function WordDetail({
             <button
               className="action"
               type="button"
-              title={word.review.retired ? undefined : STOP_REVIEWING_HINT}
+              title={word.review.retired ? undefined : KNOWN_HINT}
               onClick={() => {
                 const { retired } = word.review;
                 run(
@@ -341,24 +341,24 @@ function WordDetail({
                       stamp: next?.reviewStamp ?? null,
                       message: retired
                         ? restoredMessage(word.lemma)
-                        : stoppedMessage(word.lemma),
+                        : knownMessage(word.lemma),
                       before: word,
                     });
                   }),
                 );
               }}
             >
-              <Icon paths={ICONS.check} />{' '}
-              {word.review.retired ? 'Review again' : 'Stop reviewing'}
+              <Icon paths={word.review.retired ? ICONS.check : ICONS.known} />{' '}
+              {word.review.retired ? 'Review again' : 'I know this'}
             </button>
             <button
-              className="action is-danger"
+              className="action is-quiet"
               type="button"
               onClick={() => {
                 setConfirming(true);
               }}
             >
-              <Icon paths={ICONS.trash} /> Delete
+              <Icon paths={ICONS.trash} /> Remove
             </button>
           </>
         )}

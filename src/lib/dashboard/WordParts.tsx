@@ -1,9 +1,9 @@
 /** Shown before the click, because the button leaves the schedule without asking. */
-export const STOP_REVIEWING_HINT =
-  'Takes this word off your review schedule. It stays in Words.';
+export const KNOWN_HINT =
+  'Stops reviewing this word. It stays in Words as Known.';
 
-export const stoppedMessage = (lemma: string) =>
-  `${shortLabel(lemma)} won't come up for review again. It stays in Words as Known.`;
+export const knownMessage = (lemma: string) =>
+  `${shortLabel(lemma)} is Known and won't come up for review again.`;
 
 export const restoredMessage = (lemma: string) =>
   `${shortLabel(lemma)} is back in review, starting from the first step.`;
@@ -96,14 +96,15 @@ export function useEncounterTranslation(
   return { text, status, load };
 }
 
-export function DeleteConfirm({
+/** Says what Remove clears and how the word can come back, then asks once. */
+export function RemoveConfirm({
   word,
   onCancel,
-  onDelete,
+  onRemove,
 }: {
   readonly word: SavedWord;
   readonly onCancel: () => void;
-  readonly onDelete: () => void;
+  readonly onRemove: () => void;
 }) {
   const cancel = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -111,14 +112,18 @@ export function DeleteConfirm({
   }, []);
   return (
     <>
-      <span className="confirm" role="alert">
-        Delete {shortLabel(word.lemma)} and its progress?
-      </span>
+      <p className="confirm is-question" role="alert">
+        Remove <strong>{shortLabel(word.lemma)}</strong> from Words?
+        <small>
+          Its progress and saved lines are cleared. Save it again from any video
+          to bring it back.
+        </small>
+      </p>
       <button className="action" type="button" ref={cancel} onClick={onCancel}>
         Cancel
       </button>
-      <button className="action is-danger" type="button" onClick={onDelete}>
-        <Icon paths={ICONS.trash} /> Delete
+      <button className="action is-danger" type="button" onClick={onRemove}>
+        <Icon paths={ICONS.trash} /> Remove
       </button>
     </>
   );

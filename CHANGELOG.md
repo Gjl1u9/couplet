@@ -12,6 +12,14 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 - New-word hints in English: one word per subtitle line worth learning at your level gets a dashed underline. Turn them off in the subtitle settings.
 - A word check on the Welcome Page and in Settings: pick the last row of common words you know, and hints start from your level.
 - "I know this" in a word's card: the word is kept but never marked in subtitles or reviewed. Undo is right there, and saving the word again puts it back on review.
+- Review answers have their own sounds: Got it rises, Unsure is one even note, and Forgot falls softly. The "Save sound" setting is now "Sounds" and covers them too.
+
+### Changed
+
+- Review says what each answer did in a small pill just above the grade buttons, with Undo, instead of in the top corner.
+- "Stop reviewing" is now "I know this", in Review and Words, the same as in a word's card on video.
+- "Delete" is now "Remove", grey until it asks, and the question says what is cleared and that saving the word again brings it back.
+- The button that shows the lines around a Review sentence is now labelled "Nearby lines", beside "Show translation", with its key, C.
 
 ## [0.3.0] - 2026-11-09
 

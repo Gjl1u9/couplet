@@ -73,6 +73,7 @@ async function setup(lemmas: readonly string[], translated = ['譯文']) {
     onSettingsChange: () => () => undefined,
     explain: () => Promise.reject(new Error('Unused')),
     previewSaveSound: () => undefined,
+    playGradeSound: () => undefined,
     onVocabularyChange: () => () => undefined,
   };
   return { services, vocabulary, translate, speaker };
@@ -120,9 +121,15 @@ describe('ReviewPage', () => {
     });
   });
 
-  const show = async (services: DashboardServices) => {
+  const show = async (services: DashboardServices, sounds = false) => {
     await act(async () => {
-      root.render(<ReviewPage services={services} learningLanguage="en" />);
+      root.render(
+        <ReviewPage
+          services={services}
+          learningLanguage="en"
+          sounds={sounds}
+        />,
+      );
       await Promise.resolve();
     });
     await settle();
@@ -201,7 +208,7 @@ describe('ReviewPage', () => {
     expect(buttonNamed('Got it')?.textContent).toContain('3 days');
     await press('3');
     expect(q('.review-word')?.textContent).toBe('river');
-    expect(q('.review-status')?.textContent).toBe('bank: back in 3 days');
+    expect(q('.answer-pill')?.textContent).toBe('bank · back in 3 daysUndo');
     await expect(vocabulary.reviewLog()).resolves.toHaveLength(1);
     await press('z');
     expect(q('.review-word')?.textContent).toBe('bank');
@@ -211,32 +218,33 @@ describe('ReviewPage', () => {
   it('retires a word, keeping it in the Vocabulary', async () => {
     const { services, vocabulary } = await setup(['bank']);
     await show(services);
-    await click(buttonNamed('Stop reviewing'));
+    await click(buttonNamed('I know this'));
     const [word] = await vocabulary.list();
     expect(word?.review.retired?.reason).toBe('manual');
     expect(q('.review-card')).toBeNull();
-    expect(q('.toast')?.textContent).toContain(
-      "bank won't come up for review again",
+    expect(q('.answer-pill')?.textContent).toContain(
+      "bank · Known. Won't be reviewed again",
     );
-    await click(q('.toast button'));
-    expect(q('.toast')).toBeNull();
+    await click(q('.answer-pill button'));
+    expect(q('.answer-pill')?.textContent).toBe('Undone');
     expect(q('.review-word')?.textContent).toBe('bank');
     const [restored] = await vocabulary.list();
     expect(restored?.review.retired).toBeNull();
   });
 
-  it('asks before deleting, and blocks grade keys meanwhile', async () => {
+  it('asks before removing, and blocks grade keys meanwhile', async () => {
     const { services, vocabulary } = await setup(['bank']);
     await show(services);
-    await click(buttonNamed('Delete'));
-    expect(q('.confirm')?.textContent).toContain('bank');
+    await click(buttonNamed('Remove'));
+    expect(q('.confirm')?.textContent).toContain('Remove bank from Words?');
     await press('3');
     await expect(vocabulary.reviewLog()).resolves.toHaveLength(0);
     await press('Escape');
     expect(q('.confirm')).toBeNull();
-    await click(buttonNamed('Delete'));
+    await click(buttonNamed('Remove'));
     await click(q('.review-actions .is-danger'));
     await expect(vocabulary.list()).resolves.toEqual([]);
+    expect(q('.answer-pill')?.textContent).toBe('Removed bank');
     expect(buttonNamed('Undo')).toBeUndefined();
   });
 
@@ -255,7 +263,9 @@ describe('ReviewPage', () => {
     const { services } = await setup(['bank', 'river']);
     await show(services);
     expect(document.querySelectorAll('.cue')).toHaveLength(2);
-    await click(q('[aria-label="Hide nearby lines"]'));
+    expect(q('.context-button')?.textContent).toBe('Hide nearby linesC');
+    await click(q('.context-button'));
+    expect(q('.context-button')?.textContent).toBe('Nearby linesC');
     expect(document.querySelectorAll('.cue')).toHaveLength(1);
     expect(q('.cue')?.classList.contains('is-current')).toBe(true);
     await press('3');
@@ -273,7 +283,29 @@ describe('ReviewPage', () => {
     await vocabulary.remove(first?.id ?? '');
     await press('3');
     expect(q('.review-word')?.textContent).toBe('river');
-    expect(q('.review-status')?.textContent).toBe('bank was deleted');
+    expect(q('.answer-pill')?.textContent).toBe('bank · was removed elsewhere');
+  });
+
+  it('plays each answer’s sound only with Sounds on', async () => {
+    const quiet = await setup(['bank']);
+    const silent = vi.fn();
+    await show({ ...quiet.services, playGradeSound: silent });
+    await press('1');
+    expect(silent).not.toHaveBeenCalled();
+    await act(async () => {
+      root.unmount();
+      await Promise.resolve();
+    });
+    const container = document.getElementById('root');
+    if (!container) throw new Error('missing root');
+    root = createRoot(container);
+    const loud = await setup(['bank', 'river']);
+    const play = vi.fn();
+    await show({ ...loud.services, playGradeSound: play }, true);
+    await press('3');
+    expect(play).toHaveBeenCalledWith('good');
+    await press('1');
+    expect(play).toHaveBeenLastCalledWith('again');
   });
 
   it('ignores Card shortcuts on the Done screen', async () => {

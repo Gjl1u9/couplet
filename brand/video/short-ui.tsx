@@ -335,6 +335,7 @@ const services: DashboardServices = {
   saveSettings: () => Promise.resolve(),
   onSettingsChange: () => () => undefined,
   previewSaveSound: () => undefined,
+  playGradeSound: () => undefined,
   explain: () => Promise.resolve({ text: EXPLANATION, remaining: 49 }),
   onVocabularyChange: () => () => undefined,
 };
