@@ -1625,6 +1625,7 @@ h1,
 }
 
 .stats .stat-value {
+  display: block;
   margin-top: 4px;
 }
 
@@ -1683,6 +1684,14 @@ h1,
   margin: 0;
   font-size: 22px;
   line-height: 28px;
+}
+
+/* The one line of context under each of Home's numbers. */
+.stat-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 18px;
 }
 
 .ring-of {
