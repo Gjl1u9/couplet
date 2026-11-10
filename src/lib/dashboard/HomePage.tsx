@@ -9,7 +9,7 @@ import {
   forecast,
   longestStreak,
   reviewsLastWeek,
-  reviewsToday,
+  wordsReviewedToday,
   stageCounts,
   stageLabel,
   stageOf,
@@ -52,7 +52,7 @@ function Welcome() {
 const RING_RADIUS = 26;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 
-/** Known words: the count and its note, like the other numbers, and the share as a ring at the right. */
+/** Known words as a share of those saved: a ring, with the count beside it. */
 function KnownRing({
   known,
   saved,
@@ -63,10 +63,6 @@ function KnownRing({
   const share = saved > 0 ? known / saved : 0;
   return (
     <div className="known-ring">
-      <span>
-        <span className="stat-value">{known} known</span>
-        <span className="muted stat-note">of {saved} saved</span>
-      </span>
       <span
         className="ring"
         role="img"
@@ -87,6 +83,10 @@ function KnownRing({
         <span className="ring-share" aria-hidden="true">
           {Math.round(share * 100)}%
         </span>
+      </span>
+      <span>
+        <span className="stat-value">{known} known</span>
+        <span className="muted ring-of">of {saved} saved</span>
       </span>
     </div>
   );
@@ -119,7 +119,7 @@ export function HomePage({
     streakNote =
       streak >= best ? 'Your best yet' : `Best: ${plural(best, 'day')}`;
   }
-  const today = reviewsToday(log, now);
+  const today = wordsReviewedToday(log, now);
   const recent = [...words]
     .sort((a, b) => b.savedAt - a.savedAt)
     .slice(0, RECENT_SHOWN);
@@ -161,13 +161,11 @@ export function HomePage({
           </dd>
         </div>
         <div className="card span-2">
-          <dt className="muted">Reviews, last 7 days</dt>
+          <dt className="muted">Reviewed today</dt>
           <dd>
-            <span className="stat-value">
-              {plural(reviewsLastWeek(log, now), 'review')}
-            </span>
+            <span className="stat-value">{plural(today, 'word')}</span>
             <span className="muted stat-note">
-              {today > 0 ? `${String(today)} today` : 'None today yet'}
+              {plural(reviewsLastWeek(log, now), 'review')} in the last 7 days
             </span>
           </dd>
         </div>

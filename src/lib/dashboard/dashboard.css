@@ -1633,20 +1633,19 @@ h1,
   font-variant-numeric: tabular-nums;
 }
 
-/* Known words: the count on the left like the other numbers, the share as a ring on the right. */
+/* Known words: the share of saved words known, as a ring, with the count beside it. */
 .known-ring {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
+  margin-top: 6px;
 }
 
 .known-ring .ring {
   position: relative;
   flex: none;
-  width: 56px;
-  height: 56px;
-  margin-top: 4px;
+  width: 60px;
+  height: 60px;
 }
 
 .known-ring svg {
@@ -1674,16 +1673,29 @@ h1,
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   line-height: 1;
+}
+
+.known-ring .stat-value {
+  display: block;
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
 }
 
 /* The one line of context under each of Home's numbers. */
 .stat-note {
   display: block;
   margin-top: 2px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.ring-of {
+  display: block;
   font-size: 13px;
   line-height: 18px;
 }

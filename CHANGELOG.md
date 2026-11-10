@@ -10,7 +10,7 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 ### Changed
 
 - Home shows Known words as a ring that fills as more of your saved words become known, with the count beside it.
-- Home's review streak shows your best streak under it, and reviews in the last 7 days shows today's.
+- Home's review streak shows your best streak under it, and the reviews card now leads with the words reviewed today, with the last 7 days under it.
 - Recently saved on Home lists eight words instead of four.
 
 ## [0.4.0] - 2026-11-10

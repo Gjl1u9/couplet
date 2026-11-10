@@ -17,11 +17,11 @@ The Learning Language in Settings filters every page, because each language has 
 
 ## Home
 
-| Feature        | Without it                                  | What it does                                                                                                                | Interacts with                     |
-| -------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Ready count    | The user has to work out what to do         | States what is due and starts Review                                                                                        | Falls as words are graded          |
-| Three numbers  | Progress cannot be felt at a glance         | Review streak, under it the best streak; Known words as a ring of those saved; reviews in the last 7 days, under it today's | Read the Vocabulary and review log |
-| Recently saved | A word just saved cannot be checked quickly | The eight newest saves, about one video's worth, linking to their details                                                   | Opens the word in Words            |
+| Feature        | Without it                                  | What it does                                                                                                                                 | Interacts with                     |
+| -------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Ready count    | The user has to work out what to do         | States what is due and starts Review                                                                                                         | Falls as words are graded          |
+| Three numbers  | Progress cannot be felt at a glance         | Review streak, under it the best streak; Known words as a ring of those saved; words reviewed today, under it the reviews of the last 7 days | Read the Vocabulary and review log |
+| Recently saved | A word just saved cannot be checked quickly | The eight newest saves, about one video's worth, linking to their details                                                                    | Opens the word in Words            |
 
 **Done when:** a new user sees how to start, and a user with due words starts Review in one click.
 
@@ -147,7 +147,7 @@ Other dashboards informed the features and the general airy feel. Layout, wordin
 - 「Remove」 replaced 「Delete」: it is gentler, and the confirmation says what is cleared and that saving the word again brings it back, instead of promising it is gone for good.
 - Review's feedback is a pill above the grade buttons, not a status at the top right: the eyes are on the buttons while grading, and an answer comes every few seconds, so it must be short-lived and replace itself. Words uses the same pill, floating at the bottom, so I know this looks the same wherever it is pressed, and the rectangular Toast is gone.
 - Explain with AI also sits in the Lookup Panel, because a line is unclear while it plays, not later in Words. It sends what a save stores, so the two share one cached answer, and it asks only on a click, so lookups stay free of the allowance. The answer isn't stored with the word: the service's cache already makes Words free to ask, for 30 days.
-- Each of Home's numbers has one line of context under it, never a second card: the best streak, kept after a streak breaks so the work behind it still shows; the share known, as a ring; and today's reviews, which are part of the week's. Due now stays in the card above.
+- Each of Home's numbers has one line of context under it, never a second card: the best streak, kept after a streak breaks so the work behind it still shows; the share known, as a ring; and the week's reviews under today's words. Today is the number to act on, so it leads; the week is its context, with its own unit, so the two counts never read as one. Due now stays in the card above.
 - The product icon appears on the toolbar and in the store, not in the rail, where it did not suit Paper.
 - Filters and grouping are not remembered between visits, except the Review Card's collapsed context.
 - By-video grouping uses each word's newest sentence, so a word appears once.

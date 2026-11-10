@@ -74,10 +74,17 @@ export function longestStreak(log: readonly ReviewEvent[]): number {
   return longest;
 }
 
-/** Reviews since local midnight. */
-export function reviewsToday(log: readonly ReviewEvent[], now: number): number {
+/** Words reviewed since local midnight, each once, though Forgot brings a word back. */
+export function wordsReviewedToday(
+  log: readonly ReviewEvent[],
+  now: number,
+): number {
   const today = startOfDay(now);
-  return log.filter((event) => event.at >= today && event.at <= now).length;
+  return new Set(
+    log
+      .filter((event) => event.at >= today && event.at <= now)
+      .map((event) => event.wordId),
+  ).size;
 }
 
 const WEEK_MS = 7 * 86_400_000;

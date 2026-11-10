@@ -9,7 +9,7 @@ import {
   longestStreak,
   reviewsByDay,
   reviewsLastWeek,
-  reviewsToday,
+  wordsReviewedToday,
   reviewTrail,
   stageCounts,
   stageOf,
@@ -92,10 +92,16 @@ describe('longestStreak', () => {
   });
 });
 
-describe('reviewsToday', () => {
-  it('counts only reviews since midnight', () => {
-    const log = [event(daysAgo(0)), event(daysAgo(0)), event(daysAgo(1))];
-    expect(reviewsToday(log, NOW)).toBe(2);
+describe('wordsReviewedToday', () => {
+  it('counts each word once, and only since midnight', () => {
+    const other = { ...event(daysAgo(0)), wordId: 'x' };
+    const log = [
+      event(daysAgo(0)),
+      event(daysAgo(0)),
+      other,
+      event(daysAgo(1)),
+    ];
+    expect(wordsReviewedToday(log, NOW)).toBe(2);
   });
 });
 
