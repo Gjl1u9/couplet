@@ -7,6 +7,8 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-10
+
 ### Added
 
 - New-word hints in English: one word per subtitle line worth learning at your level gets a dashed underline. Turn them off in the subtitle settings.
