@@ -10,7 +10,8 @@ const nameOf = (code: string) =>
 
 /**
  * Asks how many of the learning language's common words the user knows, as rows from
- * easy to hard, so new-word hints can start before any word is saved.
+ * easy to hard, so new-word hints can start before any word is saved. Renders nothing
+ * for a language without a word list.
  */
 export function WordCheck({
   language,
@@ -28,17 +29,8 @@ export function WordCheck({
   const [chosen, setChosen] = useState(-1);
   const name = nameOf(language);
 
-  if (!check || !listed) {
-    return (
-      <section className="menu-group word-check">
-        <h2 className="menu-title">Words you know</h2>
-        <p className="muted">
-          A word check for {name} isn&apos;t ready yet. Couplet learns your
-          level from the words you save.
-        </p>
-      </section>
-    );
-  }
+  // Only languages with a word list have hints, so the others don't see the check.
+  if (!check || !listed) return null;
 
   const start = () => {
     setChosen(check.rows.findIndex((row) => row.size === saved));

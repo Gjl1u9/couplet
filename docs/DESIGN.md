@@ -86,7 +86,7 @@ In each original line, at most one word worth learning now has a dashed `subtitl
 
 - A hinted word comes from a band of the learning language's frequency list ([`public/frequency`](../public/frequency/README.md)): from where the user's known words end to two and a half times that. The band starts at the higher of the Word Check and, once 20 words are on review, the rank a quarter of them sit above. So saving harder words and learning easy ones moves it up, and a higher Word Check takes effect at once; a lower one cannot pull it below the saved words.
 - The 200 most common words, and every word in the Vocabulary, saved or known, are never hinted. A line hints its most common candidate, and a video hints each word, with its simple inflections, only once.
-- New word hints in the Settings Panel and the Dashboard's Settings turns them off. Only English has a list so far.
+- New word hints in the Settings Panel and the Dashboard's Settings turns them off. Only English has a list so far; for other learning languages, both say "New word hints are English only for now." under the switch.
 
 ### Selecting text
 
@@ -123,7 +123,7 @@ A language sheet using the shared settings rows, then four Paper sheets, two to 
 
 - A demonstration is drawn in HTML and CSS rather than recorded, using the Lookup Panel's real styles, so it stays sharp, adds no media, and follows the design. Its scene keeps video colours in every theme.
 - Each loops every 8 or 10 seconds and has its own Pause button. Under reduced motion, it rests on its finished state with no button.
-- Under the languages, the **Word Check** asks how many of the learning language's common words the user knows. A button names the language, so a wrong guess shows before anything is asked. It opens rows of six words, from the 500 most common to 20,000, each with its size and a rough CEFR level; the user picks the last row where they know every word, and every row up to it shows Known. Save keeps one size per language, which starts the new-word hints. The Dashboard's Settings show the same check, to change it later. A language without a list says so instead.
+- Under the languages, the **Word Check** asks how many of the learning language's common words the user knows. A button names the language, so a wrong guess shows before anything is asked. It opens rows of six words, from the 500 most common to 20,000, each with its size and a rough CEFR level; the user picks the last row where they know every word, and every row up to it shows Known. Save keeps one size per language, which starts the new-word hints. The Dashboard's Settings show the same check, to change it later. For a language without a list, the check isn't shown.
 
 ## Sign-in Toast
 

@@ -1,3 +1,4 @@
+import { frequencyLanguage } from '../hints/frequency';
 import {
   LEARNING_LANGUAGES,
   NATIVE_LANGUAGES,
@@ -225,6 +226,15 @@ export function createSettingsPanel(
           switchRow('New word hints', settings.newWordHints, (newWordHints) => {
             options.update({ newWordHints });
           }),
+          ...(frequencyLanguage(settings.learningLanguage)
+            ? []
+            : [
+                element(
+                  'p',
+                  'setting-note',
+                  'New word hints are English only for now.',
+                ),
+              ]),
         ),
       ),
     );

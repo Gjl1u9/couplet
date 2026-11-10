@@ -1,3 +1,4 @@
+import { frequencyLanguage } from '../hints/frequency';
 import { WordCheck } from './WordCheck';
 import { useEffect, useRef } from 'react';
 import {
@@ -211,6 +212,9 @@ export function SettingsPage({
               }}
             />
           </label>
+          {frequencyLanguage(settings.learningLanguage) ? null : (
+            <p className="muted">New word hints are English only for now.</p>
+          )}
           <p className="muted">
             Hints use word lists from{' '}
             <a
