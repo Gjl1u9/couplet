@@ -63,13 +63,25 @@ export interface HintPicker {
   reset: () => void;
 }
 
-/** At most one hint a line, the most common candidate, and each word once a video. */
+/**
+ * At most one hint a line, the most common candidate, and each word once a video. A
+ * line shown again, after seeking back or replaying it, keeps the hint it had.
+ */
 export function createHintPicker(options: HintPickerOptions): HintPicker {
   const hinted = new Set<string>();
+  const lines = new Map<string, number | null>();
   return {
     pick(tokens) {
       const zone = options.zone();
       if (!zone) return null;
+      const key = tokens.join(' ');
+      if (lines.has(key)) {
+        const index = lines.get(key) ?? null;
+        const token = index === null ? undefined : tokens[index];
+        return token !== undefined && !options.inVocabulary(hintForm(token))
+          ? index
+          : null;
+      }
       let best: { index: number; rank: number; form: string } | null = null;
       for (const [index, token] of tokens.entries()) {
         const form = hintForm(token);
@@ -78,12 +90,14 @@ export function createHintPicker(options: HintPickerOptions): HintPicker {
         if (hinted.has(family(form)) || options.inVocabulary(form)) continue;
         if (!best || rank < best.rank) best = { index, rank, form };
       }
+      lines.set(key, best?.index ?? null);
       if (!best) return null;
       hinted.add(family(best.form));
       return best.index;
     },
     reset() {
       hinted.clear();
+      lines.clear();
     },
   };
 }

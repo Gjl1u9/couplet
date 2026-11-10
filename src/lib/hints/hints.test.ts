@@ -53,6 +53,14 @@ describe('createHintPicker', () => {
     expect(hints.pick(['Generations'])).toBe(0);
   });
 
+  it('keeps the hint of a line shown again', () => {
+    const hints = picker();
+    const line = ['the', 'isolated', 'one'];
+    expect(hints.pick(line)).toBe(1);
+    expect(hints.pick(['an', 'isolated', 'place'])).toBeNull();
+    expect(hints.pick(line)).toBe(1);
+  });
+
   it('skips saved or known words, and words outside the zone', () => {
     const hints = picker((form) => form === 'atmosphere');
     expect(hints.pick(['atmosphere', 'common10'])).toBeNull();
