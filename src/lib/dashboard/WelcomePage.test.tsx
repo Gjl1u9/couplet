@@ -134,7 +134,7 @@ describe('WelcomePage', () => {
       start?.click();
     });
     const rungs = container.querySelectorAll<HTMLButtonElement>('.word-rung');
-    expect(rungs).toHaveLength(7);
+    expect(rungs).toHaveLength(8);
     act(() => {
       rungs[3]?.click();
     });

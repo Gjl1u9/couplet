@@ -214,13 +214,13 @@ export function SettingsPage({
           <p className="muted">
             Hints use word lists from{' '}
             <a
-              href="https://github.com/hermitdave/FrequencyWords"
+              href="https://github.com/rspeer/wordfreq"
               target="_blank"
               rel="noreferrer"
             >
-              FrequencyWords
+              wordfreq
             </a>{' '}
-            (OpenSubtitles 2018), under{' '}
+            by Robyn Speer, under{' '}
             <a
               href="https://creativecommons.org/licenses/by-sa/4.0/"
               target="_blank"

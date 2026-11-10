@@ -123,7 +123,7 @@ A language sheet using the shared settings rows, then four Paper sheets, two to 
 
 - A demonstration is drawn in HTML and CSS rather than recorded, using the Lookup Panel's real styles, so it stays sharp, adds no media, and follows the design. Its scene keeps video colours in every theme.
 - Each loops every 8 or 10 seconds and has its own Pause button. Under reduced motion, it rests on its finished state with no button.
-- Under the languages, the **Word Check** asks how many of the learning language's common words the user knows. A button names the language, so a wrong guess shows before anything is asked. It opens rows of six words, from the 500 most common to 12,000, each with its size and a rough CEFR level; the user picks the last row where they know every word, and every row up to it shows Known. Save keeps one size per language, which starts the new-word hints. The Dashboard's Settings show the same check, to change it later. A language without a list says so instead.
+- Under the languages, the **Word Check** asks how many of the learning language's common words the user knows. A button names the language, so a wrong guess shows before anything is asked. It opens rows of six words, from the 500 most common to 20,000, each with its size and a rough CEFR level; the user picks the last row where they know every word, and every row up to it shows Known. Save keeps one size per language, which starts the new-word hints. The Dashboard's Settings show the same check, to change it later. A language without a list says so instead.
 
 ## Sign-in Toast
 
