@@ -11,18 +11,18 @@ Subtitles, panels, and the Dashboard all use this style. Zhupi (朱批) means an
 
 ## Tokens
 
-| Type      | Tokens                                                                                                               | Use                                                 |
-| --------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Surfaces  | `ground`, `surface`                                                                                                  | Page background; panels and content blocks          |
-| Text      | `ink`, `ink-muted`                                                                                                   | Primary text; secondary text                        |
-| Lines     | `line`, `line-strong`                                                                                                | Decorative dividers; control borders                |
-| Accent    | `accent`, `on-accent`, `accent-soft`                                                                                 | Follow principle 1; `accent-soft` is for hover      |
-| Chips     | `chip`                                                                                                               | Meaning backgrounds                                 |
-| Status    | `alert`, `skeleton`, `saved`                                                                                         | Errors and warnings; loading skeletons; Saved Words |
-| Subtitles | `subtitle-scrim`, `subtitle-original`, `subtitle-translation`, `subtitle-context`, `subtitle-mark`, `subtitle-saved` | Over video only; identical in light and dark themes |
-| Spacing   | `space-1` 4px, `space-2` 8px, `space-3` 12px, `space-4` 16px, `space-5` 20px, `space-6` 32px                         | Components and layout                               |
-| Radius    | `radius-sm` 4px, `radius-md` 8px, `radius-lg` 14px                                                                   | Tokens and labels; buttons and inputs; panels       |
-| Shadow    | `shadow-panel`                                                                                                       | Panels over video only; pages separate with borders |
+| Type      | Tokens                                                                                                               | Use                                                              |
+| --------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Surfaces  | `ground`, `surface`                                                                                                  | Page background; panels and content blocks                       |
+| Text      | `ink`, `ink-muted`                                                                                                   | Primary text; secondary text                                     |
+| Lines     | `line`, `line-strong`                                                                                                | Decorative dividers; control borders                             |
+| Accent    | `accent`, `on-accent`, `accent-soft`                                                                                 | Follow principle 1; `accent-soft` is for hover                   |
+| Chips     | `chip`                                                                                                               | Meaning backgrounds                                              |
+| Status    | `alert`, `skeleton`, `saved`, `known`                                                                                | Errors and warnings; loading skeletons; Saved Words; Known words |
+| Subtitles | `subtitle-scrim`, `subtitle-original`, `subtitle-translation`, `subtitle-context`, `subtitle-mark`, `subtitle-saved` | Over video only; identical in light and dark themes              |
+| Spacing   | `space-1` 4px, `space-2` 8px, `space-3` 12px, `space-4` 16px, `space-5` 20px, `space-6` 32px                         | Components and layout                                            |
+| Radius    | `radius-sm` 4px, `radius-md` 8px, `radius-lg` 14px                                                                   | Tokens and labels; buttons and inputs; panels                    |
+| Shadow    | `shadow-panel`                                                                                                       | Panels over video only; pages separate with borders              |
 
 ## Type
 
@@ -97,6 +97,7 @@ The Lookup Panel shows the word and its one or two most common senses, each as a
 
 - The first row holds the word, its phonetics, a save button, and a play button. The word becomes its lemma once the entry loads, and the save button appears then. 8px separates this row from the senses.
 - A saved word's button is a star filled with `saved`; an unsaved one is an `ink-muted` outline.
+- Under a word's senses, after a `line` divider, a quiet text button says **I know this**, with a circled check. It saves the word with this line and Retires it at once, so the word is never marked in subtitles or reviewed. The row then shows a `known` filled check with "Known", an Undo, and "Won't be marked or reviewed." Undo returns the word to where it was. Saving and knowing replace each other: I know this on a saved word Retires it, and the star on a known word puts it back on the schedule. A phrase has no I know this.
 - Each sense is its meaning, then an example couplet. A `line` divider separates two senses.
 - Its width follows its content, from 180px to 360px.
 - The word stays on one line: phonetics move to their own line first, and only a word wider than the row breaks.

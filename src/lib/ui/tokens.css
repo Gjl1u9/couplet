@@ -13,6 +13,7 @@
   --on-accent: #ffffff;
   --accent-soft: #fbe7e1;
   --saved: #b7791f;
+  --known: #3f7a4a;
   --chip: #eef0f3;
   --alert: #8a5600;
   --skeleton: #e4e7eb;
@@ -30,6 +31,7 @@
   --on-accent: #15181e;
   --accent-soft: #3b221c;
   --saved: #f5c542;
+  --known: #7dc08a;
   --chip: rgba(255, 255, 255, 0.12);
   --alert: #f2b544;
   --skeleton: #2d323b;

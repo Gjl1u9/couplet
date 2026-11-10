@@ -7,6 +7,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+### Added
+
+- "I know this" in a word's card: the word is kept but never marked in subtitles or reviewed. Undo is right there, and saving the word again puts it back on review.
+
 ## [0.3.0] - 2026-11-09
 
 ### Added

@@ -25,6 +25,7 @@ import { createVocabularyClient } from '../lib/vocabulary/service';
 import {
   markedForms,
   normalizeForm,
+  wordIdOf,
   type EncounterInput,
   type SavedWord,
 } from '../lib/vocabulary/vocabulary';
@@ -228,7 +229,7 @@ export default defineContentScript({
         const [translation] = await translate([text], neverAborted);
         return translation ?? null;
       },
-      isSaved: (entry) => vocabulary.has(entry.lemma, sourceLanguage()),
+      wordStatus: (entry) => vocabulary.status(entry.lemma, sourceLanguage()),
       beforeSave: () => signInToast.require(),
       keepsOpen: (path) =>
         path.some(
@@ -236,10 +237,21 @@ export default defineContentScript({
             target instanceof Element &&
             target.classList.contains('sign-in-toast'),
         ),
-      setSaved: async (entry, cue, saved) => {
+      setWordStatus: async (entry, cue, next, previous) => {
+        const id = wordIdOf(entry.lemma, sourceLanguage());
         try {
-          if (saved) await vocabulary.save(encounterInput(entry, cue));
-          else await vocabulary.removeByLemma(entry.lemma, sourceLanguage());
+          if (next === 'none') {
+            await vocabulary.removeByLemma(entry.lemma, sourceLanguage());
+          } else if (next === 'saved') {
+            if (previous === 'known') await vocabulary.restore(id);
+            else await vocabulary.save(encounterInput(entry, cue));
+          } else {
+            // I know this keeps the word, with this line, but off the schedule.
+            if (previous === 'none') {
+              await vocabulary.save(encounterInput(entry, cue));
+            }
+            await vocabulary.retire(id);
+          }
         } catch (error) {
           warn('收藏失敗', error);
           throw error;

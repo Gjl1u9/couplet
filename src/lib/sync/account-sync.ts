@@ -257,6 +257,8 @@ export function createAccountSync(options: AccountSyncOptions): AccountSync {
     reviewLog: () => withWords((words) => words.reviewLog(), []),
     has: (lemma, source) =>
       withWords((words) => words.has(lemma, source), false),
+    status: (lemma, source) =>
+      withWords((words) => words.status(lemma, source), 'none' as const),
     save: async (input, now) => {
       const current = await active();
       if (!current) throw new Error('Not signed in');
