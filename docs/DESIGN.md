@@ -80,6 +80,8 @@ A token matching a Saved Word still on the schedule has a dotted `subtitle-saved
 
 ### New-word hints
 
+Why it works this way is in [`HINTS.md`](HINTS.md).
+
 In each original line, at most one word worth learning now has a dashed `subtitle-hint` underline: dashes, not the Saved Word's dots, so the two read apart by shape. It stays quiet and clicks like any other token.
 
 - A hinted word comes from a band of the learning language's frequency list ([`public/frequency`](../public/frequency/README.md)): from where the user's known words end to two and a half times that. The band starts at the higher of the Word Check and, once 20 words are on review, the rank a quarter of them sit above. So saving harder words and learning easy ones moves it up, and a higher Word Check takes effect at once; a lower one cannot pull it below the saved words.

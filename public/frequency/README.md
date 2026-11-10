@@ -1,6 +1,6 @@
 # Word frequency lists
 
-Each `<language>.txt` holds a language's 20,000 most common everyday words, one per line, the most common first. Couplet uses them for new-word hints and the Word Check.
+Each `<language>.txt` holds a language's 20,000 most common everyday words, one per line, the most common first. Couplet uses them for new-word hints and the Word Check, as [`docs/HINTS.md`](../../docs/HINTS.md) describes.
 
 The counts come from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave, built from the [OpenSubtitles 2018](http://opus.nlpl.eu/OpenSubtitles2018.php) corpus, and licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 
