@@ -157,10 +157,10 @@ The Settings Panel and the Dashboard's Settings page share one compact menu, in 
 Matte and tactile, like sheets on a desk. Behaviour and the features' reasons are in [`DASHBOARD.md`](DASHBOARD.md). Its tokens are in [`dashboard.css`](../src/lib/dashboard/dashboard.css), because they replace the ones used over video.
 
 - **Sheets:** light `surface` cards with a `line-strong` border, on a darker `ground` with a fine grain. Corners are 5px, and pages have no shadows.
-- **Toast:** ink on the page's top edge, with one 「Undo」. It says what an action did, so it never covers the grade buttons or the rail. It leaves after 8 seconds, unless pointed at or focused.
+- **Answer pill:** what an action did, as a fully rounded ink pill: the word in bold, a middle dot, what happened, and 「Undo」 in a lighter pill inside it. Review centres it just above the grade buttons, and it leaves after 2.5 seconds. Words floats it at the bottom of the column, clear of the rail, for 6 seconds, since Undo has no key there. It stays while pointed at or focused. A problem stays 6 seconds and which uses `danger` on `danger-soft`. It fades in over 160ms, without motion when reduced motion is asked for.
 - **Type:** serif for page titles, large numbers, and the word; sans-serif for the rest.
 - **Layout:** an 84px rail with named icons beside a single centered column, 880px at most. Below 720px, the rail moves to the bottom.
-- **Colour:** `accent` marks primary actions, the current page, progress, and the word being looked at. Stages use their own colours, always with a text label. `danger` marks Delete and hard-word counts. The check on I know this is green.
+- **Colour:** `accent` marks primary actions, the current page, progress, and the word being looked at. Stages use their own colours, always with a text label. `danger` marks Remove's confirmation and hard-word counts. Remove itself stays grey until it asks. The check on I know this is green.
 - **Review activity:** one 15px square per day, in four shades of `accent` by the day's share of the busiest day.
 - **Level Track:** seven 6px dots, then the current interval.
 - **Lists:** rows divided by `line`. A row is the hit area, but only its word reacts to hover, so nothing touches the dividers.
@@ -188,7 +188,7 @@ Behaviour is in [`REVIEW.md`](REVIEW.md). The Card's title is the largest type o
 
 ## Sound
 
-The only sound is a short two-note chime when a word is saved. It is synthesized, plays once per save, and is controlled by "Save sound", on by default. State is never carried by sound alone.
+Sounds are short, synthesized tones, all controlled by one "Sounds" switch, on by default. Saving a word plays a two-note chime. In Review, Got it rises, Unsure is one even note, and Forgot falls softly on a rounder tone, never a buzz. State is never carried by sound alone.
 
 ## Copy
 

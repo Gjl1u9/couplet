@@ -10,9 +10,9 @@ import { LevelTrack } from './LevelTrack';
 import type { DashboardServices } from './services';
 import { VideoTitle } from './VideoTitle';
 import {
-  DeleteConfirm,
+  KNOWN_HINT,
   MarkedCue,
-  STOP_REVIEWING_HINT,
+  RemoveConfirm,
   TranslationText,
   useEncounterTranslation,
 } from './WordParts';
@@ -30,7 +30,7 @@ export function ReviewCard({
   encounter,
   services,
   onRetire,
-  onDelete,
+  onRemove,
   contextCollapsed,
   onToggleContext,
   handleRef,
@@ -39,7 +39,7 @@ export function ReviewCard({
   readonly encounter: Encounter;
   readonly services: DashboardServices;
   readonly onRetire: () => void;
-  readonly onDelete: () => void;
+  readonly onRemove: () => void;
   /** Kept across Cards by the page. */
   readonly contextCollapsed: boolean;
   readonly onToggleContext: () => void;
@@ -172,19 +172,6 @@ export function ReviewCard({
               ) : (
                 cue.original
               )}
-              {isCurrent && encounter.cues.length > 1 ? (
-                <button
-                  className="icon-button"
-                  type="button"
-                  aria-label={
-                    contextCollapsed ? 'Show nearby lines' : 'Hide nearby lines'
-                  }
-                  aria-expanded={!contextCollapsed}
-                  onClick={onToggleContext}
-                >
-                  <Icon paths={contextCollapsed ? ICONS.down : ICONS.up} />
-                </button>
-              ) : null}
             </p>
           );
         })}
@@ -201,6 +188,21 @@ export function ReviewCard({
             {open ? 'Hide translation' : 'Show translation'}
           </button>
         ) : null}
+        {encounter.cues.length > 1 ? (
+          // The subtitles' own context switch uses the same icon, and C its key.
+          <button
+            className="text-button context-button"
+            type="button"
+            aria-expanded={!contextCollapsed}
+            onClick={onToggleContext}
+          >
+            <Icon
+              paths={contextCollapsed ? ICONS.contextOn : ICONS.contextOff}
+            />
+            {contextCollapsed ? 'Nearby lines' : 'Hide nearby lines'}
+            <kbd aria-hidden="true">C</kbd>
+          </button>
+        ) : null}
       </div>
       {open ? (
         <TranslationText
@@ -212,31 +214,31 @@ export function ReviewCard({
       ) : null}
       <div className="review-actions">
         {confirming ? (
-          <DeleteConfirm
+          <RemoveConfirm
             word={word}
             onCancel={() => {
               setConfirming(false);
             }}
-            onDelete={onDelete}
+            onRemove={onRemove}
           />
         ) : (
           <>
             <button
               className="action"
               type="button"
-              title={STOP_REVIEWING_HINT}
+              title={KNOWN_HINT}
               onClick={onRetire}
             >
-              <Icon paths={ICONS.check} /> Stop reviewing
+              <Icon paths={ICONS.known} /> I know this
             </button>
             <button
-              className="action is-danger"
+              className="action is-quiet"
               type="button"
               onClick={() => {
                 setConfirming(true);
               }}
             >
-              <Icon paths={ICONS.trash} /> Delete
+              <Icon paths={ICONS.trash} /> Remove
             </button>
           </>
         )}

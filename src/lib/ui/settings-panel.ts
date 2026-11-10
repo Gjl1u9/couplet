@@ -219,7 +219,7 @@ export function createSettingsPanel(
               options.update({ panelTheme });
             },
           ),
-          switchRow('Save sound', settings.saveSound, (saveSound) => {
+          switchRow('Sounds', settings.saveSound, (saveSound) => {
             options.update({ saveSound });
             if (saveSound) options.previewSaveSound();
           }),

@@ -21,7 +21,11 @@ import {
   saveSettings,
   type Settings,
 } from '../settings/settings';
-import { createSaveSound } from '../ui/sound';
+import {
+  createGradeSounds,
+  createSaveSound,
+  type GradeSoundName,
+} from '../ui/sound';
 import { createSpeaker, type Speaker } from '../ui/speech';
 import {
   createVocabularyClient,
@@ -43,6 +47,8 @@ export interface DashboardServices {
   /** Calls back when a video tab changes the settings. Returns how to stop. */
   readonly onSettingsChange: (listener: () => void) => () => void;
   readonly previewSaveSound: () => void;
+  /** A Review answer's sound. The page checks the Sounds setting. */
+  readonly playGradeSound: (grade: GradeSoundName) => void;
   readonly explain: (input: ExplainInput) => Promise<Explanation>;
   /** Calls back when another page changes the Vocabulary. Returns how to stop. */
   readonly onVocabularyChange: (listener: () => void) => () => void;
@@ -50,6 +56,7 @@ export interface DashboardServices {
 
 export function createDashboardServices(): DashboardServices {
   const saveSound = createSaveSound();
+  const gradeSounds = createGradeSounds();
   return {
     vocabulary: createVocabularyClient((message) =>
       browser.runtime.sendMessage(message),
@@ -95,6 +102,9 @@ export function createDashboardServices(): DashboardServices {
     ),
     previewSaveSound: () => {
       saveSound.play();
+    },
+    playGradeSound: (grade) => {
+      gradeSounds.play(grade);
     },
     onVocabularyChange: (listener) => {
       const onChanged = (changes: Record<string, unknown>) => {

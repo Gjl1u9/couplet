@@ -252,6 +252,7 @@ export function App({ services }: { readonly services: DashboardServices }) {
           key={settings.learningLanguage}
           services={services}
           learningLanguage={settings.learningLanguage}
+          sounds={settings.saveSound}
         />
       );
     }

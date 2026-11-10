@@ -277,7 +277,7 @@ describe('createSettingsPanel', () => {
     const { panel, layer, update, previewSaveSound } = setup();
     panel.toggle();
     const row = [...layer.querySelectorAll('.setting')].find((item) =>
-      item.textContent.includes('Save sound'),
+      item.textContent.includes('Sounds'),
     );
     const input = row?.querySelector('input');
     if (!input) throw new Error('missing switch');

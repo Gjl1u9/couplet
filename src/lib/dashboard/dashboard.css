@@ -344,7 +344,7 @@ h2 {
   height: 16px;
 }
 
-.action:not(.is-danger) .icon {
+.action:not(.is-danger, .is-quiet) .icon {
   color: var(--stage-known);
 }
 
@@ -359,6 +359,16 @@ h2 {
 
 .action.is-danger:hover {
   background: var(--danger-soft);
+}
+
+/* Remove stays grey until its confirmation, which alone is red. */
+.action.is-quiet {
+  border-color: var(--line);
+  color: var(--ink-muted);
+}
+
+.action.is-quiet:hover {
+  color: var(--ink);
 }
 
 .text-button .icon {
@@ -1024,12 +1034,8 @@ mark {
   margin-bottom: 12px;
 }
 
-.review-status {
-  flex: 1;
-  color: var(--ink-muted);
-  font-size: 13px;
-  line-height: 20px;
-  text-align: right;
+.review-head .review-count {
+  margin-left: auto;
 }
 
 .review-bar {
@@ -1126,8 +1132,7 @@ mark {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
+  gap: 4px 20px;
   margin-top: 18px;
 }
 
@@ -1162,14 +1167,115 @@ mark {
   border-top: 1px solid var(--line);
 }
 
-.grades {
+/* The grade buttons and the answer pill above them stay in reach while the Card scrolls. */
+.review-foot {
   position: sticky;
   bottom: 16px;
+  margin-top: auto;
+}
+
+.grades {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin-top: auto;
   padding-top: 16px;
+}
+
+/* Review's answer pill: one line on what just happened, over the gap above the grades. */
+.answer-pill-slot {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% - 4px);
+  left: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.answer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 5px 5px 5px 14px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 13px;
+  line-height: 20px;
+  pointer-events: auto;
+  animation: pill-in 160ms ease-out;
+}
+
+.answer-pill.no-undo {
+  padding-right: 14px;
+}
+
+.answer-pill strong {
+  font-weight: 600;
+}
+
+.answer-pill.is-alert {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.answer-pill button {
+  flex: none;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 18%, transparent);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.answer-pill button:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.answer-pill button:focus-visible {
+  outline: 2px solid var(--surface);
+  outline-offset: 2px;
+}
+
+/* Pages without grade buttons float it at the bottom, centred over the column and clear
+   of the rail, which moves to the bottom on narrow screens. */
+.answer-pill-slot.is-floating {
+  position: fixed;
+  z-index: 9;
+  right: 16px;
+  bottom: 24px;
+  left: 16px;
+}
+
+@media (min-width: 721px) {
+  .answer-pill-slot.is-floating {
+    left: 100px;
+  }
+}
+
+@media (max-width: 720px) {
+  .answer-pill-slot.is-floating {
+    bottom: 88px;
+  }
+}
+
+@keyframes pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer-pill {
+    animation: none;
+  }
 }
 
 .grade {
@@ -1445,6 +1551,27 @@ h1,
   line-height: 20px;
 }
 
+/* Remove's question: its own line, in ink, with what it clears under it. */
+.confirm.is-question {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--ink);
+  text-align: right;
+}
+
+.confirm.is-question small {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.context-button kbd {
+  margin-left: 2px;
+  color: var(--ink-muted);
+}
+
 .skeleton {
   display: block;
   height: 12px;
@@ -1551,63 +1678,6 @@ h1,
 /* Keeps the nearby-lines button's hit area clear of the row below. */
 .sentence-tools {
   margin-top: 14px;
-}
-
-/* Says what an action did. Inverted so it reads as separate from the Paper below, and at
-   the top so it never covers the grade buttons or the bottom rail. */
-.toast-region {
-  position: fixed;
-  z-index: 9;
-  top: 16px;
-  right: 16px;
-  left: 16px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
-/* Centres over the page, clear of the session head's End review. */
-@media (min-width: 721px) {
-  .toast-region {
-    left: 96px;
-  }
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  max-width: 640px;
-  padding: 10px 10px 10px 16px;
-  border-radius: 5px;
-  background: var(--ink);
-  color: var(--surface);
-  font-size: 13px;
-  line-height: 20px;
-  pointer-events: auto;
-}
-
-.toast button {
-  flex: none;
-  min-height: 28px;
-  padding: 0 10px;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.toast button:hover {
-  background: var(--surface);
-  color: var(--ink);
-}
-
-.toast button:focus-visible {
-  outline: 2px solid var(--surface);
-  outline-offset: 2px;
 }
 
 .select-list {

@@ -76,6 +76,7 @@ describe('App across languages', () => {
       onSettingsChange: () => () => undefined,
       explain: () => Promise.reject(new Error('Unused')),
       previewSaveSound: vi.fn(),
+      playGradeSound: () => undefined,
       onVocabularyChange: () => () => undefined,
     };
     await act(async () => {
