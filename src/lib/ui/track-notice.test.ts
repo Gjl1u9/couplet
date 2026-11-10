@@ -33,6 +33,16 @@ describe('createTrackNotice', () => {
     expect(notice.isOpen()).toBe(false);
   });
 
+  it('closes on a press anywhere else, but not on itself', () => {
+    notice.show();
+    find('.player-toast-note')?.dispatchEvent(
+      new Event('pointerdown', { bubbles: true, composed: true }),
+    );
+    expect(notice.isOpen()).toBe(true);
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    expect(notice.isOpen()).toBe(false);
+  });
+
   it('leaves after 8 seconds, but not while pointed at', () => {
     notice.show();
     const current = find('.track-notice');
