@@ -147,7 +147,7 @@ A Retired word stays in the Vocabulary, with its star filled, but never enters t
 
 Meeting a Retired word in a video does not bring it back automatically.
 
-It says 「I know this」, as the Lookup Panel does, because both Retire the word and one name is easier to learn than two. A hover hint says what follows before the click. Afterwards the pill says 「**bank** · Known. Won't be reviewed again」 with 「Undo」; in Words, a toast says 「bank is Known and won't come up for review again.」. It does not ask first, because Undo makes the action safe and a question on every word would slow a review.
+It says 「I know this」, as the Lookup Panel does, because both Retire the word and one name is easier to learn than two. A hover hint says what follows before the click. Afterwards the pill says 「**bank** · Known. Won't be reviewed again」 with 「Undo」; Words shows the same pill at the bottom of the page. It does not ask first, because Undo makes the action safe and a question on every word would slow a review.
 
 ### Removing a word
 

@@ -414,16 +414,16 @@ describe('Dashboard pages', () => {
       await render('en:bank', services);
       await click(named('I know this'));
       expect(retire).toHaveBeenCalledWith('en:bank');
-      expect(q('.toast')?.textContent).toContain(
-        "bank is Known and won't come up for review again",
+      expect(q('.answer-pill-slot.is-floating')?.textContent).toBe(
+        "bank · Known. Won't be reviewed againUndo",
       );
-      await click(q('.toast button'));
+      await click(q('.answer-pill button'));
       expect(revert).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'en:bank' }),
         null,
         null,
       );
-      expect(q('.toast')).toBeNull();
+      expect(q('.answer-pill')).toBeNull();
       await show(
         <WordsPage
           services={services}
@@ -434,6 +434,9 @@ describe('Dashboard pages', () => {
       );
       await click(named('Review again'));
       expect(restore).toHaveBeenCalledWith('en:bank');
+      expect(q('.answer-pill')?.textContent).toContain(
+        'bank · Back in review, from the first step',
+      );
     });
 
     it('asks before removing, saying what goes', async () => {

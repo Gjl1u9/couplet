@@ -24,18 +24,18 @@ The interface, designs, and code all use these names. Each thing has one name.
 
 ## Settings
 
-| Term              | Meaning                                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------------------- |
-| Popup             | The small page opened from the extension's toolbar icon.                                           |
-| Welcome Page      | The page opened once after install, with language settings and what to try first.                  |
-| Sign-in Toast     | The prompt at the player's top right when saving a word without an account.                        |
-| Track Notice      | The note at the player's top right when the video has no subtitles at all.                         |
-| Settings Panel    | The subtitle settings panel opened from the player's controls.                                     |
-| Subtitle Switch   | The player control that turns Dual Subtitles on and off. `enabled` in settings.                    |
-| Panel Theme       | Whether the Lookup Panel is dark or light. `panelTheme` in code.                                   |
-| Subtitle Position | Where the user placed the strip, or `null` for the default. `subtitlePosition` in code.            |
-| Sounds            | The short tones for saving a word and for Review's answers, under one switch. `saveSound` in code. |
-| Answer pill       | Review's one-line feedback above the grade buttons, such as "bank · back in 3 days".               |
+| Term              | Meaning                                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Popup             | The small page opened from the extension's toolbar icon.                                                                |
+| Welcome Page      | The page opened once after install, with language settings and what to try first.                                       |
+| Sign-in Toast     | The prompt at the player's top right when saving a word without an account.                                             |
+| Track Notice      | The note at the player's top right when the video has no subtitles at all.                                              |
+| Settings Panel    | The subtitle settings panel opened from the player's controls.                                                          |
+| Subtitle Switch   | The player control that turns Dual Subtitles on and off. `enabled` in settings.                                         |
+| Panel Theme       | Whether the Lookup Panel is dark or light. `panelTheme` in code.                                                        |
+| Subtitle Position | Where the user placed the strip, or `null` for the default. `subtitlePosition` in code.                                 |
+| Sounds            | The short tones for saving a word and for Review's answers, under one switch. `saveSound` in code.                      |
+| Answer pill       | The one-line feedback with Undo, such as "bank · back in 3 days": above Review's grade buttons, at the bottom of Words. |
 
 ## Lookup
 

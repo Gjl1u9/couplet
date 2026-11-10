@@ -16,7 +16,7 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ### Changed
 
-- Review says what each answer did in a small pill just above the grade buttons, with Undo, instead of in the top corner.
+- Review says what each answer did in a small pill just above the grade buttons, with Undo, instead of in the top corner. Words uses the same pill instead of the large notice at the top.
 - "Stop reviewing" is now "I know this", in Review and Words, the same as in a word's card on video.
 - "Delete" is now "Remove", grey until it asks, and the question says what is cleared and that saving the word again brings it back.
 - The button that shows the lines around a Review sentence is now labelled "Nearby lines", beside "Show translation", with its key, C.

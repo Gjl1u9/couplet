@@ -1243,6 +1243,28 @@ mark {
   outline-offset: 2px;
 }
 
+/* Pages without grade buttons float it at the bottom, centred over the column and clear
+   of the rail, which moves to the bottom on narrow screens. */
+.answer-pill-slot.is-floating {
+  position: fixed;
+  z-index: 9;
+  right: 16px;
+  bottom: 24px;
+  left: 16px;
+}
+
+@media (min-width: 721px) {
+  .answer-pill-slot.is-floating {
+    left: 100px;
+  }
+}
+
+@media (max-width: 720px) {
+  .answer-pill-slot.is-floating {
+    bottom: 88px;
+  }
+}
+
 @keyframes pill-in {
   from {
     opacity: 0;
@@ -1656,63 +1678,6 @@ h1,
 /* Keeps the nearby-lines button's hit area clear of the row below. */
 .sentence-tools {
   margin-top: 14px;
-}
-
-/* Says what an action did. Inverted so it reads as separate from the Paper below, and at
-   the top so it never covers the grade buttons or the bottom rail. */
-.toast-region {
-  position: fixed;
-  z-index: 9;
-  top: 16px;
-  right: 16px;
-  left: 16px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
-/* Centres over the page, clear of the session head's End review. */
-@media (min-width: 721px) {
-  .toast-region {
-    left: 96px;
-  }
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  max-width: 640px;
-  padding: 10px 10px 10px 16px;
-  border-radius: 5px;
-  background: var(--ink);
-  color: var(--surface);
-  font-size: 13px;
-  line-height: 20px;
-  pointer-events: auto;
-}
-
-.toast button {
-  flex: none;
-  min-height: 28px;
-  padding: 0 10px;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.toast button:hover {
-  background: var(--surface);
-  color: var(--ink);
-}
-
-.toast button:focus-visible {
-  outline: 2px solid var(--surface);
-  outline-offset: 2px;
 }
 
 .select-list {

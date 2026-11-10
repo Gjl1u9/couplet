@@ -5,18 +5,16 @@ import type { Encounter, SavedWord } from '../vocabulary/vocabulary';
 import { jumpLink } from '../youtube/origin';
 import { DictionaryButton } from './Dictionary';
 import { wordsToCsv } from './export';
-import { formatDue, formatTimestamp, savedGroup } from './format';
+import { formatDue, formatTimestamp, savedGroup, shortLabel } from './format';
 import { Icon, ICONS } from './Icon';
 import { LevelTrack } from './LevelTrack';
 import type { DashboardServices } from './services';
 import { VideoTitle } from './VideoTitle';
-import { Toast } from './Toast';
+import { AnswerPill, type PillMessage } from './AnswerPill';
 import {
   KNOWN_HINT,
-  knownMessage,
   RemoveConfirm,
   MarkedCue,
-  restoredMessage,
   TranslationText,
   useEncounterTranslation,
 } from './WordParts';
@@ -25,8 +23,11 @@ import { STAGES, stageCounts, stageLabel, stageOf, type Stage } from './stats';
 type StageFilter = Stage | 'all';
 type WordView = 'date' | 'video';
 
+/** Long enough to reach Undo, which has no key here. */
+const NOTICE_MS = 6000;
+
 interface Notice {
-  readonly message: string;
+  readonly message: Omit<PillMessage, 'id' | 'undo'>;
   /** The word before the action, so Undo keeps its level. */
   readonly before: SavedWord;
   /** The schedule the action wrote. Undo is refused once it has moved on. */
@@ -339,9 +340,12 @@ function WordDetail({
                   ).then((next) => {
                     onNotice({
                       stamp: next?.reviewStamp ?? null,
-                      message: retired
-                        ? restoredMessage(word.lemma)
-                        : knownMessage(word.lemma),
+                      message: {
+                        word: shortLabel(word.lemma),
+                        text: retired
+                          ? 'Back in review, from the first step'
+                          : "Known. Won't be reviewed again",
+                      },
                       before: word,
                     });
                   }),
@@ -445,13 +449,20 @@ export function WordsPage({
   const [filter, setFilter] = useState<StageFilter>('all');
   const [view, setView] = useState<WordView>('date');
   const [openId, setOpenId] = useState(focusWordId);
-  const [notice, setNotice] = useState<Notice | null>(null);
+  const [notice, setNoticeState] = useState<
+    (Notice & { readonly id: number }) | null
+  >(null);
+  const noticeCount = useRef(0);
+  const setNotice = useCallback((next: Notice | null) => {
+    noticeCount.current += 1;
+    setNoticeState(next && { ...next, id: noticeCount.current });
+  }, []);
   const dismissNotice = useCallback(() => {
-    setNotice(null);
+    setNoticeState(null);
   }, []);
   const undoNotice = () => {
     if (!notice) return;
-    setNotice(null);
+    setNoticeState(null);
     services.vocabulary.revert(notice.before, null, notice.stamp).catch(() => {
       setNotice(notice);
     });
@@ -613,10 +624,12 @@ export function WordsPage({
           ))
         )}
       </section>
-      <Toast
-        message={notice?.message ?? null}
+      <AnswerPill
+        message={notice && { ...notice.message, id: notice.id, undo: true }}
         onUndo={undoNotice}
         onDismiss={dismissNotice}
+        shownMs={NOTICE_MS}
+        floating
       />
     </div>
   );

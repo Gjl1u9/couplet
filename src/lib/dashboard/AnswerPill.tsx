@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 /** Long enough to read while answering quickly; Z still undoes after it leaves. */
-const SHOWN_MS = 2500;
+export const ANSWER_SHOWN_MS = 2500;
 /** Problems stay longer, since they ask the user to do something. */
 const ALERT_MS = 6000;
 
@@ -18,15 +18,22 @@ export interface PillMessage {
 }
 
 /**
- * Review's one-line feedback, above the grade buttons where the eyes already are. The
- * region stays mounted so screen readers hear each new message.
+ * One line on what an action did, with Undo. Review puts it above the grade buttons,
+ * where the eyes already are; Words floats it at the bottom. The region stays mounted
+ * so screen readers hear each new message.
  */
 export function AnswerPill({
   message,
   onUndo,
   onDismiss,
+  shownMs = ANSWER_SHOWN_MS,
+  floating = false,
 }: {
   readonly message: PillMessage | null;
+  /** How long a message without a problem stays. */
+  readonly shownMs?: number;
+  /** Fixed at the bottom of the window, for pages without grade buttons. */
+  readonly floating?: boolean;
   /** `null` when there is nothing to undo. */
   readonly onUndo: (() => void) | null;
   readonly onDismiss: () => void;
@@ -34,11 +41,11 @@ export function AnswerPill({
   const [held, setHeld] = useState(false);
   useEffect(() => {
     if (message === null || held) return undefined;
-    const timer = setTimeout(onDismiss, message.alert ? ALERT_MS : SHOWN_MS);
+    const timer = setTimeout(onDismiss, message.alert ? ALERT_MS : shownMs);
     return () => {
       clearTimeout(timer);
     };
-  }, [message, held, onDismiss]);
+  }, [message, held, onDismiss, shownMs]);
   useEffect(() => {
     if (message === null) setHeld(false);
   }, [message]);
@@ -51,7 +58,10 @@ export function AnswerPill({
   const undo = message?.undo ? onUndo : null;
   const word = message?.word ? <strong>{message.word}</strong> : null;
   return (
-    <div className="answer-pill-slot" role="status">
+    <div
+      className={floating ? 'answer-pill-slot is-floating' : 'answer-pill-slot'}
+      role="status"
+    >
       {message === null ? null : (
         <div
           key={message.id}

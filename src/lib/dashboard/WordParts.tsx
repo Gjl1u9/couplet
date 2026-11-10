@@ -2,12 +2,6 @@
 export const KNOWN_HINT =
   'Stops reviewing this word. It stays in Words as Known.';
 
-export const knownMessage = (lemma: string) =>
-  `${shortLabel(lemma)} is Known and won't come up for review again.`;
-
-export const restoredMessage = (lemma: string) =>
-  `${shortLabel(lemma)} is back in review, starting from the first step.`;
-
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Encounter, SavedWord } from '../vocabulary/vocabulary';
 import { markWord, shortLabel } from './format';
