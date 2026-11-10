@@ -29,9 +29,15 @@ describe('hintZone', () => {
     expect(hintZone(null, [])).toBeNull();
   });
 
-  it('follows saved words once there are enough', () => {
+  it('moves up with saved words once there are enough', () => {
     const saved = Array.from({ length: 20 }, (_, i) => 1000 + i * 100);
-    expect(hintZone(8000, saved)?.from).toBe(1500);
+    expect(hintZone(null, saved)?.from).toBe(1500);
+    expect(hintZone(1000, saved)?.from).toBe(1500);
+  });
+
+  it('takes a higher Word Check at once, even with saved words', () => {
+    const saved = Array.from({ length: 20 }, (_, i) => 1000 + i * 100);
+    expect(hintZone(5000, saved)).toEqual({ from: 5000, to: 12500 });
   });
 
   it('never reaches into the most common words', () => {

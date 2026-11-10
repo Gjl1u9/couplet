@@ -19,23 +19,22 @@ export const SAVED_FOR_ZONE = 20;
 const ZONE_SPAN = 2.5;
 
 /**
- * Where hints come from: the user's own saved words once there are enough, since they
- * show what the user is learning now, or else the Word Check. `null` hints nothing.
+ * Where hints start: the higher of the Word Check and the user's own saved words, once
+ * there are enough of them. Saved words move it up as the user learns, and a higher
+ * Word Check always takes effect at once. `null` hints nothing.
  */
 export function hintZone(
   level: number | null,
   savedRanks: readonly number[],
 ): HintZone | null {
-  let from: number | null = null;
+  let saved: number | null = null;
   if (savedRanks.length >= SAVED_FOR_ZONE) {
     // A quarter of saved words are more common than this: roughly where knowing ends.
     const sorted = [...savedRanks].sort((a, b) => a - b);
-    from = sorted[Math.floor(sorted.length / 4)] ?? null;
-  } else if (level !== null) {
-    from = level;
+    saved = sorted[Math.floor(sorted.length / 4)] ?? null;
   }
-  if (from === null) return null;
-  from = Math.max(from, ALWAYS_KNOWN + 1);
+  if (level === null && saved === null) return null;
+  const from = Math.max(level ?? 0, saved ?? 0, ALWAYS_KNOWN + 1);
   return { from, to: Math.round(from * ZONE_SPAN) };
 }
 
