@@ -18,12 +18,14 @@ WATCH WITH DUAL SUBTITLES
 • Works on videos with subtitles, including auto-generated ones
 • Move and resize the subtitles, or show the lines before and after
 • Hide the translation to test yourself
+• Learning English? One new term per line, picked for your level, gets a dashed underline
 
 LOOK UP WITHOUT LEAVING THE VIDEO
 • Click a word for its meaning, phonetics, and example sentences
 • Hear it spoken
 • Drag across a phrase to translate it, even across two lines
 • The video can pause while you read
+• Already know it? Mark it, and it's never underlined or reviewed
 
 KEEP WHAT YOU MEET
 • Save a word or phrase with one click
@@ -36,14 +38,14 @@ REVIEW IN CONTEXT
 • See your streak, your progress, and what needs more practice
 
 ASK AI WHEN A SENTENCE STAYS UNCLEAR
-• In your word list, get two or three sentences on meaning and grammar
+• From the lookup card or your list, get two or three sentences on meaning and grammar
 • 50 explanations a day
 
 LANGUAGES
 Learn English, Spanish, French, German, Portuguese, Italian, Japanese, or Korean, with translations into 22 languages.
 
 ACCOUNT AND PRIVACY
-Subtitles and lookups work without an account. To save and review, sign in with Google.
+Watching and looking up work without an account. To save and review, sign in with Google.
 
 We don't sell your data or show ads. Subtitles go to Google Translate, and lookups and AI explanations are handled by Alibaba Cloud's AI service. See the privacy policy for details.
 
@@ -60,12 +62,14 @@ Couplet is an independent product, not affiliated with YouTube or Google.
 • 有字幕的影片都能用，包括自動產生的字幕
 • 字幕可以移動、調整大小，也能顯示前後句
 • 想測試自己時，可以隱藏翻譯
+• 學英文的話，每行會用虛線標出一個適合你程度的新字
 
 不離開影片就能查
 • 點單字看意思、音標和例句
 • 可以聽發音
 • 拖曳選取片語來翻譯，也可以跨兩行
 • 查字時影片可以自動暫停
+• 已經會的字按「I know this」，就不再標出或複習
 
 把遇到的字留下來
 • 一鍵收藏單字或片語
@@ -78,7 +82,7 @@ Couplet is an independent product, not affiliated with YouTube or Google.
 • 查看連續天數、進度，以及需要加強的單字
 
 句子還是看不懂，就問 AI
-• 在單字清單裡，用兩三句話說明意思和文法
+• 在字卡或單字清單裡，用兩三句話說明意思和文法
 • 每天 50 次
 
 語言
@@ -159,7 +163,7 @@ No test account is needed. Any Google account can sign in.
 3. Click a word to see its Lookup Panel. Drag across several words to translate a phrase. No account is needed for these.
 4. Press the star in the Lookup Panel, and sign in with Google from the prompt at the player's top right. The word is saved. A translated phrase has the same star.
 5. Click the extension's toolbar icon, then Start review or Open Dashboard, to see Review, Words, and Progress.
-6. In Words, open a word and press Explain with AI. It's limited to 50 a day per account.
+6. In the Lookup Panel, or in Words after opening a word, press Explain with AI. It's limited to 50 a day per account.
 
 Subtitles appear on videos that have subtitles. A video without the learning language shows its own language with a translation, a video in the native language keeps YouTube's own subtitles, and the extension says so when a video has none.
 ```
