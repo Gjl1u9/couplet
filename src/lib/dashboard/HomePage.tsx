@@ -46,6 +46,49 @@ function Welcome() {
   );
 }
 
+const RING_RADIUS = 26;
+const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
+
+/** Known words as a share of those saved: a ring, with the count beside it. */
+function KnownRing({
+  known,
+  saved,
+}: {
+  readonly known: number;
+  readonly saved: number;
+}) {
+  const share = saved > 0 ? known / saved : 0;
+  return (
+    <div className="known-ring">
+      <span
+        className="ring"
+        role="img"
+        aria-label={`${String(Math.round(share * 100))}% of saved words known`}
+      >
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle className="ring-track" cx="32" cy="32" r={RING_RADIUS} />
+          {known > 0 ? (
+            <circle
+              className="ring-done"
+              cx="32"
+              cy="32"
+              r={RING_RADIUS}
+              strokeDasharray={`${String(RING_LENGTH * share)} ${String(RING_LENGTH)}`}
+            />
+          ) : null}
+        </svg>
+        <span className="ring-share" aria-hidden="true">
+          {Math.round(share * 100)}%
+        </span>
+      </span>
+      <span>
+        <span className="stat-value">{known} known</span>
+        <span className="muted ring-of">of {saved} saved</span>
+      </span>
+    </div>
+  );
+}
+
 export function HomePage({
   words,
   log,
@@ -100,9 +143,8 @@ export function HomePage({
         </div>
         <div className="card span-2">
           <dt className="muted">Known words</dt>
-          <dd className="stat-value">
-            {known}
-            <span className="muted"> of {words.length} saved</span>
+          <dd>
+            <KnownRing known={known} saved={words.length} />
           </dd>
         </div>
         <div className="card span-2">

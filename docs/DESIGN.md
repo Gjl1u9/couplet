@@ -163,6 +163,7 @@ Matte and tactile, like sheets on a desk. Behaviour and the features' reasons ar
 - **Colour:** `accent` marks primary actions, the current page, progress, and the word being looked at. Stages use their own colours, always with a text label. `danger` marks Remove's confirmation and hard-word counts. Remove itself stays grey until it asks. The check on I know this is green.
 - **Review activity:** one 15px square per day, in four shades of `accent` by the day's share of the busiest day.
 - **Level Track:** seven 6px dots, then the current interval.
+- **Known ring:** Home's Known words is a 60px ring, a `line` track with a `known` arc for the share of saved words known, and that share small in its middle. Beside it, the count in the serif, then "of 40 saved" in `ink-muted`. The arc carries a share the bare count couldn't, and the count stays for those who want the number.
 - **Lists:** rows divided by `line`. A row is the hit area, but only its word reacts to hover, so nothing touches the dividers.
 
 ## AI

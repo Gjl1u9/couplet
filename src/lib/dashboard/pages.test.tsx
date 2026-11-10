@@ -176,11 +176,37 @@ describe('Dashboard pages', () => {
 
     it('labels its numbers and links recent words', async () => {
       await show(<HomePage words={[word('bank')]} log={[]} streakLog={[]} />);
-      expect(q('.stats')?.textContent).toContain('0 of 1 saved');
+      expect(q('.known-ring')?.textContent).toBe('0%0 knownof 1 saved');
+      expect(q('.known-ring .ring-done')).toBeNull();
       expect(q('.stats')?.textContent).toContain('Reviews, last 7 days');
       expect(q('.row-link')?.getAttribute('href')).toBe(
         '#/words?word=en%3Abank',
       );
+    });
+
+    it('fills the ring by the share of saved words known', async () => {
+      await show(
+        <HomePage
+          words={[
+            word('bank', { level: 5 }),
+            word('river'),
+            word('lake'),
+            word('sea'),
+          ]}
+          log={[]}
+          streakLog={[]}
+        />,
+      );
+      expect(q('.known-ring')?.textContent).toBe('25%1 knownof 4 saved');
+      expect(q('.known-ring [role="img"]')?.getAttribute('aria-label')).toBe(
+        '25% of saved words known',
+      );
+      const [done = 0, all = 1] = (
+        q('.known-ring .ring-done')?.getAttribute('stroke-dasharray') ?? ''
+      )
+        .split(' ')
+        .map(Number);
+      expect(done / all).toBeCloseTo(0.25);
     });
   });
 
