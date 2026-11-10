@@ -133,7 +133,7 @@ At the player's top right, in dark paper colours, 320px wide, so it clears the s
 
 ## Track Notice
 
-Only a video with no captions at all shows nothing, so only then does the Track Notice say why. It shares the Sign-in Toast's place and paper: an `alert` icon with "This video has no subtitles", and a close button, with nothing to choose, because no setting would help. It appears once per video, never while the Settings Panel is open, and leaves after 8 seconds unless pointed at or focused. It closes when the video changes.
+Only a video with no captions at all shows nothing, so only then does the Track Notice say why. It shares the Sign-in Toast's place and paper: an `alert` icon with "This video has no subtitles", and a close button, with nothing to choose, because no setting would help. It appears once per video, never while the Settings Panel is open, and leaves on its close button, on any press elsewhere (which still reaches the video), or after 8 seconds unless pointed at or focused. It closes when the video changes.
 
 ## Player controls
 

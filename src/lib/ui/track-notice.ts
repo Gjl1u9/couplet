@@ -16,14 +16,22 @@ const SHOWN_MS = 8_000;
 
 /**
  * Says why nothing shows on a video without any captions, so the user is not left
- * wondering whether the extension broke.
+ * wondering whether the extension broke. It leaves on its close button, on any press
+ * outside it, or after a while.
  */
 export function createTrackNotice(options: TrackNoticeOptions): TrackNotice {
   let notice: HTMLElement | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
+  /** Any press outside the notice dismisses it; the press still reaches the page. */
+  const onPointerDown = (event: PointerEvent) => {
+    if (notice && event.composedPath().includes(notice)) return;
+    close();
+  };
+
   const close = () => {
     clearTimeout(timer);
+    window.removeEventListener('pointerdown', onPointerDown, { capture: true });
     notice?.remove();
     notice = null;
   };
@@ -58,8 +66,10 @@ export function createTrackNotice(options: TrackNoticeOptions): TrackNotice {
       current.addEventListener('focusin', () => {
         clearTimeout(timer);
       });
+      current.addEventListener('focusout', startTimer);
       notice = current;
       layer.append(current);
+      window.addEventListener('pointerdown', onPointerDown, { capture: true });
       startTimer();
     },
     close,

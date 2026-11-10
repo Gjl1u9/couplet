@@ -19,6 +19,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 - Notes in automatic Japanese captions, such as [音楽], are no longer part of a word.
 
+### Fixed
+
+- The notice that a video has no subtitles closes on a click anywhere else, and no longer stays up after keyboard focus leaves it.
+
 ## [0.4.0] - 2026-11-10
 
 ### Added
