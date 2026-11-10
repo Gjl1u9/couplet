@@ -58,6 +58,35 @@ export function streakDays(log: readonly ReviewEvent[], now: number): number {
   return streak;
 }
 
+/** The most days in a row with a review, ever. */
+export function longestStreak(log: readonly ReviewEvent[]): number {
+  const days = [...new Set(log.map((event) => startOfDay(event.at)))].sort(
+    (a, b) => a - b,
+  );
+  let longest = 0;
+  let run = 0;
+  let last: number | null = null;
+  for (const day of days) {
+    run = last !== null && nextDay(last) === day ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    last = day;
+  }
+  return longest;
+}
+
+/** Words reviewed since local midnight, each once, though Forgot brings a word back. */
+export function wordsReviewedToday(
+  log: readonly ReviewEvent[],
+  now: number,
+): number {
+  const today = startOfDay(now);
+  return new Set(
+    log
+      .filter((event) => event.at >= today && event.at <= now)
+      .map((event) => event.wordId),
+  ).size;
+}
+
 const WEEK_MS = 7 * 86_400_000;
 
 export function reviewsLastWeek(
