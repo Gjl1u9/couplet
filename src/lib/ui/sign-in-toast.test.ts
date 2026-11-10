@@ -43,6 +43,14 @@ describe('createSignInToast', () => {
     expect(find('.sign-in-toast')).toBeNull();
   });
 
+  it('says what the sign-in is for', async () => {
+    void toast.require('Sign in to use explanations');
+    await flush();
+    expect(find('.sign-in-toast-note')?.textContent).toBe(
+      'Sign in to use explanations',
+    );
+  });
+
   it('stays after the sign-in window is closed', async () => {
     signIn.mockResolvedValue(false);
     const result = toast.require();

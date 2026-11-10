@@ -690,3 +690,142 @@ describe('createLookupPanel', () => {
     });
   });
 });
+
+describe('Explain with AI', () => {
+  const ANSWER = { text: '這裡的 banks 指銀行。', remaining: 48 };
+
+  async function openWithExplain(overrides: Partial<LookupPanelOptions> = {}) {
+    const explain = vi.fn(() => Promise.resolve(ANSWER));
+    const { panel, anchor, other, find } = setup({ explain, ...overrides });
+    panel.toggle(CUE, anchor);
+    await flush();
+    const button = () => find('.explain-action');
+    return { panel, anchor, other, find, explain, button };
+  }
+
+  it('waits for a click, then shows the answer with what is left', async () => {
+    const { panel, find, explain, button } = await openWithExplain();
+    expect(button()?.textContent).toBe('Explain with AIBeta');
+    expect(find('.lookup-explain')?.hidden).toBe(true);
+    expect(explain).not.toHaveBeenCalled();
+    button()?.click();
+    await flush();
+    expect(explain).toHaveBeenCalledWith(ENTRY, CUE);
+    await flush();
+    expect(find('.explain-text')?.textContent).toBe(ANSWER.text);
+    expect(find('.explain-note')?.textContent).toBe(
+      'AI can make mistakes · 48 left today',
+    );
+    expect(button()?.textContent).toBe('Hide explanation');
+    expect(button()?.getAttribute('aria-expanded')).toBe('true');
+    panel.close();
+  });
+
+  it('hides the answer and shows it again without asking twice', async () => {
+    const { panel, find, explain, button } = await openWithExplain();
+    button()?.click();
+    await flush();
+    await flush();
+    button()?.click();
+    expect(find('.lookup-explain')?.hidden).toBe(true);
+    button()?.click();
+    expect(find('.explain-text')?.textContent).toBe(ANSWER.text);
+    expect(explain).toHaveBeenCalledTimes(1);
+    panel.close();
+  });
+
+  it('asks nothing when beforeExplain declines', async () => {
+    const { panel, find, explain, button } = await openWithExplain({
+      beforeExplain: () => Promise.resolve(false),
+    });
+    button()?.click();
+    await flush();
+    expect(explain).not.toHaveBeenCalled();
+    expect(find('.lookup-explain')?.hidden).toBe(true);
+    panel.close();
+  });
+
+  it('says when the daily limit is used up, with nothing to retry', async () => {
+    const { panel, find, button } = await openWithExplain({
+      explain: () =>
+        Promise.reject(new Error('explain-limit|50|2026-11-11T00:00:00.000Z')),
+    });
+    button()?.click();
+    await flush();
+    await flush();
+    const box = find('.lookup-explain');
+    expect(box?.classList.contains('is-alert')).toBe(true);
+    expect(box?.getAttribute('role')).toBe('alert');
+    expect(box?.textContent).toContain("You've used today's 50 explanations.");
+    expect(box?.querySelector('.text-button')).toBeNull();
+    panel.close();
+  });
+
+  it('offers a retry after a failure', async () => {
+    const explain = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce(ANSWER);
+    const { panel, find, button } = await openWithExplain({ explain });
+    button()?.click();
+    await flush();
+    await flush();
+    find('.lookup-explain .text-button')?.click();
+    await flush();
+    await flush();
+    expect(find('.explain-text')?.textContent).toBe(ANSWER.text);
+    panel.close();
+  });
+
+  it('drops an answer that arrives after moving to another word', async () => {
+    let answer: (value: typeof ANSWER) => void = () => undefined;
+    const { panel, other, find, button } = await openWithExplain({
+      explain: () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        }),
+    });
+    button()?.click();
+    await flush();
+    expect(find('.explain-skeleton')).not.toBeNull();
+    expect(button()?.textContent).toBe('Hide explanation');
+    panel.toggle({ ...CUE, word: 'river' }, other);
+    await flush();
+    answer(ANSWER);
+    await flush();
+    expect(find('.explain-text')).toBeNull();
+    expect(find('.lookup-explain')?.hidden).toBe(true);
+    panel.close();
+  });
+
+  it('sits beside Known once a word is known', async () => {
+    const { panel, find } = await openWithExplain({
+      wordStatus: () => Promise.resolve('known' as const),
+    });
+    const foot = find('.lookup-foot');
+    expect([...(foot?.children ?? [])].map((child) => child.className)).toEqual(
+      [
+        'known-note',
+        'known-action',
+        'known-action explain-action',
+        'known-hint',
+      ],
+    );
+    panel.close();
+  });
+
+  it('explains a phrase too, in a foot of its own', async () => {
+    const explain = vi.fn(() => Promise.resolve(ANSWER));
+    const { panel, anchor, find } = setup({ explain });
+    panel.showSelection(PHRASE, anchor);
+    await flush();
+    expect(find('.lookup-foot')?.textContent).toBe('Explain with AIBeta');
+    find('.explain-action')?.click();
+    await flush();
+    expect(explain).toHaveBeenCalledWith(
+      expect.objectContaining({ lemma: 'get rid of' }),
+      PHRASE,
+    );
+    panel.close();
+  });
+});

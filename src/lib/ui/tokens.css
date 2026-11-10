@@ -17,6 +17,7 @@
   --chip: #eef0f3;
   --alert: #8a5600;
   --skeleton: #e4e7eb;
+  --ai-outline: #a88700;
 }
 
 [data-theme='dark'] {
@@ -35,6 +36,7 @@
   --chip: rgba(255, 255, 255, 0.12);
   --alert: #f2b544;
   --skeleton: #2d323b;
+  --ai-outline: none;
 }
 
 :host,
@@ -46,6 +48,8 @@
   --subtitle-mark: #ff7a59;
   --subtitle-saved: #f5c542;
   --subtitle-hint: #9ec9ff;
+  /* The AI mark's fill, the same in both themes. */
+  --ai: #ffd60a;
   --font-sans:
     'IBM Plex Sans', 'PingFang TC', 'Noto Sans TC', 'Hiragino Sans',
     'Microsoft JhengHei', sans-serif;

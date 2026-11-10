@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lookup Panel: Explain with AI</title>
+    <link rel="stylesheet" href="../src/lib/ui/tokens.css" />
+    <link rel="stylesheet" href="../src/lib/ui/lookup-panel.css" />
+    <style>
+      /* Prototype only: Explain with AI in the Lookup Panel, beside I know this. */
+      body {
+        margin: 0;
+        padding: 24px 16px 48px;
+        background: #f3f4f6;
+        color: #15181e;
+        font-family: var(--font-sans);
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+        line-height: 28px;
+      }
+
+      .lead {
+        max-width: 72ch;
+        margin: 0 0 20px;
+        color: #565d68;
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 20px;
+      }
+
+      /* Stand-in video. Panels over video default to dark. */
+      .scene {
+        position: relative;
+        display: grid;
+        align-content: start;
+        gap: 8px;
+        min-height: 300px;
+        padding: 20px;
+        border-radius: 12px;
+        background:
+          radial-gradient(60% 70% at 70% 30%, #6b5440 0%, transparent 70%),
+          linear-gradient(#2a2622, #15171b);
+        container-type: inline-size;
+      }
+
+      .state-name {
+        margin: 0;
+        color: #c9ced6;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .scene .panel {
+        position: relative;
+      }
+
+      .icon-button {
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-md);
+        background: none;
+        cursor: pointer;
+      }
+
+      .icon-button::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        top: 50%;
+        left: 50%;
+        width: 25px;
+        height: 25px;
+        border-radius: var(--radius-sm);
+        transform: translate(-50%, -50%);
+      }
+
+      .icon-button:hover::before {
+        background: var(--accent-soft);
+      }
+
+      .icon {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* The AI mark keeps the Dashboard's filled sparkles, so AI reads apart. */
+      .ai-icon {
+        flex: none;
+        width: 14px;
+        height: 14px;
+        fill: #ffd60a;
+      }
+
+      .beta {
+        padding: 0 3px;
+        border: 1px solid var(--line-strong);
+        border-radius: 3px;
+        color: var(--ink-muted);
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 13px;
+      }
+
+      /* The explanation sits under the senses, marked off like a quotation. */
+      .lookup-explain {
+        margin-top: 10px;
+        padding: 0 8px 0 12px;
+        border-left: 2px solid var(--line-strong);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .lookup-explain p {
+        margin: 0;
+      }
+
+      .lookup-explain .explain-note {
+        margin-top: 4px;
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      .lookup-explain.is-alert {
+        color: var(--alert);
+      }
+
+      .explain-skeleton {
+        display: grid;
+        gap: 6px;
+        padding: 3px 0;
+      }
+
+      .explain-skeleton span {
+        display: block;
+        height: 12px;
+        border-radius: var(--radius-sm);
+        background: var(--skeleton);
+      }
+
+      .explain-skeleton span:last-child {
+        width: 60%;
+      }
+
+      .text-link {
+        border: 0;
+        padding: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .notes {
+        max-width: 72ch;
+        margin-top: 24px;
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .notes li + li {
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lookup Panel: Explain with AI</h1>
+    <p class="lead">
+      Explain with AI joins I know this under the senses, and asks only when
+      clicked. Each scene is one state; the first is live, so click its buttons.
+    </p>
+
+    <div class="grid" id="grid"></div>
+
+    <ul class="notes">
+      <li>
+        It sends the word with its line and the lines around it, exactly as
+        saving stores them, so Words gets the same explanation from the
+        service's cache without using another one.
+      </li>
+      <li>
+        It needs a sign-in, like saving, and counts toward the 50 a day the
+        Words page already uses.
+      </li>
+      <li>
+        Hide explanation closes it; asking again in the same panel shows it
+        again without a new request.
+      </li>
+    </ul>
+
+    <template id="panel">
+      <div class="panel lookup-panel" data-theme="dark">
+        <div class="lookup-head">
+          <div class="lookup-title">
+            <span class="lookup-word">fortunate</span>
+            <span class="phonetic">/ˈfɔːrtʃənət/</span>
+          </div>
+          <div class="lookup-actions"></div>
+        </div>
+        <div class="lookup-senses">
+          <div class="lookup-sense">
+            <div class="lookup-meaning">
+              <span class="meaning-chip">幸運的</span>
+            </div>
+            <div class="couplet-original">
+              We were fortunate to find a seat.
+            </div>
+            <div class="couplet-translation">我們很幸運找到了座位。</div>
+          </div>
+        </div>
+        <div class="lookup-foot"></div>
+      </div>
+    </template>
+
+    <script>
+      const SVG = (inner, cls = 'icon') =>
+        `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${inner}</svg>`;
+      const STAR = SVG(
+        '<path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245"/>',
+      );
+      const SPEAK = SVG(
+        '<path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/>',
+      );
+      const KNOWN = SVG(
+        '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M8.5 12.2l2.4 2.4l4.6 -5"/>',
+      );
+      const SPARKLES = SVG(
+        '<path d="M16 3l1.2 3l3 1.2l-3 1.2l-1.2 3l-1.2 -3l-3 -1.2l3 -1.2z"/><path d="M8 9l1.8 4.2l4.2 1.8l-4.2 1.8l-1.8 4.2l-1.8 -4.2l-4.2 -1.8l4.2 -1.8z"/>',
+        'ai-icon',
+      );
+      const TEXT =
+        '這裡的 fortunate 是形容詞，意思是「幸運的」，表示找到座位是運氣好、不一定理所當然。句型 be fortunate to do something 常用來說「有幸、很幸運能做某事」，語氣比 lucky 正式一點。';
+
+      /** One panel. state: idle | loading | done | limit | hidden */
+      function makePanel(initial, live) {
+        const panel = document
+          .getElementById('panel')
+          .content.firstElementChild.cloneNode(true);
+        panel.querySelector('.lookup-actions').innerHTML =
+          `<button class="icon-button save" type="button" aria-label="Save word">${STAR}</button>` +
+          `<button class="icon-button speak" type="button" aria-label="Play pronunciation">${SPEAK}</button>`;
+        const foot = panel.querySelector('.lookup-foot');
+        const box = document.createElement('div');
+        panel.querySelector('.lookup-senses').after(box);
+        let state = initial;
+        let remaining = 48;
+
+        function render() {
+          box.className = '';
+          box.replaceChildren();
+          if (state === 'loading') {
+            box.className = 'lookup-explain';
+            box.setAttribute('aria-label', 'Loading explanation');
+            box.innerHTML =
+              '<div class="explain-skeleton"><span></span><span></span><span></span></div>';
+          } else if (state === 'done') {
+            box.className = 'lookup-explain';
+            box.innerHTML = `<p dir="auto"></p><p class="explain-note">AI can make mistakes · ${remaining} left today</p>`;
+            box.firstChild.textContent = TEXT;
+          } else if (state === 'limit') {
+            box.className = 'lookup-explain is-alert';
+            box.setAttribute('role', 'alert');
+            box.innerHTML =
+              "<p>You've used today's 50 explanations. More at 8:00 AM.</p>";
+          }
+          const open = state === 'done' || state === 'loading';
+          foot.innerHTML =
+            `<button class="known-action" type="button">${KNOWN}<span>I know this</span></button>` +
+            `<button class="known-action explain" type="button" aria-expanded="${open}">${SPARKLES}` +
+            (open
+              ? '<span>Hide explanation</span>'
+              : '<span>Explain with AI</span><span class="beta">Beta</span>') +
+            '</button>';
+          if (!live) return;
+          foot.querySelector('.explain').addEventListener('click', () => {
+            if (state === 'done' || state === 'loading') {
+              state = 'hidden';
+              render();
+              return;
+            }
+            if (state === 'hidden') {
+              state = 'done';
+              render();
+              return;
+            }
+            state = 'loading';
+            render();
+            setTimeout(() => {
+              remaining -= 1;
+              state = 'done';
+              render();
+            }, 1400);
+          });
+        }
+        render();
+        return panel;
+      }
+
+      const grid = document.getElementById('grid');
+      for (const [label, state, live] of [
+        ['Live: click Explain with AI', 'idle', true],
+        ['Loading', 'loading', false],
+        ['Explained', 'done', false],
+        ['Daily limit reached', 'limit', false],
+      ]) {
+        const scene = document.createElement('section');
+        scene.className = 'scene';
+        const name = document.createElement('p');
+        name.className = 'state-name';
+        name.textContent = label;
+        scene.append(name, makePanel(state, live));
+        grid.append(scene);
+      }
+    </script>
+  </body>
+</html>

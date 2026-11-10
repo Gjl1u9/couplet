@@ -12,6 +12,7 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 - New-word hints in English: one word per subtitle line worth learning at your level gets a dashed underline. Turn them off in the subtitle settings.
 - A word check on the Welcome Page and in Settings: pick the last row of common words you know, and hints start from your level.
 - "I know this" in a word's card: the word is kept but never marked in subtitles or reviewed. Undo is right there, and saving the word again puts it back on review.
+- Explain with AI in a word's or phrase's card on YouTube, beside "I know this". It shares the 50 a day with Words, and a line explained in one place costs nothing to open in the other.
 
 ## [0.3.0] - 2026-11-09
 

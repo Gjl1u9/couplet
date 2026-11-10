@@ -158,6 +158,70 @@
   line-height: 18px;
 }
 
+/* The AI mark keeps the Dashboard's filled sparkles, so AI reads apart. */
+.known-action .ai-icon {
+  width: 14px;
+  height: 14px;
+  fill: var(--ai);
+  stroke: var(--ai-outline);
+  stroke-width: 1;
+}
+
+.beta {
+  padding: 0 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 13px;
+}
+
+/* The explanation sits under the senses, marked off like a quotation. */
+.lookup-explain {
+  margin-top: 10px;
+  padding: 0 8px 0 12px;
+  border-left: 2px solid var(--line-strong);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.lookup-explain[hidden] {
+  display: none;
+}
+
+.lookup-explain p {
+  margin: 0;
+}
+
+.lookup-explain .explain-note {
+  margin-top: 4px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.lookup-explain.is-alert {
+  color: var(--alert);
+}
+
+.explain-skeleton {
+  display: grid;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.explain-skeleton span {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--skeleton);
+}
+
+.explain-skeleton span:last-child {
+  width: 60%;
+}
+
 .lookup-sense + .lookup-sense {
   margin-top: 8px;
   padding-top: 8px;
