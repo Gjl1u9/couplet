@@ -59,6 +59,16 @@ describe('createHintPicker', () => {
     expect(hints.pick(['Generations'])).toBe(0);
   });
 
+  it('never hints a word with an apostrophe', () => {
+    const lookup = rankLookup(['cant', 'whats', 'ill']);
+    const hints = createHintPicker({
+      rankOf: lookup,
+      zone: () => ({ from: 1, to: 10 }),
+      inVocabulary: () => false,
+    });
+    expect(hints.pick(["can't", 'What’s', "I'll"])).toBeNull();
+  });
+
   it('keeps the hint of a line shown again', () => {
     const hints = picker();
     const line = ['the', 'isolated', 'one'];

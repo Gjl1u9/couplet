@@ -11,7 +11,7 @@ While watching, the user sees which word in a line is worth learning now, withou
 1. **Word list:** each learning language with a list has its 20,000 most common everyday words in [`public/frequency`](../public/frequency/README.md), most common first, built by [`scripts/build-frequency.mjs`](../scripts/build-frequency.mjs). The background script serves it to the video page.
 2. **Level:** the Word Check stores one size per language in `vocabularyLevels`, such as `en: 3000`.
 3. **Band:** hints come from ranks between a start and two and a half times it. The start is the higher of the Word Check and, once 20 words are on review, the rank a quarter of those words sit above ([`hintZone`](../src/lib/hints/hints.ts)).
-4. **Line:** each original line hints at most its most common candidate. The 200 most common words and every word in the Vocabulary, saved or known, are skipped. A video hints each word, with simple inflections, once; a line shown again keeps its hint.
+4. **Line:** each original line hints at most its most common candidate. The 200 most common words, words with an apostrophe, and every word in the Vocabulary, saved or known, are skipped. Without its apostrophe a contraction reads as another listed word: `can't` as `cant`, `I'll` as `ill`. A video hints each word, with simple inflections, once; a line shown again keeps its hint.
 5. **Known:** I know this in the Lookup Panel saves the word with its line and Retires it, so it leaves the hints, the marks, and Review.
 
 ## Decisions made

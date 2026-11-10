@@ -43,6 +43,8 @@ export function hintForm(token: string): string {
   return token.toLowerCase().replace(/[^\p{L}]/gu, '');
 }
 
+const APOSTROPHE = /['\u2019]/u;
+
 /** Groups simple inflections, so `generation` and `generations` count as one word. */
 function family(form: string): string {
   return form.replace(/(ies|es|s|ed|ing)$/u, '');
@@ -83,6 +85,9 @@ export function createHintPicker(options: HintPickerOptions): HintPicker {
       }
       let best: { index: number; rank: number; form: string } | null = null;
       for (const [index, token] of tokens.entries()) {
+        // Contractions and possessives are grammar, and without the apostrophe they
+        // read as other words: can't as cant, I'll as ill.
+        if (APOSTROPHE.test(token)) continue;
         const form = hintForm(token);
         const rank = options.rankOf(form);
         if (rank === undefined || rank < zone.from || rank > zone.to) continue;
