@@ -19,6 +19,7 @@ Subtitles, panels, and the Dashboard all use this style. Zhupi (朱批) means an
 | Accent    | `accent`, `on-accent`, `accent-soft`                                                                                                  | Follow principle 1; `accent-soft` is for hover                   |
 | Chips     | `chip`                                                                                                                                | Meaning backgrounds                                              |
 | Status    | `alert`, `skeleton`, `saved`, `known`                                                                                                 | Errors and warnings; loading skeletons; Saved Words; Known words |
+| AI        | `ai`, `ai-outline`                                                                                                                    | The sparkles on Explain with AI; `ai` is the same in both themes |
 | Subtitles | `subtitle-scrim`, `subtitle-original`, `subtitle-translation`, `subtitle-context`, `subtitle-mark`, `subtitle-saved`, `subtitle-hint` | Over video only; identical in light and dark themes              |
 | Spacing   | `space-1` 4px, `space-2` 8px, `space-3` 12px, `space-4` 16px, `space-5` 20px, `space-6` 32px                                          | Components and layout                                            |
 | Radius    | `radius-sm` 4px, `radius-md` 8px, `radius-lg` 14px                                                                                    | Tokens and labels; buttons and inputs; panels                    |
@@ -108,6 +109,7 @@ The Lookup Panel shows the word and its one or two most common senses, each as a
 - The first row holds the word, its phonetics, a save button, and a play button. The word becomes its lemma once the entry loads, and the save button appears then. 8px separates this row from the senses.
 - A saved word's button is a star filled with `saved`; an unsaved one is an `ink-muted` outline.
 - Under a word's senses, after a `line` divider, a quiet text button says **I know this**, with a circled check. It saves the word with this line and Retires it at once, so the word is never marked in subtitles or reviewed. The row then shows a `known` filled check with "Known", an Undo, and "Won't be marked or reviewed." Undo returns the word to where it was. Saving and knowing replace each other: I know this on a saved word Retires it, and the star on a known word puts it back on the schedule. A phrase has no I know this.
+- Beside it, **Explain with AI** asks only when clicked, and needs a sign-in. Its answer sits between the senses and the foot, set off by a 2px `line-strong` rule on its left like a quotation, with "AI can make mistakes · 48 left today" under it in `ink-muted`. While it loads, three `skeleton` bars hold its place. The button then reads Hide explanation, and asking again in the same panel shows the same answer without a new request. Failures, such as the daily limit, are `alert` text in the same place. A phrase has a foot with Explain only.
 - Each sense is its meaning, then an example couplet. A `line` divider separates two senses.
 - Its width follows its content, from 180px to 360px.
 - The word stays on one line: phonetics move to their own line first, and only a word wider than the row breaks.
@@ -165,7 +167,7 @@ Matte and tactile, like sheets on a desk. Behaviour and the features' reasons ar
 
 ## AI
 
-Explain with AI is a quiet text button at 12px, with a Beta label and a filled sparkles icon in bright yellow, `#ffd60a`, the one filled icon on these pages. On light paper the icon has a thin amber outline, because bright yellow alone fails 3:1 there.
+Explain with AI is a quiet text button, at 12px in Words and 13px in the Lookup Panel's foot, with a Beta label and a filled sparkles icon in bright yellow, `ai` (`#ffd60a`), the one filled icon on these pages. On light paper the icon has a thin amber `ai-outline`, because bright yellow alone fails 3:1 there.
 
 ## Review Card
 

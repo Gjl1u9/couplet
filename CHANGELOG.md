@@ -13,6 +13,7 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 - A word check on the Welcome Page and in Settings: pick the last row of common words you know, and hints start from your level.
 - "I know this" in a word's card: the word is kept but never marked in subtitles or reviewed. Undo is right there, and saving the word again puts it back on review.
 - Review answers have their own sounds: Got it rises, Unsure is one even note, and Forgot falls softly. The "Save sound" setting is now "Sounds" and covers them too.
+- Explain with AI in a word's or phrase's card on YouTube, beside "I know this". It shares the 50 a day with Words, and a line explained in one place costs nothing to open in the other.
 
 ### Changed
 

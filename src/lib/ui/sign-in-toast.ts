@@ -10,8 +10,11 @@ export interface SignInToastOptions {
 }
 
 export interface SignInToast {
-  /** Resolves true once signed in, or false if the user walks away from it. */
-  require: () => Promise<boolean>;
+  /**
+   * Resolves true once signed in, or false if the user walks away from it. `reason`
+   * says what sign-in is for.
+   */
+  require: (reason?: string) => Promise<boolean>;
   /** Another page may have signed in while the toast waits. */
   recheck: () => void;
   isOpen: () => boolean;
@@ -44,12 +47,8 @@ export function createSignInToast(options: SignInToastOptions): SignInToast {
     }, SHOWN_MS);
   };
 
-  const show = (layer: HTMLElement) => {
-    const note = element(
-      'p',
-      'player-toast-note sign-in-toast-note',
-      'Sign in to save words',
-    );
+  const show = (layer: HTMLElement, reason: string) => {
+    const note = element('p', 'player-toast-note sign-in-toast-note', reason);
     const label = element('span', '', 'Sign in with Google');
     const button = element(
       'button',
@@ -63,7 +62,7 @@ export function createSignInToast(options: SignInToastOptions): SignInToast {
       clearTimeout(timer);
       button.disabled = true;
       label.textContent = 'Signing in…';
-      note.textContent = 'Sign in to save words';
+      note.textContent = reason;
       note.classList.remove('is-alert');
       options.signIn().then(
         (signedIn) => {
@@ -111,7 +110,7 @@ export function createSignInToast(options: SignInToastOptions): SignInToast {
   };
 
   return {
-    require: async () => {
+    require: async (reason = 'Sign in to save words') => {
       if (await options.isSignedIn()) return true;
       // The newest word wins: an earlier one waiting here is left unsaved.
       finish(false);
@@ -119,7 +118,7 @@ export function createSignInToast(options: SignInToastOptions): SignInToast {
       if (!layer) return false;
       return new Promise<boolean>((resolve) => {
         settle = resolve;
-        show(layer);
+        show(layer, reason);
       });
     },
     recheck() {

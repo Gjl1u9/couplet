@@ -12,6 +12,8 @@ Word lookups go through our Cloudflare Worker, [`worker/`](../worker), at `api.c
 
 Each account gets 50 a day, set by `EXPLAIN_DAILY_LIMIT`, resetting at midnight UTC. Unlike lookups, this allowance is shown, as 「48 left today」. The same word in the same lines is cached by a salted hash, for everyone, and costs nothing to ask again, even past the allowance. Failures are refunded.
 
+The Lookup Panel and Words send the same input for a saved line: the word as written, the lines the save stored, and the native language. So whichever asks first fills the cache, and the other gets the same answer without using the allowance. The panel asks only when Explain with AI is clicked, so opening cards costs nothing.
+
 ## Ceilings
 
 People have no daily allowance and see no counter. Two ceilings exist only to stop scripts and cap the bill. Reaching either reads as 「Lookups are busy right now. Try again later.」, never as a used-up allowance. Each resets at midnight UTC, and is set in [`wrangler.toml`](../worker/wrangler.toml).
