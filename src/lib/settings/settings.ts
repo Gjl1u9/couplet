@@ -27,6 +27,13 @@ export interface Settings {
   readonly saveSound: boolean;
   /** The Dashboard's theme. */
   readonly pageTheme: PageTheme;
+  /** Points out one word per line that is worth learning at the user's level. */
+  readonly newWordHints: boolean;
+  /**
+   * How many of each learning language's most common words the user knows, from the
+   * Word Check. Missing means not checked.
+   */
+  readonly vocabularyLevels: Readonly<Record<string, number>>;
 }
 
 export const NATIVE_LANGUAGES = [
@@ -96,6 +103,8 @@ export function defaultSettings(browserLanguage: string): Settings {
     showContext: false,
     saveSound: true,
     pageTheme: 'system',
+    newWordHints: true,
+    vocabularyLevels: {},
   };
 }
 
@@ -134,7 +143,20 @@ export function parseSettings(raw: unknown, defaults: Settings): Settings {
     saveSound: bool(r.saveSound, defaults.saveSound),
     pageTheme:
       PAGE_THEMES.find((theme) => theme === r.pageTheme) ?? defaults.pageTheme,
+    newWordHints: bool(r.newWordHints, defaults.newWordHints),
+    vocabularyLevels: parseLevels(r.vocabularyLevels),
   };
+}
+
+function parseLevels(raw: unknown): Readonly<Record<string, number>> {
+  if (typeof raw !== 'object' || raw === null) return {};
+  const levels: Record<string, number> = {};
+  for (const [language, size] of Object.entries(raw)) {
+    if (typeof size === 'number' && Number.isFinite(size) && size > 0) {
+      levels[language] = size;
+    }
+  }
+  return levels;
 }
 
 const STORAGE_KEY = 'settings';

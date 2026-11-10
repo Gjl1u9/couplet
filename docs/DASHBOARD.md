@@ -144,6 +144,7 @@ Other dashboards informed the features and the general airy feel. Layout, wordin
 - Language selects replace the browser's own, which could not match Paper or show a current-value check. The same control runs in the Settings Panel and on this page.
 - Each language keeps its own list instead of merging or moving words: a mixed queue would blur statistics and interrupt reviews.
 - 「Stop reviewing」 replaced 「I know this」: the label names the effect, and a word can be Known while still scheduled. Undo keeps the word's level, while 「Review again」 restarts it.
+- The Lookup Panel does say 「I know this」, because there the word may not be saved yet, so there is nothing to stop. Both Retire the word, so it lands under Known in Words either way, where 「Review again」 brings it back.
 - The product icon appears on the toolbar and in the store, not in the rail, where it did not suit Paper.
 - Filters and grouping are not remembered between visits, except the Review Card's collapsed context.
 - By-video grouping uses each word's newest sentence, so a word appears once.

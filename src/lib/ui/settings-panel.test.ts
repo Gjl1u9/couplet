@@ -105,6 +105,19 @@ describe('createSettingsPanel', () => {
     panel.dispose();
   });
 
+  it('says hints are English only when learning another language', () => {
+    const { panel, layer, update } = setup();
+    panel.toggle();
+    expect(layer.textContent).not.toContain('English only');
+    panel.toggle();
+    update({ learningLanguage: 'es' });
+    panel.toggle();
+    expect(layer.textContent).toContain(
+      'New word hints are English only for now.',
+    );
+    panel.dispose();
+  });
+
   it('toggles from the button without reaching the player', () => {
     const { panel, entry, find, onOpen } = setup();
     panel.ensureButton();

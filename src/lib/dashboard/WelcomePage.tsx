@@ -14,6 +14,7 @@ import {
 import { Logo } from './Logo';
 import type { DashboardServices } from './services';
 import { Select } from './SettingsPage';
+import { WordCheck } from './WordCheck';
 import { usePageTheme } from './theme';
 
 function Scene({
@@ -259,6 +260,15 @@ function LanguagePicker({
           <div className="welcome-languages-loading" />
         )}
       </div>
+      {settings ? (
+        <WordCheck
+          language={settings.learningLanguage}
+          levels={settings.vocabularyLevels}
+          onSave={(vocabularyLevels) => {
+            save({ vocabularyLevels });
+          }}
+        />
+      ) : null}
       <p className="muted" role={failed ? 'alert' : undefined}>
         {failed
           ? "Couldn't save that change. Try again."

@@ -9,6 +9,11 @@ export const ICON_STAR = [
   'M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245',
 ];
 export const ICON_CHECK = ['M5 12l5 5l9 -10'];
+/** A check in a circle: done, so it never reads as a second save. The ring fills when known. */
+export const ICON_KNOWN = [
+  'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0',
+  'M8.5 12.2l2.4 2.4l4.6 -5',
+];
 export const ICON_CHEVRON_DOWN = ['M6 9l6 6l6 -6'];
 export const ICON_CLOSE = ['M6 6l12 12', 'M18 6L6 18'];
 export const ICON_DICTIONARY = [

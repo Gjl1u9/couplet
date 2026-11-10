@@ -10,6 +10,7 @@ import type {
   SavedEncounter,
   SavedWord,
   Vocabulary,
+  WordStatus,
 } from './vocabulary';
 
 const MESSAGE_TYPE = 'vocabulary';
@@ -22,6 +23,7 @@ export type VocabularyCommand =
   | { readonly op: 'list' }
   | { readonly op: 'reviewLog' }
   | { readonly op: 'has'; readonly lemma: string; readonly source: string }
+  | { readonly op: 'status'; readonly lemma: string; readonly source: string }
   | { readonly op: 'save'; readonly input: EncounterInput }
   | { readonly op: 'addEncounter'; readonly input: EncounterInput }
   | {
@@ -104,6 +106,8 @@ export function createVocabularyService(options: VocabularyServiceOptions) {
         return vocabulary.reviewLog();
       case 'has':
         return vocabulary.has(command.lemma, command.source);
+      case 'status':
+        return vocabulary.status(command.lemma, command.source);
       case 'save': {
         const saved = await vocabulary.save(command.input, now());
         translateInBackground(saved);
@@ -178,6 +182,7 @@ export interface VocabularyClient {
   list: () => Promise<readonly SavedWord[]>;
   reviewLog: () => Promise<readonly ReviewEvent[]>;
   has: (lemma: string, source: string) => Promise<boolean>;
+  status: (lemma: string, source: string) => Promise<WordStatus>;
   save: (input: EncounterInput) => Promise<SavedWord>;
   addEncounter: (input: EncounterInput) => Promise<SavedWord | null>;
   fillTranslation: (
@@ -217,6 +222,7 @@ export function createVocabularyClient(
     list: () => send({ op: 'list' }),
     reviewLog: () => send({ op: 'reviewLog' }),
     has: (lemma, source) => send({ op: 'has', lemma, source }),
+    status: (lemma, source) => send({ op: 'status', lemma, source }),
     save: (input) => send({ op: 'save', input }),
     addEncounter: (input) => send({ op: 'addEncounter', input }),
     fillTranslation: (wordId, encounterId) =>

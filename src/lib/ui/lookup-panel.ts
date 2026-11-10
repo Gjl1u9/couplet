@@ -1,12 +1,14 @@
 import { MAX_WORD_LENGTH, meaningsOf, phraseEntry } from '../lookup/entry';
 import type { PanelTheme } from '../settings/settings';
 import type { Sense, WordEntry, WordInCue } from '../lookup/types';
+import type { WordStatus } from '../vocabulary/vocabulary';
 import {
   element,
   icon,
   iconButton,
   meaningChip,
   ICON_ALERT,
+  ICON_KNOWN,
   ICON_SPEAK,
   ICON_STAR,
   watchDismiss,
@@ -20,22 +22,23 @@ export interface LookupPanelOptions {
   readonly lookUp: (word: string) => Promise<WordEntry | null>;
   /** Resolves to `null` when the text is already in the target language. */
   readonly translateSelection: (text: string) => Promise<string | null>;
-  readonly isSaved: (entry: WordEntry) => Promise<boolean>;
-  /** Rejecting tells the panel to show the previous state again. */
-  readonly setSaved: (
+  readonly wordStatus: (entry: WordEntry) => Promise<WordStatus>;
+  /** Moves the word from `previous` to `next`. Rejecting shows `previous` again. */
+  readonly setWordStatus: (
     entry: WordEntry,
     cue: WordInCue,
-    saved: boolean,
+    next: WordStatus,
+    previous: WordStatus,
   ) => Promise<void>;
   readonly sourceLanguage: () => string;
   readonly theme: () => PanelTheme;
   readonly speaker: Speaker;
-  /** Resolves false to leave the word unsaved, such as when sign-in is declined. */
+  /** Resolves false to leave the word unsaved or not known, such as when sign-in is declined. */
   readonly beforeSave?: () => Promise<boolean>;
   /** Clicks here leave the panel open, such as on the sign-in toast. */
   readonly keepsOpen?: (path: readonly EventTarget[]) => boolean;
   readonly onSaved?: () => void;
-  /** The word is already saved and was opened again, perhaps in a new sentence. */
+  /** The word is already saved or known and was opened again, perhaps in a new sentence. */
   readonly onSeenAgain?: (entry: WordEntry, cue: WordInCue) => void;
   readonly onOpen: () => void;
   readonly onClose: () => void;
@@ -130,32 +133,74 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
     if (byKeyboard && previous?.isConnected) previous.focus();
   };
 
-  const saveButton = (
+  /**
+   * The save star, and for a word the I know this action under its senses. Saving and
+   * knowing exclude each other: knowing takes a saved word off the schedule, and saving
+   * a known word puts it back.
+   */
+  const wordControls = (
     cue: WordInCue,
     entry: WordEntry,
-    saveLabel = 'Save word',
+    { saveLabel = 'Save word', canKnow = true } = {},
   ) => {
-    let saved = false;
-    const show = (next: boolean) => {
-      saved = next;
-      button.classList.toggle('is-saved', saved);
-      button.setAttribute('aria-pressed', String(saved));
-      button.setAttribute(
+    let status: WordStatus = 'none';
+    /** Where Undo returns to: the status before I know this was pressed. */
+    let beforeKnown: WordStatus = 'saved';
+    const foot = canKnow ? element('div', 'lookup-foot') : null;
+
+    const knowButton = element(
+      'button',
+      'known-action',
+      icon(ICON_KNOWN),
+      element('span', '', 'I know this'),
+    );
+    knowButton.type = 'button';
+    const undoButton = element('button', 'known-action', 'Undo');
+    undoButton.type = 'button';
+    undoButton.setAttribute('aria-label', 'Undo I know this');
+    const knownNote = element(
+      'span',
+      'known-note',
+      icon(ICON_KNOWN),
+      element('span', '', 'Known'),
+    );
+    const knownHint = element(
+      'span',
+      'known-hint',
+      "Won't be marked or reviewed.",
+    );
+
+    const show = (next: WordStatus) => {
+      status = next;
+      const saved = status === 'saved';
+      save.classList.toggle('is-saved', saved);
+      save.setAttribute('aria-pressed', String(saved));
+      save.setAttribute(
         'aria-label',
         saved ? 'Remove from saved words' : saveLabel,
       );
+      foot?.replaceChildren(
+        ...(status === 'known'
+          ? [knownNote, undoButton, knownHint]
+          : [knowButton]),
+      );
+      place();
     };
-    const apply = (next: boolean) => {
+
+    const apply = (next: WordStatus) => {
+      const previous = status;
+      if (next === 'known') beforeKnown = previous;
       show(next);
-      if (next) options.onSaved?.();
-      options.setSaved(entry, cue, next).catch(() => {
-        if (saved === next) show(!next);
+      if (next === 'saved') options.onSaved?.();
+      options.setWordStatus(entry, cue, next, previous).catch(() => {
+        if (status === next) show(previous);
       });
     };
+
     let asking = false;
-    const button = iconButton('save', saveLabel, ICON_STAR, () => {
-      const next = !saved;
-      if (!next || !options.beforeSave) {
+    /** Saving or knowing a word that isn't stored yet asks beforeSave first. */
+    const request = (next: WordStatus) => {
+      if (status !== 'none' || next === 'none' || !options.beforeSave) {
         apply(next);
         return;
       }
@@ -164,22 +209,33 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
       options.beforeSave().then(
         (allowed) => {
           asking = false;
-          if (allowed) apply(true);
+          if (allowed) apply(next);
         },
         () => {
           asking = false;
         },
       );
+    };
+
+    const save = iconButton('save', saveLabel, ICON_STAR, () => {
+      request(status === 'saved' ? 'none' : 'saved');
     });
-    show(false);
-    options.isSaved(entry).then(
-      (isSaved) => {
-        show(isSaved);
-        if (isSaved) options.onSeenAgain?.(entry, cue);
+    knowButton.addEventListener('click', () => {
+      request('known');
+    });
+    undoButton.addEventListener('click', () => {
+      apply(beforeKnown);
+    });
+
+    show('none');
+    options.wordStatus(entry).then(
+      (stored) => {
+        show(stored);
+        if (stored !== 'none') options.onSeenAgain?.(entry, cue);
       },
       () => undefined,
     );
-    return button;
+    return { save, foot };
   };
 
   const load = (cue: WordInCue) => {
@@ -226,7 +282,9 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
           word.textContent = entry.lemma;
           phonetic.textContent = entry.phonetic;
           phonetic.hidden = !entry.phonetic;
-          speak.before(saveButton(cue, entry));
+          const controls = wordControls(cue, entry);
+          speak.before(controls.save);
+          if (controls.foot) senses.after(controls.foot);
         }
         senses.hidden = !entry;
         senses.replaceChildren(...(entry?.senses.map(senseRow) ?? []));
@@ -289,7 +347,10 @@ export function createLookupPanel(options: LookupPanelOptions): LookupPanel {
         if (current !== generation) return;
         if (translation?.trim() && text.length <= MAX_WORD_LENGTH) {
           speak.before(
-            saveButton(cue, phraseEntry(text, translation), 'Save phrase'),
+            wordControls(cue, phraseEntry(text, translation), {
+              saveLabel: 'Save phrase',
+              canKnow: false,
+            }).save,
           );
         }
         body.hidden = translation === null;

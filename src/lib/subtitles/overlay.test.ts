@@ -38,6 +38,36 @@ describe('marks on Saved Words', () => {
   });
 });
 
+describe('new-word hints', () => {
+  const hinted = () =>
+    [...(host()?.shadowRoot?.querySelectorAll('.token.is-hinted') ?? [])].map(
+      (token) => token.textContent,
+    );
+
+  it('hints the token the picker chooses, in the original line only', () => {
+    const pickHint = vi.fn((tokens: readonly string[]) =>
+      tokens.indexOf('isolated'),
+    );
+    const overlay = createOverlay({ pickHint });
+    overlay.render({ original: 'we felt isolated there', translation: null });
+    expect(hinted()).toEqual(['isolated']);
+    expect(pickHint).toHaveBeenCalledWith(['we', 'felt', 'isolated', 'there']);
+  });
+
+  it('drops a hint once the word joins the Vocabulary', () => {
+    let saved = false;
+    const overlay = createOverlay({
+      pickHint: () => 1,
+      isHintable: () => !saved,
+    });
+    overlay.render({ original: 'so isolated', translation: null });
+    expect(hinted()).toEqual(['isolated']);
+    saved = true;
+    overlay.refreshMarks();
+    expect(hinted()).toEqual([]);
+  });
+});
+
 describe('translation only', () => {
   it('shows the original as plain text when lookups are off', () => {
     const overlay = createOverlay({ canLookUp: () => false });

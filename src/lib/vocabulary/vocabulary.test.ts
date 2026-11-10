@@ -4,6 +4,7 @@ import {
   dueWords,
   encounterForReview,
   markedForms,
+  wordIdOf,
   type EncounterInput,
 } from './vocabulary';
 import { phraseEntry } from '../lookup/entry';
@@ -51,6 +52,18 @@ describe('createVocabulary', () => {
     await expect(vocabulary.has('bank', 'en')).resolves.toBe(true);
     await vocabulary.removeByLemma('bank', 'en');
     await expect(vocabulary.has('bank', 'en')).resolves.toBe(false);
+  });
+
+  it('tells an unsaved, a saved, and a known word apart', async () => {
+    const { vocabulary } = setup();
+    await expect(vocabulary.status('bank', 'en')).resolves.toBe('none');
+    const { word } = await vocabulary.save(input(), 1);
+    await expect(vocabulary.status('bank', 'en')).resolves.toBe('saved');
+    expect(word.id).toBe(wordIdOf('bank', 'en'));
+    await vocabulary.retire(word.id, 2);
+    await expect(vocabulary.status('bank', 'en')).resolves.toBe('known');
+    await vocabulary.restore(word.id, 3);
+    await expect(vocabulary.status('bank', 'en')).resolves.toBe('saved');
   });
 
   it('keeps the same spelling in another language apart', async () => {

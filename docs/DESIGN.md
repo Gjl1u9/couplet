@@ -11,18 +11,18 @@ Subtitles, panels, and the Dashboard all use this style. Zhupi (朱批) means an
 
 ## Tokens
 
-| Type      | Tokens                                                                                                               | Use                                                 |
-| --------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Surfaces  | `ground`, `surface`                                                                                                  | Page background; panels and content blocks          |
-| Text      | `ink`, `ink-muted`                                                                                                   | Primary text; secondary text                        |
-| Lines     | `line`, `line-strong`                                                                                                | Decorative dividers; control borders                |
-| Accent    | `accent`, `on-accent`, `accent-soft`                                                                                 | Follow principle 1; `accent-soft` is for hover      |
-| Chips     | `chip`                                                                                                               | Meaning backgrounds                                 |
-| Status    | `alert`, `skeleton`, `saved`                                                                                         | Errors and warnings; loading skeletons; Saved Words |
-| Subtitles | `subtitle-scrim`, `subtitle-original`, `subtitle-translation`, `subtitle-context`, `subtitle-mark`, `subtitle-saved` | Over video only; identical in light and dark themes |
-| Spacing   | `space-1` 4px, `space-2` 8px, `space-3` 12px, `space-4` 16px, `space-5` 20px, `space-6` 32px                         | Components and layout                               |
-| Radius    | `radius-sm` 4px, `radius-md` 8px, `radius-lg` 14px                                                                   | Tokens and labels; buttons and inputs; panels       |
-| Shadow    | `shadow-panel`                                                                                                       | Panels over video only; pages separate with borders |
+| Type      | Tokens                                                                                                                                | Use                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Surfaces  | `ground`, `surface`                                                                                                                   | Page background; panels and content blocks                       |
+| Text      | `ink`, `ink-muted`                                                                                                                    | Primary text; secondary text                                     |
+| Lines     | `line`, `line-strong`                                                                                                                 | Decorative dividers; control borders                             |
+| Accent    | `accent`, `on-accent`, `accent-soft`                                                                                                  | Follow principle 1; `accent-soft` is for hover                   |
+| Chips     | `chip`                                                                                                                                | Meaning backgrounds                                              |
+| Status    | `alert`, `skeleton`, `saved`, `known`                                                                                                 | Errors and warnings; loading skeletons; Saved Words; Known words |
+| Subtitles | `subtitle-scrim`, `subtitle-original`, `subtitle-translation`, `subtitle-context`, `subtitle-mark`, `subtitle-saved`, `subtitle-hint` | Over video only; identical in light and dark themes              |
+| Spacing   | `space-1` 4px, `space-2` 8px, `space-3` 12px, `space-4` 16px, `space-5` 20px, `space-6` 32px                                          | Components and layout                                            |
+| Radius    | `radius-sm` 4px, `radius-md` 8px, `radius-lg` 14px                                                                                    | Tokens and labels; buttons and inputs; panels                    |
+| Shadow    | `shadow-panel`                                                                                                                        | Panels over video only; pages separate with borders              |
 
 ## Type
 
@@ -78,6 +78,16 @@ The previous and next cues can appear above and below the couplet, inside the st
 
 A token matching a Saved Word still on the schedule has a dotted `subtitle-saved` underline. It stays quiet and clicks like any other token.
 
+### New-word hints
+
+Why it works this way is in [`HINTS.md`](HINTS.md).
+
+In each original line, at most one word worth learning now has a dashed `subtitle-hint` underline: dashes, not the Saved Word's dots, so the two read apart by shape. It stays quiet and clicks like any other token.
+
+- A hinted word comes from a band of the learning language's frequency list ([`public/frequency`](../public/frequency/README.md)): from where the user's known words end to two and a half times that. The band starts at the higher of the Word Check and, once 20 words are on review, the rank a quarter of them sit above. So saving harder words and learning easy ones moves it up, and a higher Word Check takes effect at once; a lower one cannot pull it below the saved words.
+- The 200 most common words, and every word in the Vocabulary, saved or known, are never hinted. A line hints its most common candidate, and a video hints each word, with its simple inflections, only once.
+- New word hints in the Settings Panel and the Dashboard's Settings turns them off. Only English has a list so far; for other learning languages, both say "New word hints are English only for now." under the switch.
+
 ### Selecting text
 
 Dragging from one token to another selects every token between them, including across Context Lines. Selected tokens use the same mark as a selected token, and releasing opens the Lookup Panel with the text and its Google translation. A drag that returns to its first token cancels. Selecting pauses the video, because a new cue would replace the tokens under the pointer.
@@ -97,6 +107,7 @@ The Lookup Panel shows the word and its one or two most common senses, each as a
 
 - The first row holds the word, its phonetics, a save button, and a play button. The word becomes its lemma once the entry loads, and the save button appears then. 8px separates this row from the senses.
 - A saved word's button is a star filled with `saved`; an unsaved one is an `ink-muted` outline.
+- Under a word's senses, after a `line` divider, a quiet text button says **I know this**, with a circled check. It saves the word with this line and Retires it at once, so the word is never marked in subtitles or reviewed. The row then shows a `known` filled check with "Known", an Undo, and "Won't be marked or reviewed." Undo returns the word to where it was. Saving and knowing replace each other: I know this on a saved word Retires it, and the star on a known word puts it back on the schedule. A phrase has no I know this.
 - Each sense is its meaning, then an example couplet. A `line` divider separates two senses.
 - Its width follows its content, from 180px to 360px.
 - The word stays on one line: phonetics move to their own line first, and only a word wider than the row breaks.
@@ -112,6 +123,7 @@ A language sheet using the shared settings rows, then four Paper sheets, two to 
 
 - A demonstration is drawn in HTML and CSS rather than recorded, using the Lookup Panel's real styles, so it stays sharp, adds no media, and follows the design. Its scene keeps video colours in every theme.
 - Each loops every 8 or 10 seconds and has its own Pause button. Under reduced motion, it rests on its finished state with no button.
+- Under the languages, the **Word Check** asks how many of the learning language's common words the user knows. A button names the language, so a wrong guess shows before anything is asked. It opens rows of six words, from the 500 most common to 20,000, each with its size and a rough CEFR level; the user picks the last row where they know every word, and every row up to it shows Known. Save keeps one size per language, which starts the new-word hints. The Dashboard's Settings show the same check, to change it later. For a language without a list, the check isn't shown.
 
 ## Sign-in Toast
 

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lookup Panel: I Know This</title>
+    <link rel="stylesheet" href="../src/lib/ui/tokens.css" />
+    <link rel="stylesheet" href="../src/lib/ui/lookup-panel.css" />
+    <style>
+      /* Prototype only: two ways to mark a word known in the Lookup Panel. */
+
+      /* A proposed token. Known reads as done, apart from saved gold and vermilion. */
+      :root,
+      [data-theme='light'] {
+        --known: #3f7a4a;
+      }
+      [data-theme='dark'] {
+        --known: #7dc08a;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px 16px 48px;
+        background: #f3f4f6;
+        color: #15181e;
+        font-family: var(--font-sans);
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+        line-height: 28px;
+      }
+
+      .lead {
+        max-width: 70ch;
+        margin: 0 0 20px;
+        color: #565d68;
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .versions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 20px;
+      }
+
+      .version h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+
+      .version > p {
+        margin: 0 0 10px;
+        color: #565d68;
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      /* Stand-in video. Panels over video default to dark. */
+      .scene {
+        position: relative;
+        display: grid;
+        gap: 18px;
+        padding: 20px;
+        border-radius: 12px;
+        background:
+          radial-gradient(60% 70% at 70% 30%, #6b5440 0%, transparent 70%),
+          linear-gradient(#2a2622, #15171b);
+        container-type: inline-size;
+      }
+
+      .state-name {
+        margin: 0 0 6px;
+        color: #c9ced6;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .scene .panel {
+        position: relative;
+      }
+
+      /* Rules the panel shares with the overlay's icon buttons. */
+      .icon-button {
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-md);
+        background: none;
+        cursor: pointer;
+      }
+
+      .icon-button::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        top: 50%;
+        left: 50%;
+        width: 25px;
+        height: 25px;
+        border-radius: var(--radius-sm);
+        transform: translate(-50%, -50%);
+      }
+
+      .icon-button:hover::before {
+        background: var(--accent-soft);
+      }
+
+      .icon-button:focus-visible {
+        outline: none;
+      }
+
+      .icon-button:focus-visible::before {
+        outline: 2px solid var(--subtitle-mark);
+      }
+
+      .icon {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* Version A: an icon beside save and play. Known fills the circle. */
+      .lookup-actions .known.is-known {
+        color: var(--known);
+      }
+
+      .lookup-actions .known.is-known .icon .ring {
+        fill: currentColor;
+      }
+
+      .lookup-actions .known.is-known .icon .tick {
+        stroke: var(--surface);
+      }
+
+      /* Version B: a quiet text button under the senses. */
+      .lookup-foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 10px;
+        margin-top: 10px;
+        padding-top: 8px;
+        padding-right: 8px;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .text-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: -6px;
+        padding: 4px 6px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        color: var(--ink-muted);
+        font: 500 13px/20px var(--font-sans);
+        cursor: pointer;
+      }
+
+      .text-action:hover {
+        background: var(--accent-soft);
+        color: var(--ink);
+      }
+
+      .text-action:focus-visible {
+        outline: 2px solid var(--subtitle-mark);
+      }
+
+      .text-action .icon {
+        width: 15px;
+        height: 15px;
+      }
+
+      .known-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--known);
+        font-weight: 600;
+      }
+
+      .known-note .icon {
+        width: 15px;
+        height: 15px;
+      }
+
+      .known-note .icon .ring {
+        fill: currentColor;
+      }
+
+      .known-note .icon .tick {
+        stroke: var(--surface);
+      }
+
+      .foot-hint {
+        flex-basis: 100%;
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      .rules {
+        max-width: 70ch;
+        margin-top: 24px;
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .rules li + li {
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lookup Panel: I know this</h1>
+    <p class="lead">
+      Two versions of the same action: an icon beside save and play, or a text
+      button under the senses. Each scene shows the panel unsaved, saved, and
+      known. Click the buttons: save and known turn each other off.
+    </p>
+
+    <div class="versions">
+      <section class="version">
+        <h2>A · Icon</h2>
+        <p>A circled check joins the row. Filled green means known.</p>
+        <div class="scene" data-version="icon"></div>
+      </section>
+      <section class="version">
+        <h2>B · Text</h2>
+        <p>
+          "I know this" sits under the senses. Once known, it says what that
+          does.
+        </p>
+        <div class="scene" data-version="text"></div>
+      </section>
+    </div>
+
+    <ul class="rules">
+      <li>
+        <strong>Known</strong> saves the word with this line and takes it off
+        the schedule: no Review, no subtitle mark, no new-word hint.
+      </li>
+      <li>
+        <strong>Save</strong> on a known word puts it back on the schedule.
+        <strong>Known</strong> on a saved word is the same as Stop reviewing.
+      </li>
+      <li>
+        Undo is the same button again. The Words page lists known words under
+        Known.
+      </li>
+    </ul>
+
+    <template id="panel">
+      <div class="panel lookup-panel" data-theme="dark">
+        <div class="lookup-head">
+          <div class="lookup-title">
+            <span class="lookup-word">fortunate</span>
+            <span class="phonetic">/ˈfɔːrtʃənət/</span>
+          </div>
+          <div class="lookup-actions"></div>
+        </div>
+        <div class="lookup-senses">
+          <div class="lookup-sense">
+            <div class="lookup-meaning">
+              <span class="meaning-chip">幸運的</span>
+            </div>
+            <div class="couplet-original">
+              We were fortunate to find a seat.
+            </div>
+            <div class="couplet-translation">我們很幸運找到了座位。</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      const SVG = (inner) =>
+        `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${inner}</svg>`;
+      const STAR = SVG(
+        '<path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245"/>',
+      );
+      const SPEAK = SVG(
+        '<path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/>',
+      );
+      // Known: a check inside a circle, so it reads as done rather than as another save.
+      const KNOWN = SVG(
+        '<circle class="ring" cx="12" cy="12" r="9"/><path class="tick" d="M8.5 12.2l2.4 2.4l4.6 -5"/>',
+      );
+
+      /** One panel's state: save and known exclude each other. */
+      function makePanel(version, initial) {
+        const panel = document
+          .getElementById('panel')
+          .content.firstElementChild.cloneNode(true);
+        const actions = panel.querySelector('.lookup-actions');
+        let state = initial; // 'none' | 'saved' | 'known'
+
+        const save = document.createElement('button');
+        save.type = 'button';
+        save.className = 'icon-button save';
+        save.innerHTML = STAR;
+
+        const speak = document.createElement('button');
+        speak.type = 'button';
+        speak.className = 'icon-button speak';
+        speak.setAttribute('aria-label', 'Play pronunciation');
+        speak.innerHTML = SPEAK;
+
+        let known;
+        if (version === 'icon') {
+          known = document.createElement('button');
+          known.type = 'button';
+          known.className = 'icon-button known';
+          known.innerHTML = KNOWN;
+          actions.append(known, save, speak);
+        } else {
+          actions.append(save, speak);
+          const foot = document.createElement('div');
+          foot.className = 'lookup-foot';
+          panel.append(foot);
+          known = foot;
+        }
+
+        function render() {
+          save.classList.toggle('is-saved', state === 'saved');
+          save.setAttribute('aria-pressed', String(state === 'saved'));
+          save.setAttribute(
+            'aria-label',
+            state === 'saved' ? 'Remove from saved words' : 'Save word',
+          );
+          save.title = save.getAttribute('aria-label');
+          if (version === 'icon') {
+            known.classList.toggle('is-known', state === 'known');
+            known.setAttribute('aria-pressed', String(state === 'known'));
+            known.setAttribute(
+              'aria-label',
+              state === 'known' ? 'Known. Click to undo' : 'I know this',
+            );
+            known.title = known.getAttribute('aria-label');
+            return;
+          }
+          known.replaceChildren();
+          if (state === 'known') {
+            const note = document.createElement('span');
+            note.className = 'known-note';
+            note.innerHTML = KNOWN + '<span>Known</span>';
+            const undo = document.createElement('button');
+            undo.type = 'button';
+            undo.className = 'text-action';
+            undo.textContent = 'Undo';
+            undo.addEventListener('click', () => {
+              state = 'none';
+              render();
+            });
+            const hint = document.createElement('span');
+            hint.className = 'foot-hint';
+            hint.textContent = "Won't be marked or reviewed.";
+            known.append(note, undo, hint);
+          } else {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'text-action';
+            button.innerHTML =
+              KNOWN.replace('class="icon"', 'class="icon"') +
+              '<span>I know this</span>';
+            button.addEventListener('click', () => {
+              state = 'known';
+              render();
+            });
+            known.append(button);
+          }
+        }
+
+        save.addEventListener('click', () => {
+          state = state === 'saved' ? 'none' : 'saved';
+          render();
+        });
+        if (version === 'icon') {
+          known.addEventListener('click', () => {
+            state = state === 'known' ? 'none' : 'known';
+            render();
+          });
+        }
+        render();
+        return panel;
+      }
+
+      for (const scene of document.querySelectorAll('.scene')) {
+        for (const [label, initial] of [
+          ['Not saved', 'none'],
+          ['Saved', 'saved'],
+          ['Known', 'known'],
+        ]) {
+          const block = document.createElement('div');
+          const name = document.createElement('p');
+          name.className = 'state-name';
+          name.textContent = label;
+          block.append(name, makePanel(scene.dataset.version, initial));
+          scene.append(block);
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome: Word Check</title>
+    <link rel="stylesheet" href="../src/lib/ui/tokens.css" />
+    <link rel="stylesheet" href="../src/lib/ui/settings-menu.css" />
+    <link rel="stylesheet" href="../src/lib/dashboard/dashboard.css" />
+    <link rel="stylesheet" href="../src/lib/dashboard/welcome.css" />
+    <style>
+      /* Prototype only: the Word Check, a ladder of frequency rows inside the language sheet. */
+      body {
+        margin: 0;
+        background: var(--ground);
+        font-family: var(--font-sans);
+      }
+
+      .proto-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: min(880px, 100% - 32px);
+        margin: 16px auto 0;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .proto-bar button {
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .language-select {
+        min-width: 160px;
+        padding: 6px 10px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--ink);
+        font: 13px var(--font-sans);
+      }
+
+      .static-select {
+        min-width: 160px;
+        padding: 6px 10px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      .word-check {
+        display: grid;
+        gap: 12px;
+        padding-top: 10px;
+        padding-bottom: 14px;
+      }
+
+      .word-check[hidden] {
+        display: none;
+      }
+
+      .word-check-lead {
+        margin: 0;
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .split {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px 16px;
+      }
+
+      .split > p {
+        flex: 1 1 280px;
+        margin: 0;
+      }
+
+      /* The ladder: easiest row first. Rows up to the chosen one read as known. */
+      .word-ladder {
+        display: grid;
+        border-top: 1px solid var(--line);
+      }
+
+      .word-rung {
+        display: grid;
+        grid-template-columns: 76px minmax(0, 1fr) 72px;
+        align-items: center;
+        gap: 12px;
+        min-height: 52px;
+        padding: 8px 10px;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        background: none;
+        color: var(--ink);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .word-rung:hover {
+        background: var(--chip);
+      }
+
+      .word-rung:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: -2px;
+      }
+
+      .rung-size {
+        display: grid;
+        line-height: 1.2;
+      }
+
+      .rung-size strong {
+        font-size: 15px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .rung-size small {
+        color: var(--ink-muted);
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .rung-words {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 14px;
+        font-size: 14px;
+        line-height: 22px;
+      }
+
+      .rung-state {
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--stage-known);
+        font-size: 12px;
+        font-weight: 600;
+        visibility: hidden;
+      }
+
+      .rung-state svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .word-rung.is-known .rung-state {
+        visibility: visible;
+      }
+
+      .word-rung.is-known .rung-words {
+        color: var(--ink-muted);
+      }
+
+      /* The chosen row: the boundary between known and still to learn. */
+      .word-rung[aria-checked='true'] {
+        box-shadow: inset 3px 0 0 var(--ink);
+        background: var(--chip);
+      }
+
+      .word-rung[aria-checked='true'] .rung-words {
+        color: var(--ink);
+      }
+
+      @media (max-width: 520px) {
+        .word-rung {
+          grid-template-columns: 64px minmax(0, 1fr);
+        }
+
+        .rung-state {
+          grid-column: 2;
+          justify-self: start;
+        }
+
+        .word-rung:not(.is-known) .rung-state {
+          display: none;
+        }
+      }
+
+      .word-estimate {
+        margin: 0;
+        font-size: 14px;
+        line-height: 20px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .word-estimate strong {
+        font-weight: 600;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .actions .button {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 10px;
+        font-size: 13px;
+      }
+
+      .result-size {
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 24px;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="proto-bar" role="group" aria-label="Prototype controls">
+      <span>Prototype:</span>
+      <button type="button" data-theme-set="light">Light</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" id="reset">Reset</button>
+    </div>
+    <main class="welcome">
+      <header class="welcome-head"><span>Couplet</span></header>
+      <div class="welcome-intro">
+        <div>
+          <h1>Welcome to Couplet</h1>
+          <p class="welcome-lead">
+            Choose your languages, then try these on your next YouTube video. It
+            works on videos that have subtitles.
+          </p>
+        </div>
+        <a class="button is-primary" href="#">Open YouTube</a>
+      </div>
+
+      <section class="card settings-card settings-menu welcome-languages">
+        <div class="menu-group">
+          <h2 class="menu-title">Your languages</h2>
+          <div class="setting">
+            <span>Native language</span>
+            <span class="static-select">繁體中文</span>
+          </div>
+          <div class="setting">
+            <label for="language">Learning language</label>
+            <select class="language-select" id="language">
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="pt">Portuguese</option>
+              <option value="it">Italian</option>
+              <option value="ja">Japanese</option>
+              <option value="ko">Korean</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="menu-group word-check" id="intro">
+          <h2 class="menu-title">Words you know</h2>
+          <div class="split">
+            <p class="word-check-lead" id="intro-text"></p>
+            <button type="button" class="button" id="start"></button>
+          </div>
+        </div>
+
+        <div class="menu-group word-check" id="check" hidden>
+          <h2 class="menu-title" id="check-title"></h2>
+          <p class="word-check-lead" id="check-lead"></p>
+          <div class="word-ladder" id="ladder" role="radiogroup"></div>
+          <div class="split">
+            <p class="word-estimate" id="estimate" aria-live="polite"></p>
+            <div class="actions">
+              <button type="button" class="button" id="skip">Not now</button>
+              <button
+                type="button"
+                class="button is-primary"
+                id="save"
+                disabled
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-group word-check" id="result" hidden>
+          <h2 class="menu-title">Words you know</h2>
+          <div class="split">
+            <p class="result-size" id="result-size"></p>
+            <button type="button" class="text-button" id="retake">
+              Change
+            </button>
+          </div>
+          <p class="muted" id="result-note"></p>
+        </div>
+
+        <p class="muted">
+          You can change these any time in the subtitle settings.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      // Six sample words near each frequency rank. Level names are rough guides, not tests.
+      const SETS = {
+        en: {
+          scale: 'CEFR',
+          rows: [
+            [
+              500,
+              'A1',
+              ['trouble', 'promise', 'answer', 'perfect', 'dinner', 'country'],
+            ],
+            [
+              1000,
+              'A2',
+              ['honest', 'realize', 'accept', 'window', 'teacher', 'hungry'],
+            ],
+            [
+              2000,
+              'B1',
+              [
+                'familiar',
+                'avoid',
+                'celebrate',
+                'knowledge',
+                'invite',
+                'request',
+              ],
+            ],
+            [
+              3000,
+              'B1',
+              [
+                'routine',
+                'pattern',
+                'temperature',
+                'patience',
+                'identify',
+                'awkward',
+              ],
+            ],
+            [
+              5000,
+              'B2',
+              [
+                'encounter',
+                'sympathy',
+                'accompany',
+                'domestic',
+                'fortunate',
+                'exclusive',
+              ],
+            ],
+            [
+              8000,
+              'C1',
+              [
+                'exquisite',
+                'manipulate',
+                'equivalent',
+                'errand',
+                'propaganda',
+                'convenience',
+              ],
+            ],
+            [
+              12000,
+              'C2',
+              [
+                'endurance',
+                'disrupt',
+                'bleak',
+                'retribution',
+                'deceit',
+                'somber',
+              ],
+            ],
+          ],
+        },
+        es: {
+          scale: 'CEFR',
+          rows: [
+            [
+              500,
+              'A1',
+              ['dolor', 'negocio', 'situación', 'abogado', 'pagar', 'pobre'],
+            ],
+            [
+              1000,
+              'A2',
+              ['verano', 'mentira', 'tarjeta', 'bosque', 'calor', 'visita'],
+            ],
+            [
+              2000,
+              'B1',
+              [
+                'pelota',
+                'chaqueta',
+                'sonrisa',
+                'abrigo',
+                'estudiar',
+                'pescado',
+              ],
+            ],
+            [
+              3000,
+              'B1',
+              [
+                'costumbre',
+                'cabaña',
+                'gimnasio',
+                'lenguaje',
+                'garaje',
+                'barato',
+              ],
+            ],
+            [
+              5000,
+              'B2',
+              [
+                'bailarina',
+                'apetito',
+                'dentista',
+                'humilde',
+                'ángulo',
+                'descubrimiento',
+              ],
+            ],
+            [
+              8000,
+              'C1',
+              [
+                'cadera',
+                'mérito',
+                'villano',
+                'anteojos',
+                'resaca',
+                'optimista',
+              ],
+            ],
+            [
+              12000,
+              'C2',
+              [
+                'atuendo',
+                'mártir',
+                'costilla',
+                'tinieblas',
+                'pulpo',
+                'inscripción',
+              ],
+            ],
+          ],
+        },
+        ja: {
+          scale: 'JLPT',
+          note: 'Count a word only if you can read it and know what it means.',
+          rows: [
+            [300, 'N5', ['病院', '普通', '興味', '番号', '昨日', '運転']],
+            [700, 'N4', ['後悔', '有名', '恋人', '練習', '新聞', '時計']],
+            [1500, 'N3', ['印象', '給料', '祖母', '苦手', '外国', '恋愛']],
+            [3000, 'N2', ['漫画', '土産', '丁寧', '平等', '視線', '経緯']],
+            [6000, 'N1', ['噴水', '継母', '湿気', '大袈裟', '星空', '順応']],
+          ],
+        },
+      };
+      const CHECK =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+      const $ = (id) => document.getElementById(id);
+      const select = $('language');
+      const ladder = $('ladder');
+      const results = {}; // One result per learning language.
+      let chosen = -1;
+
+      const nameOf = (code) =>
+        select.querySelector(`option[value="${code}"]`).textContent;
+      const format = (n) => n.toLocaleString('en-US');
+      const show = (id) => {
+        for (const part of ['intro', 'check', 'result'])
+          $(part).hidden = part !== id;
+      };
+
+      function renderLanguage() {
+        const code = select.value;
+        if (results[code]) {
+          showResult(code);
+          return;
+        }
+        show('intro');
+        const name = nameOf(code);
+        if (!SETS[code]) {
+          $('intro-text').textContent =
+            `A word check for ${name} isn't ready yet. Couplet learns your level from the words you save.`;
+          $('start').hidden = true;
+          return;
+        }
+        $('start').hidden = false;
+        $('intro-text').textContent =
+          `Tell Couplet roughly how many ${name} words you know, and it points out words worth learning at your level.`;
+        $('start').textContent = `Check my ${name} words`;
+      }
+
+      function choose(index) {
+        chosen = index;
+        [...ladder.children].forEach((rung, i) => {
+          rung.setAttribute('aria-checked', String(i === index));
+          rung.tabIndex = i === Math.max(index, 0) ? 0 : -1;
+          rung.classList.toggle('is-known', i <= index);
+        });
+        const set = SETS[select.value];
+        const name = nameOf(select.value);
+        $('save').disabled = index < 0;
+        $('estimate').innerHTML =
+          index < 0
+            ? 'Choose a row.'
+            : `You know about the <strong>${format(set.rows[index][0])}</strong> most common ${name} words`;
+      }
+
+      function startCheck() {
+        const code = select.value;
+        const set = SETS[code];
+        const name = nameOf(code);
+        $('check-title').textContent = `Words you know · ${name}`;
+        $('check-lead').textContent =
+          'Choose the last row where you know every word.' +
+          (set.note ? ' ' + set.note : '');
+        ladder.setAttribute(
+          'aria-label',
+          `${name} words by how common they are`,
+        );
+        ladder.replaceChildren();
+        set.rows.forEach(([size, level, words], index) => {
+          const rung = document.createElement('button');
+          rung.type = 'button';
+          rung.className = 'word-rung';
+          rung.setAttribute('role', 'radio');
+          rung.innerHTML =
+            `<span class="rung-size"><strong>${format(size)}</strong><small>~${level}</small></span>` +
+            `<span class="rung-words" lang="${code}"></span>` +
+            `<span class="rung-state">${CHECK}Known</span>`;
+          for (const word of words) {
+            const span = document.createElement('span');
+            span.textContent = word;
+            rung.querySelector('.rung-words').append(span);
+          }
+          rung.setAttribute(
+            'aria-label',
+            `${format(size)} words, about ${set.scale} ${level}: ${words.join(', ')}`,
+          );
+          rung.addEventListener('click', () => choose(index));
+          rung.addEventListener('keydown', (event) => {
+            const step = {
+              ArrowDown: 1,
+              ArrowRight: 1,
+              ArrowUp: -1,
+              ArrowLeft: -1,
+            }[event.key];
+            if (!step) return;
+            event.preventDefault();
+            const next = Math.min(
+              Math.max(index + step, 0),
+              set.rows.length - 1,
+            );
+            choose(next);
+            ladder.children[next].focus();
+          });
+          ladder.append(rung);
+        });
+        const previous = results[code];
+        choose(previous && !previous.skipped ? previous.index : -1);
+        show('check');
+      }
+
+      function showResult(code) {
+        const r = results[code];
+        const name = nameOf(code);
+        show('result');
+        if (r.skipped) {
+          $('result-size').textContent = `${name}: not set`;
+          $('result-note').textContent =
+            'Couplet starts pointing out words after you save a few.';
+          return;
+        }
+        const [size, level] = SETS[code].rows[r.index];
+        $('result-size').textContent =
+          `About ${format(size)} ${name} words · ~${SETS[code].scale} ${level}`;
+        $('result-note').textContent =
+          'Couplet points out words just past this in subtitles, and adjusts as you save words.';
+      }
+
+      select.addEventListener('change', renderLanguage);
+      $('start').addEventListener('click', startCheck);
+      $('save').addEventListener('click', () => {
+        results[select.value] = { index: chosen };
+        showResult(select.value);
+      });
+      $('skip').addEventListener('click', () => {
+        results[select.value] = { skipped: true };
+        showResult(select.value);
+      });
+      $('retake').addEventListener('click', startCheck);
+      $('reset').addEventListener('click', () => {
+        for (const key of Object.keys(results)) delete results[key];
+        renderLanguage();
+      });
+      for (const button of document.querySelectorAll('[data-theme-set]')) {
+        button.addEventListener('click', () => {
+          document.documentElement.dataset.theme = button.dataset.themeSet;
+        });
+      }
+      renderLanguage();
+    </script>
+  </body>
+</html>

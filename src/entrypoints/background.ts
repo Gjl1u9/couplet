@@ -1,3 +1,7 @@
+import {
+  answerFrequencyMessage,
+  isFrequencyMessage,
+} from '../lib/hints/frequency';
 import { createAuth, unexpiredToken } from '../lib/auth/auth';
 import {
   answerAuthMessage,
@@ -146,6 +150,15 @@ export default defineBackground(() => {
       }
       if (isSyncMessage(message)) {
         answerSyncMessage(message, sync, sendResponse);
+        return true;
+      }
+      if (isFrequencyMessage(message)) {
+        answerFrequencyMessage(
+          message,
+          async (path) =>
+            (await fetch(browser.runtime.getURL(path as '/'))).text(),
+          sendResponse,
+        );
         return true;
       }
       if (!isVocabularyMessage(message)) return undefined;

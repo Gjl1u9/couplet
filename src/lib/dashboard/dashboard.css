@@ -1751,3 +1751,154 @@ h1,
   line-height: 18px;
   overflow-wrap: anywhere;
 }
+
+/* Word Check: rows of common words, easy to hard. Rows up to the chosen one read as known. */
+.word-check {
+  display: grid;
+  gap: 10px;
+}
+
+.word-check p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.word-check-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.word-check-head > p {
+  flex: 1 1 260px;
+}
+
+.word-check-head strong,
+.word-check p strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.word-check-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.word-check .button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.word-ladder {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.word-rung {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.word-rung:hover {
+  background: var(--chip);
+}
+
+.word-rung:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+.word-rung-size {
+  display: grid;
+  line-height: 1.2;
+}
+
+.word-rung-size strong {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.word-rung-size small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.word-rung-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.word-rung-state {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--stage-known);
+  font-size: 12px;
+  font-weight: 600;
+  visibility: hidden;
+}
+
+.word-rung-state svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.word-rung.is-known .word-rung-state {
+  visibility: visible;
+}
+
+.word-rung.is-known .word-rung-words {
+  color: var(--ink-muted);
+}
+
+/* The chosen row: where known ends. */
+.word-rung[aria-checked='true'] {
+  box-shadow: inset 3px 0 0 var(--ink);
+  background: var(--chip);
+}
+
+.word-rung[aria-checked='true'] .word-rung-words {
+  color: var(--ink);
+}
+
+@media (max-width: 520px) {
+  .word-rung {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .word-rung-state {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .word-rung:not(.is-known) .word-rung-state {
+    display: none;
+  }
+}

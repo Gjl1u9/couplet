@@ -109,6 +109,12 @@ export interface SavedEncounter {
 
 export type RevertResult = 'reverted' | 'changed';
 
+/**
+ * Where a word stands for the user: not saved, saved and on the schedule, or known,
+ * meaning saved but Retired, by mastery or by choice.
+ */
+export type WordStatus = 'none' | 'saved' | 'known';
+
 export interface VocabularyOptions {
   readonly store?: SyncStore;
   readonly clock?: StampClock;
@@ -122,6 +128,7 @@ export interface Vocabulary {
   list: () => Promise<readonly SavedWord[]>;
   reviewLog: () => Promise<readonly ReviewEvent[]>;
   has: (lemma: string, source: string) => Promise<boolean>;
+  status: (lemma: string, source: string) => Promise<WordStatus>;
   /** Saves a new word, or adds this Encounter to one already saved. */
   save: (input: EncounterInput, now: number) => Promise<SavedEncounter>;
   /** Records a saved word met again, leaving its schedule alone. */
@@ -337,6 +344,14 @@ export function createVocabulary(options: VocabularyOptions = {}): Vocabulary {
         async () =>
           viewOf((await store.getWord(wordIdOf(lemma, source)))?.doc) !== null,
       ),
+    status: async (lemma, source) =>
+      queued(async () => {
+        const word = viewOf(
+          (await store.getWord(wordIdOf(lemma, source)))?.doc,
+        );
+        if (!word) return 'none';
+        return word.review.retired ? 'known' : 'saved';
+      }),
     save: async (input, now) => {
       const saved = await upsert(input, now, true);
       if (!saved) throw new Error('收藏失敗');

@@ -73,6 +73,10 @@ export interface OverlayOptions {
   readonly expectsTranslation?: () => boolean;
   /** Whether this token is a Saved Word still on the schedule. */
   readonly isMarked?: (token: string) => boolean;
+  /** Which token of a new original line to point out as a new word, if any. */
+  readonly pickHint?: (tokens: readonly string[]) => number | null;
+  /** Whether a hinted token still qualifies, once the Vocabulary changes. */
+  readonly isHintable?: (token: string) => boolean;
   readonly onToken?: (cue: WordInCue, element: HTMLElement) => void;
   /** The pointer reached the subtitles, so a lookup may follow. */
   readonly onApproach?: () => void;
@@ -97,7 +101,7 @@ export interface OverlayDisplay {
 
 export interface Overlay {
   render: (view: SubtitleView | null) => void;
-  /** Redraws the marks on Saved Words after the Vocabulary changes. */
+  /** Redraws the marks on Saved Words, and drops stale hints, after the Vocabulary changes. */
   refreshMarks: () => void;
   setNativeCaptionsHidden: (hidden: boolean) => void;
   setDisplay: (display: OverlayDisplay) => void;
@@ -120,7 +124,7 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
   host.id = HOST_ID;
   const shadow = host.attachShadow({ mode: 'open' });
 
-  const createLine = (className: string): TokenLine => {
+  const createLine = (className: string, hints = false): TokenLine => {
     const line = element('div', className);
     line.dir = 'auto';
     let current: string | null = null;
@@ -150,6 +154,11 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
             },
           ),
         );
+        if (hints && options.pickHint) {
+          const tokens = [...line.querySelectorAll<HTMLElement>('.token')];
+          const index = options.pickHint(tokens.map((t) => t.textContent));
+          if (index !== null) tokens[index]?.classList.add('is-hinted');
+        }
         return true;
       },
     };
@@ -158,7 +167,7 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
   const style = document.createElement('style');
   style.textContent = `${tokenStyles}\n${lookupPanelStyles}\n${overlayStyles}\n${settingsMenuStyles}`;
   const previous = createLine('context context-previous');
-  const original = createLine('original');
+  const original = createLine('original', true);
   const next = createLine('context context-next');
   const translation = element('div', 'translation');
   translation.dir = 'auto';
@@ -483,6 +492,12 @@ export function createOverlay(options: OverlayOptions = {}): Overlay {
           'is-marked',
           options.isMarked?.(token.textContent) ?? false,
         );
+        if (
+          token.classList.contains('is-hinted') &&
+          options.isHintable?.(token.textContent) === false
+        ) {
+          token.classList.remove('is-hinted');
+        }
       }
     },
     render(view) {

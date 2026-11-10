@@ -37,8 +37,8 @@ function setup(overrides: Partial<LookupPanelOptions> = {}) {
     layer: () => layer,
     lookUp: () => Promise.resolve(ENTRY),
     translateSelection: () => Promise.resolve('擺脫'),
-    isSaved: () => Promise.resolve(false),
-    setSaved: () => Promise.resolve(),
+    wordStatus: () => Promise.resolve('none' as const),
+    setWordStatus: () => Promise.resolve(),
     sourceLanguage: () => 'en',
     theme: () => 'dark',
     speaker,
@@ -55,11 +55,11 @@ afterEach(() => {
 });
 
 async function openWithSave(overrides: Partial<LookupPanelOptions>) {
-  const setSaved = vi.fn(() => Promise.resolve());
-  const { panel, anchor, find } = setup({ setSaved, ...overrides });
+  const setWordStatus = vi.fn(() => Promise.resolve());
+  const { panel, anchor, find } = setup({ setWordStatus, ...overrides });
   panel.toggle(CUE, anchor);
   await flush();
-  return { panel, setSaved, button: () => find('.save') };
+  return { panel, setWordStatus, button: () => find('.save') };
 }
 
 describe('createLookupPanel', () => {
@@ -186,7 +186,7 @@ describe('createLookupPanel', () => {
 
   it('shows that a word is already saved', async () => {
     const { panel, anchor, find } = setup({
-      isSaved: () => Promise.resolve(true),
+      wordStatus: () => Promise.resolve('saved' as const),
     });
     panel.toggle(CUE, anchor);
     await flush();
@@ -205,16 +205,16 @@ describe('createLookupPanel', () => {
           allow = resolve;
         }),
     );
-    const { panel, setSaved, button } = await openWithSave({ beforeSave });
+    const { panel, setWordStatus, button } = await openWithSave({ beforeSave });
     button()?.click();
     button()?.click();
     expect(beforeSave).toHaveBeenCalledOnce();
-    expect(setSaved).not.toHaveBeenCalled();
+    expect(setWordStatus).not.toHaveBeenCalled();
     expect(button()?.classList.contains('is-saved')).toBe(false);
     panel.close();
     allow(true);
     await vi.waitFor(() => {
-      expect(setSaved).toHaveBeenCalledOnce();
+      expect(setWordStatus).toHaveBeenCalledOnce();
     });
   });
 
@@ -231,42 +231,42 @@ describe('createLookupPanel', () => {
 
   it('leaves the word unsaved when beforeSave declines', async () => {
     const beforeSave = vi.fn(() => Promise.resolve(false));
-    const { setSaved, button } = await openWithSave({ beforeSave });
+    const { setWordStatus, button } = await openWithSave({ beforeSave });
     button()?.click();
     await Promise.resolve();
     await Promise.resolve();
-    expect(setSaved).not.toHaveBeenCalled();
+    expect(setWordStatus).not.toHaveBeenCalled();
     expect(button()?.classList.contains('is-saved')).toBe(false);
   });
 
   it('does not ask before removing a word', async () => {
     const beforeSave = vi.fn(() => Promise.resolve(true));
-    const { setSaved, button } = await openWithSave({
+    const { setWordStatus, button } = await openWithSave({
       beforeSave,
-      isSaved: () => Promise.resolve(true),
+      wordStatus: () => Promise.resolve('saved' as const),
     });
     button()?.click();
     expect(beforeSave).not.toHaveBeenCalled();
-    expect(setSaved).toHaveBeenCalled();
+    expect(setWordStatus).toHaveBeenCalled();
   });
 
   it('saves and unsaves the entry with its cue', async () => {
-    const setSaved = vi.fn(() => Promise.resolve());
-    const { panel, anchor, find } = setup({ setSaved });
+    const setWordStatus = vi.fn(() => Promise.resolve());
+    const { panel, anchor, find } = setup({ setWordStatus });
     panel.toggle(CUE, anchor);
     await flush();
     find('.save')?.click();
-    expect(setSaved).toHaveBeenLastCalledWith(ENTRY, CUE, true);
+    expect(setWordStatus).toHaveBeenLastCalledWith(ENTRY, CUE, 'saved', 'none');
     expect(find('.save')?.classList.contains('is-saved')).toBe(true);
     find('.save')?.click();
-    expect(setSaved).toHaveBeenLastCalledWith(ENTRY, CUE, false);
+    expect(setWordStatus).toHaveBeenLastCalledWith(ENTRY, CUE, 'none', 'saved');
     expect(find('.save')?.classList.contains('is-saved')).toBe(false);
     panel.close();
   });
 
   it('shows the previous state again when saving fails', async () => {
     const { panel, anchor, find } = setup({
-      setSaved: () => Promise.reject(new Error('quota')),
+      setWordStatus: () => Promise.reject(new Error('quota')),
     });
     panel.toggle(CUE, anchor);
     await flush();
@@ -274,6 +274,95 @@ describe('createLookupPanel', () => {
     expect(find('.save')?.classList.contains('is-saved')).toBe(true);
     await flush();
     expect(find('.save')?.classList.contains('is-saved')).toBe(false);
+    panel.close();
+  });
+
+  it('marks a word known under its senses, and undoes it', async () => {
+    const setWordStatus = vi.fn(() => Promise.resolve());
+    const { panel, anchor, find } = setup({ setWordStatus });
+    panel.toggle(CUE, anchor);
+    await flush();
+    expect(find('.lookup-foot')?.textContent).toBe('I know this');
+    find('.lookup-foot .known-action')?.click();
+    expect(setWordStatus).toHaveBeenLastCalledWith(ENTRY, CUE, 'known', 'none');
+    expect(find('.known-note')?.textContent).toBe('Known');
+    expect(find('.known-hint')?.textContent).toBe(
+      "Won't be marked or reviewed.",
+    );
+    find('.lookup-foot .known-action')?.click();
+    expect(setWordStatus).toHaveBeenLastCalledWith(ENTRY, CUE, 'none', 'known');
+    expect(find('.known-note')).toBeNull();
+    panel.close();
+  });
+
+  it('lets saving and knowing replace each other', async () => {
+    const setWordStatus = vi.fn(() => Promise.resolve());
+    const { panel, anchor, find } = setup({
+      setWordStatus,
+      wordStatus: () => Promise.resolve('saved' as const),
+    });
+    panel.toggle(CUE, anchor);
+    await flush();
+    find('.lookup-foot .known-action')?.click();
+    expect(setWordStatus).toHaveBeenLastCalledWith(
+      ENTRY,
+      CUE,
+      'known',
+      'saved',
+    );
+    expect(find('.save')?.classList.contains('is-saved')).toBe(false);
+    find('.save')?.click();
+    expect(setWordStatus).toHaveBeenLastCalledWith(
+      ENTRY,
+      CUE,
+      'saved',
+      'known',
+    );
+    expect(find('.save')?.classList.contains('is-saved')).toBe(true);
+    expect(find('.lookup-foot')?.textContent).toBe('I know this');
+    panel.close();
+  });
+
+  it('shows a known word as known, and Undo puts it back on review', async () => {
+    const setWordStatus = vi.fn(() => Promise.resolve());
+    const { panel, anchor, find } = setup({
+      setWordStatus,
+      wordStatus: () => Promise.resolve('known' as const),
+    });
+    panel.toggle(CUE, anchor);
+    await flush();
+    expect(find('.known-note')).not.toBeNull();
+    expect(find('.save')?.getAttribute('aria-pressed')).toBe('false');
+    find('.lookup-foot .known-action')?.click();
+    expect(setWordStatus).toHaveBeenLastCalledWith(
+      ENTRY,
+      CUE,
+      'saved',
+      'known',
+    );
+    panel.close();
+  });
+
+  it('asks beforeSave before knowing an unsaved word', async () => {
+    const beforeSave = vi.fn(() => Promise.resolve(false));
+    const setWordStatus = vi.fn(() => Promise.resolve());
+    const { panel, anchor, find } = setup({ beforeSave, setWordStatus });
+    panel.toggle(CUE, anchor);
+    await flush();
+    find('.lookup-foot .known-action')?.click();
+    await flush();
+    expect(beforeSave).toHaveBeenCalledOnce();
+    expect(setWordStatus).not.toHaveBeenCalled();
+    expect(find('.known-note')).toBeNull();
+    panel.close();
+  });
+
+  it('offers no I know this for a phrase', async () => {
+    const { panel, anchor, find } = setup();
+    panel.showSelection(PHRASE, anchor);
+    await flush();
+    expect(find('.save')).not.toBeNull();
+    expect(find('.lookup-foot')).toBeNull();
     panel.close();
   });
 
@@ -379,8 +468,8 @@ describe('createLookupPanel', () => {
       layer: () => null,
       lookUp: () => Promise.resolve(ENTRY),
       translateSelection: () => Promise.resolve('擺脫'),
-      isSaved: () => Promise.resolve(false),
-      setSaved: () => Promise.resolve(),
+      wordStatus: () => Promise.resolve('none' as const),
+      setWordStatus: () => Promise.resolve(),
       sourceLanguage: () => 'en',
       theme: () => 'dark',
       speaker: { speak: vi.fn(), stop: vi.fn() },
@@ -404,8 +493,8 @@ describe('createLookupPanel', () => {
     });
 
     it('saves the text as a phrase once it is translated', async () => {
-      const setSaved = vi.fn(() => Promise.resolve());
-      const { panel, anchor, find } = setup({ setSaved });
+      const setWordStatus = vi.fn(() => Promise.resolve());
+      const { panel, anchor, find } = setup({ setWordStatus });
       panel.showSelection(PHRASE, anchor);
       expect(find('.save')).toBeNull();
       await flush();
@@ -413,14 +502,15 @@ describe('createLookupPanel', () => {
       expect(save?.getAttribute('aria-label')).toBe('Save phrase');
       save?.click();
       await flush();
-      expect(setSaved).toHaveBeenCalledWith(
+      expect(setWordStatus).toHaveBeenCalledWith(
         {
           lemma: 'get rid of',
           phonetic: null,
           senses: [{ meaning: '擺脫', example: '', translation: '' }],
         },
         PHRASE,
-        true,
+        'saved',
+        'none',
       );
       expect(find('.save')?.getAttribute('aria-pressed')).toBe('true');
     });
@@ -428,7 +518,7 @@ describe('createLookupPanel', () => {
     it('shows a saved phrase as saved', async () => {
       const onSeenAgain = vi.fn();
       const { panel, anchor, find } = setup({
-        isSaved: () => Promise.resolve(true),
+        wordStatus: () => Promise.resolve('saved' as const),
         onSeenAgain,
       });
       panel.showSelection(PHRASE, anchor);
@@ -519,7 +609,7 @@ describe('createLookupPanel', () => {
     it('reports a saved word when it is opened', async () => {
       const onSeenAgain = vi.fn();
       const { panel, anchor } = setup({
-        isSaved: () => Promise.resolve(true),
+        wordStatus: () => Promise.resolve('saved' as const),
         onSeenAgain,
       });
       panel.toggle(CUE, anchor);

@@ -1,3 +1,5 @@
+import { frequencyLanguage } from '../hints/frequency';
+import { WordCheck } from './WordCheck';
 import { useEffect, useRef } from 'react';
 import {
   LEARNING_LANGUAGES,
@@ -155,6 +157,13 @@ export function SettingsPage({
             />
           </div>
         </section>
+        <WordCheck
+          language={settings.learningLanguage}
+          levels={settings.vocabularyLevels}
+          onSave={(vocabularyLevels) => {
+            onChange({ vocabularyLevels });
+          }}
+        />
         <section className="menu-group">
           <h2 className="menu-title">Appearance</h2>
           <Segmented
@@ -191,6 +200,40 @@ export function SettingsPage({
               }}
             />
           </label>
+          <label className="setting">
+            New word hints
+            <input
+              className="switch"
+              type="checkbox"
+              role="switch"
+              checked={settings.newWordHints}
+              onChange={(event) => {
+                onChange({ newWordHints: event.target.checked });
+              }}
+            />
+          </label>
+          {frequencyLanguage(settings.learningLanguage) ? null : (
+            <p className="muted">New word hints are English only for now.</p>
+          )}
+          <p className="muted">
+            Hints use word lists from{' '}
+            <a
+              href="https://github.com/rspeer/wordfreq"
+              target="_blank"
+              rel="noreferrer"
+            >
+              wordfreq
+            </a>{' '}
+            by Robyn Speer, under{' '}
+            <a
+              href="https://creativecommons.org/licenses/by-sa/4.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC BY-SA 4.0
+            </a>
+            .
+          </p>
         </section>
       </section>
     </div>
