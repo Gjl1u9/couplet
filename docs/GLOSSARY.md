@@ -39,17 +39,17 @@ The interface, designs, and code all use these names. Each thing has one name.
 
 ## Lookup
 
-| Term          | Meaning                                                                                      |
-| ------------- | -------------------------------------------------------------------------------------------- |
-| Token         | The smallest clickable unit in a subtitle: a single word, or a term such as `Navier-Stokes`. |
-| Lookup        | Finding a clicked token's Word Entry. It does not depend on the token's cue.                 |
-| Word Entry    | A word's lemma, phonetics, and senses. `WordEntry` in code.                                  |
-| Sense         | One meaning of a word, with a couplet example.                                               |
-| Lookup Panel  | The compact panel shown over the video after a token is clicked.                             |
-| Saved Word    | A word or phrase the user saved, with its Encounters and schedule. `SavedWord` in code.      |
-| Vocabulary    | The user's Saved Words. `createVocabulary` in code.                                          |
-| Pronunciation | The word spoken by a browser voice, from the play button.                                    |
-| Phonetics     | A phonetic transcription or reading of the word, when the source has one.                    |
+| Term          | Meaning                                                                                                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Token         | The smallest clickable unit in a subtitle: a single word, or a term such as `Navier-Stokes`. In Japanese, a word with its endings, such as `行きました`, or a particle on its own, such as `は`. |
+| Lookup        | Finding a clicked token's Word Entry. It does not depend on the token's cue.                                                                                                                     |
+| Word Entry    | A word's lemma, phonetics, and senses. `WordEntry` in code.                                                                                                                                      |
+| Sense         | One meaning of a word, with a couplet example.                                                                                                                                                   |
+| Lookup Panel  | The compact panel shown over the video after a token is clicked.                                                                                                                                 |
+| Saved Word    | A word or phrase the user saved, with its Encounters and schedule. `SavedWord` in code.                                                                                                          |
+| Vocabulary    | The user's Saved Words. `createVocabulary` in code.                                                                                                                                              |
+| Pronunciation | The word spoken by a browser voice, from the play button.                                                                                                                                        |
+| Phonetics     | A phonetic transcription or reading of the word, when the source has one.                                                                                                                        |
 
 ## Review
 

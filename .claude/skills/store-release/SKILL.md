@@ -68,6 +68,7 @@ The store package is the zip on the GitHub release, which CI builds. Loaded unpa
 - A build's folder name repeats in every checkout, so give the full path.
 - Each Chrome profile keeps its own folder. Load it in the profile the person is watching in, then refresh the YouTube tab.
 - The extension's **Loaded from** line is the truth. Chrome's preference files lag behind it.
+- After the `wxt` dev server restarts, hot reload stops reaching Chrome until the extension is reloaded once. See [When a change doesn't show in the dev build](../../../docs/DEBUGGING.md#when-a-change-doesnt-show-in-the-dev-build).
 - If a feature seems missing, compare the commit on the card's version line with `git log` first, then `grep -c "<a string from the feature>"` on the build the card names.
 
 ## Store text
