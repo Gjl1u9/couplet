@@ -35,7 +35,7 @@ Done when the person confirms the feature works in their Chrome. Name anything s
 
 Follow `RELEASING.md`. A new feature bumps the minor version.
 
-- Auto-merge is off for this repo, so merge once CI passes on the head commit: `gh pr merge --merge --match-head-commit <sha>`. The person may have merged already, so read the PR's state first.
+- Auto-merge is off for this repo, so squash-merge once CI passes on the head commit: `gh pr merge --squash --match-head-commit <sha>`. See `RELEASING.md` for why. The person may have merged already, so read the PR's state first.
 - Before tagging, confirm the merged tree matches the head you checked, and that the tag doesn't exist.
 
 Done when `gh release view v<version>` shows the zip.
