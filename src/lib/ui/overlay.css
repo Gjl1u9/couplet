@@ -259,6 +259,12 @@ input:focus-visible {
   text-underline-offset: 0.2em;
 }
 
+/* A new-word hint: dashes, not dots, so it reads apart from a Saved Word by shape too. */
+.token.is-hinted {
+  text-decoration: underline dashed var(--subtitle-hint) 0.08em;
+  text-underline-offset: 0.2em;
+}
+
 .token:hover::before {
   background: rgba(255, 255, 255, 0.18);
 }

@@ -222,6 +222,9 @@ export function createSettingsPanel(
             options.update({ saveSound });
             if (saveSound) options.previewSaveSound();
           }),
+          switchRow('New word hints', settings.newWordHints, (newWordHints) => {
+            options.update({ newWordHints });
+          }),
         ),
       ),
     );

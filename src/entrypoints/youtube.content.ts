@@ -1,4 +1,12 @@
-import { sameLanguage } from '../lib/language';
+import { languageBase, sameLanguage } from '../lib/language';
+import {
+  FREQUENCY_MESSAGE_TYPE,
+  frequencyLanguage,
+  parseFrequencyList,
+  rankLookup,
+  type RankOf,
+} from '../lib/hints/frequency';
+import { createHintPicker, hintForm, hintZone } from '../lib/hints/hints';
 import {
   createCachedLookup,
   createPortLookup,
@@ -85,6 +93,8 @@ export default defineContentScript({
       canLookUp: () => trackStatus?.mode !== 'translation',
       expectsTranslation: () => controller.expectsTranslation(),
       isMarked: (token) => isSavedForm(token),
+      pickHint: (tokens) => hints.pick(tokens),
+      isHintable: (token) => !vocabularyIndex().forms.has(hintForm(token)),
       onApproach: warmLookup,
       onToken: (cue, element) => {
         // Selecting first moves the strip, so the panel is placed against its final spot.
@@ -187,11 +197,73 @@ export default defineContentScript({
       }
       return marks.forms.has(normalizeForm(token));
     };
+    /** Every word in the Vocabulary as lists spell it, and the ranks of those on review. */
+    let vocabularyForms: {
+      language: string;
+      forms: ReadonlySet<string>;
+      savedRanks: readonly number[];
+    } | null = null;
+    const vocabularyIndex = () => {
+      const language = languageBase(sourceLanguage());
+      if (vocabularyForms?.language === language) return vocabularyForms;
+      const forms = new Set<string>();
+      const savedRanks: number[] = [];
+      for (const word of savedWords) {
+        if (languageBase(word.source) !== language) continue;
+        const lemma = hintForm(word.lemma);
+        forms.add(lemma);
+        for (const form of word.forms) forms.add(hintForm(form));
+        const rank =
+          ranks?.language === language ? ranks.rankOf(lemma) : undefined;
+        if (!word.review.retired && rank !== undefined) savedRanks.push(rank);
+      }
+      vocabularyForms = { language, forms, savedRanks };
+      return vocabularyForms;
+    };
+
+    /** New-word hints read the learning language's frequency list, loaded once. */
+    const lists = new Map<string, Promise<RankOf | null>>();
+    let ranks: { language: string; rankOf: RankOf } | null = null;
+    const loadRanks = (language: string) => {
+      if (lists.has(language)) return;
+      const loading = browser.runtime
+        .sendMessage({ type: FREQUENCY_MESSAGE_TYPE, language })
+        .then(
+          (text: unknown) =>
+            typeof text === 'string'
+              ? rankLookup(parseFrequencyList(text))
+              : null,
+          () => null,
+        );
+      lists.set(language, loading);
+      void loading.then((rankOf) => {
+        if (!rankOf) return;
+        ranks = { language, rankOf };
+        vocabularyForms = null;
+      });
+    };
+    const hints = createHintPicker({
+      rankOf: (form) => ranks?.rankOf(form),
+      zone: () => {
+        const { newWordHints, vocabularyLevels } = settings.get();
+        const language = frequencyLanguage(sourceLanguage());
+        if (!newWordHints || !language) return null;
+        if (ranks?.language !== language) {
+          loadRanks(language);
+          return null;
+        }
+        const level = vocabularyLevels[language] ?? null;
+        return hintZone(level, vocabularyIndex().savedRanks);
+      },
+      inVocabulary: (form) => vocabularyIndex().forms.has(form),
+    });
+
     const reloadMarks = () => {
       vocabulary.list().then(
         (words) => {
           savedWords = words;
           marks = null;
+          vocabularyForms = null;
           overlay.refreshMarks();
         },
         (error: unknown) => {
@@ -476,6 +548,7 @@ export default defineContentScript({
           trackStatus = null;
           trackVideoId = null;
           trackNotice.close();
+          hints.reset();
         }
       }
       controller.handle(event);

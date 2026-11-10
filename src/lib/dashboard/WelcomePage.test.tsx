@@ -125,4 +125,29 @@ describe('WelcomePage', () => {
     const link = container.querySelector<HTMLAnchorElement>('a.button');
     expect(link?.getAttribute('href')).toBe('https://www.youtube.com');
   });
+
+  it('checks how many English words the user knows, and saves the row', () => {
+    const start = [...container.querySelectorAll('button')].find(
+      (button) => button.textContent === 'Check my English words',
+    );
+    act(() => {
+      start?.click();
+    });
+    const rungs = container.querySelectorAll<HTMLButtonElement>('.word-rung');
+    expect(rungs).toHaveLength(7);
+    act(() => {
+      rungs[3]?.click();
+    });
+    expect(container.querySelectorAll('.word-rung.is-known')).toHaveLength(4);
+    const save = [...container.querySelectorAll('button')].find(
+      (button) => button.textContent === 'Save',
+    );
+    act(() => {
+      save?.click();
+    });
+    expect(saved.at(-1)?.vocabularyLevels).toEqual({ en: 3000 });
+    expect(container.querySelector('.word-check')?.textContent).toContain(
+      'About 3,000 common English words',
+    );
+  });
 });

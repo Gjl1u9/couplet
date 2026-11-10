@@ -54,21 +54,23 @@ The interface, designs, and code all use these names. Each thing has one name.
 
 Specified in [`REVIEW.md`](REVIEW.md).
 
-| Term         | Meaning                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------ |
-| Dashboard    | The extension page holding Home, Review, Words, Progress, and Settings.                    |
-| Card         | One Saved Word as shown for review. `Review Card` in full.                                 |
-| Encounter    | One time the user met a Saved Word: its cues, video, and moment.                           |
-| Review Queue | The Cards that are due now.                                                                |
-| Grade        | The user's answer on a Card: Forgot, Unsure, or Got it.                                    |
-| Level        | A Card's step in the schedule, which sets its next interval.                               |
-| Retired      | Kept in the Vocabulary but no longer scheduled, by mastery or by choice.                   |
-| I know this  | The Lookup Panel's action that saves a word and Retires it at once. Its status is `known`. |
-| Stage        | Where a word stands: New, Learning, or Known. Defined in [`DASHBOARD.md`](DASHBOARD.md).   |
-| Level Track  | The seven dots showing a word's Level.                                                     |
-| Hard Word    | A word on the schedule forgotten repeatedly and still low on it. Shown on Progress.        |
-| Words        | The Dashboard page listing the Vocabulary.                                                 |
-| Page Theme   | Whether Dashboard pages follow the system or stay light or dark. `pageTheme` in code.      |
+| Term          | Meaning                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| Dashboard     | The extension page holding Home, Review, Words, Progress, and Settings.                         |
+| Card          | One Saved Word as shown for review. `Review Card` in full.                                      |
+| Encounter     | One time the user met a Saved Word: its cues, video, and moment.                                |
+| Review Queue  | The Cards that are due now.                                                                     |
+| Grade         | The user's answer on a Card: Forgot, Unsure, or Got it.                                         |
+| Level         | A Card's step in the schedule, which sets its next interval.                                    |
+| Retired       | Kept in the Vocabulary but no longer scheduled, by mastery or by choice.                        |
+| New-word hint | A dashed underline on one word per line worth learning at the user's level.                     |
+| Word Check    | The rows of common words where the user picks how many they know. Stored in `vocabularyLevels`. |
+| I know this   | The Lookup Panel's action that saves a word and Retires it at once. Its status is `known`.      |
+| Stage         | Where a word stands: New, Learning, or Known. Defined in [`DASHBOARD.md`](DASHBOARD.md).        |
+| Level Track   | The seven dots showing a word's Level.                                                          |
+| Hard Word     | A word on the schedule forgotten repeatedly and still low on it. Shown on Progress.             |
+| Words         | The Dashboard page listing the Vocabulary.                                                      |
+| Page Theme    | Whether Dashboard pages follow the system or stay light or dark. `pageTheme` in code.           |
 
 ## Naming rules
 
