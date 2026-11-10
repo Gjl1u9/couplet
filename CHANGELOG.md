@@ -13,6 +13,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 - Home's review streak shows your best streak under it, and the reviews card now leads with the words reviewed today, with the last 7 days under it.
 - Recently saved on Home lists eight words instead of four.
 
+### Fixed
+
+- The notice that a video has no subtitles closes on a click anywhere else, and no longer stays up after keyboard focus leaves it.
+
 ## [0.4.0] - 2026-11-10
 
 ### Added
