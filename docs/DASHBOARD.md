@@ -126,13 +126,13 @@ Saving has no demonstration of its own; the review step says it needs a Google s
 
 Other dashboards informed the features and the general airy feel. Layout, wording, and visuals are our own:
 
-| Common elsewhere                 | Ours                                          |
-| -------------------------------- | --------------------------------------------- |
-| Glossy white with soft gradients | Matte paper: warm tones, grain, and hairlines |
-| Rounded sans-serif headings      | Serif headings and 5px corners                |
-| Progress ring                    | Stages as one labelled bar                    |
-| Blue accent                      | Vermilion                                     |
-| Icon-only rail                   | Icons with their names                        |
+| Common elsewhere                 | Ours                                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Glossy white with soft gradients | Matte paper: warm tones, grain, and hairlines                                                        |
+| Rounded sans-serif headings      | Serif headings and 5px corners                                                                       |
+| Progress ring                    | Stages as one labelled bar on Progress; one small ring only for Home's Known share, beside its count |
+| Blue accent                      | Vermilion                                                                                            |
+| Icon-only rail                   | Icons with their names                                                                               |
 
 ## Decisions made
 

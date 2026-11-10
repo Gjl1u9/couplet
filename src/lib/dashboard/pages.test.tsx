@@ -176,7 +176,7 @@ describe('Dashboard pages', () => {
 
     it('labels its numbers and links recent words', async () => {
       await show(<HomePage words={[word('bank')]} log={[]} streakLog={[]} />);
-      expect(q('.known-ring')?.textContent).toBe('0%0 knownof 1 saved');
+      expect(q('.known-ring')?.textContent).toBe('0 knownof 1 saved0%');
       expect(q('.known-ring .ring-done')).toBeNull();
       expect(q('.stats')?.textContent).toContain('Reviews, last 7 days');
       expect(q('.row-link')?.getAttribute('href')).toBe(
@@ -206,7 +206,7 @@ describe('Dashboard pages', () => {
       const notes = [...document.querySelectorAll('.stat-note')].map(
         (note) => note.textContent,
       );
-      expect(notes).toEqual(['Best: 3 days', '1 today']);
+      expect(notes).toEqual(['Best: 3 days', 'of 1 saved', '1 today']);
     });
 
     it('shows eight recent words', async () => {
@@ -232,7 +232,7 @@ describe('Dashboard pages', () => {
           streakLog={[]}
         />,
       );
-      expect(q('.known-ring')?.textContent).toBe('25%1 knownof 4 saved');
+      expect(q('.known-ring')?.textContent).toBe('1 knownof 4 saved25%');
       expect(q('.known-ring [role="img"]')?.getAttribute('aria-label')).toBe(
         '25% of saved words known',
       );

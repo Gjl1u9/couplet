@@ -52,7 +52,7 @@ function Welcome() {
 const RING_RADIUS = 26;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 
-/** Known words as a share of those saved: a ring, with the count beside it. */
+/** Known words: the count and its note, like the other numbers, and the share as a ring at the right. */
 function KnownRing({
   known,
   saved,
@@ -63,6 +63,10 @@ function KnownRing({
   const share = saved > 0 ? known / saved : 0;
   return (
     <div className="known-ring">
+      <span>
+        <span className="stat-value">{known} known</span>
+        <span className="muted stat-note">of {saved} saved</span>
+      </span>
       <span
         className="ring"
         role="img"
@@ -83,10 +87,6 @@ function KnownRing({
         <span className="ring-share" aria-hidden="true">
           {Math.round(share * 100)}%
         </span>
-      </span>
-      <span>
-        <span className="stat-value">{known} known</span>
-        <span className="muted ring-of">of {saved} saved</span>
       </span>
     </div>
   );
@@ -163,7 +163,9 @@ export function HomePage({
         <div className="card span-2">
           <dt className="muted">Reviews, last 7 days</dt>
           <dd>
-            <span className="stat-value">{reviewsLastWeek(log, now)}</span>
+            <span className="stat-value">
+              {plural(reviewsLastWeek(log, now), 'review')}
+            </span>
             <span className="muted stat-note">
               {today > 0 ? `${String(today)} today` : 'None today yet'}
             </span>
