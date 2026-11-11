@@ -882,24 +882,79 @@
       }
 
       footer {
-        padding: 28px 0 36px;
+        border-top: 1px solid var(--line);
+        padding: 32px 0 36px;
         color: var(--ink-muted);
         font-size: 13px;
+        line-height: 20px;
       }
 
-      footer .wrap {
+      footer a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        color: var(--ink);
+        text-decoration: underline;
+      }
+
+      .footer-main {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        gap: 12px;
+        gap: 32px;
+      }
+
+      .footer-about {
+        max-width: 280px;
+      }
+
+      .footer-about p {
+        margin: 4px 0 0;
+      }
+
+      .footer-name {
+        color: var(--ink);
+        font-size: 15px;
+        font-weight: 600;
       }
 
       footer nav {
         display: flex;
-        gap: 18px;
+        flex-wrap: wrap;
+        gap: 32px 48px;
+      }
+
+      .footer-label {
+        margin: 0 0 8px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      footer ul {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .footer-base {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
       }
 
       @media (max-width: 860px) {
+        footer ul {
+          gap: 14px;
+        }
+
         .top nav {
           display: none;
         }
@@ -1427,12 +1482,57 @@
     </main>
 
     <footer>
-      <div class="wrap">
-        <span>Couplet</span>
+      <div class="wrap footer-main">
+        <div class="footer-about">
+          <span class="footer-name">Couplet</span>
+          <p>
+            Dual subtitles and word lookup for YouTube. Free and open source.
+          </p>
+        </div>
         <nav aria-label="Footer">
-          <a href="/privacy/">Privacy</a>
-          <a href="mailto:support@coupletapp.com">Contact</a>
+          <div>
+            <p class="footer-label">Product</p>
+            <ul>
+              <li>
+                <a
+                  href="https://chromewebstore.google.com/detail/pnjdidlglcbbnfhcnhmhndoakdphhckj"
+                  >Chrome Web Store</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Gjl1u9/couplet/blob/main/CHANGELOG.md"
+                  >Changelog</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-label">Community</p>
+            <ul>
+              <li><a href="https://github.com/Gjl1u9/couplet">GitHub</a></li>
+              <li><a href="https://discord.gg/H6DUtNSfUf">Discord</a></li>
+              <li>
+                <a href="https://github.com/Gjl1u9/couplet/issues"
+                  >Report a bug</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p class="footer-label">Support</p>
+            <ul>
+              <li><a href="mailto:support@coupletapp.com">Contact</a></li>
+              <li><a href="/privacy/">Privacy</a></li>
+            </ul>
+          </div>
         </nav>
+      </div>
+      <div class="wrap footer-base">
+        <span>© 2026 Couplet</span>
+        <a href="https://github.com/Gjl1u9/couplet/blob/main/LICENSE"
+          >MIT License</a
+        >
       </div>
     </footer>
 
