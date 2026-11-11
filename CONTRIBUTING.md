@@ -6,6 +6,7 @@ Thanks for helping with Couplet.
 
 - For a bug, open an issue with the video link, the subtitle languages, and what you saw.
 - For a feature or a larger change, open an issue first so we can agree on it before you write code.
+- For questions and ideas, join us on [Discord](https://discord.gg/H6DUtNSfUf).
 
 ## Making a change
 

@@ -4,6 +4,7 @@ A Chrome extension that shows dual-language subtitles on YouTube, with word look
 
 - Install: [Chrome Web Store](https://chromewebstore.google.com/detail/pnjdidlglcbbnfhcnhmhndoakdphhckj)
 - Website: [coupletapp.com](https://coupletapp.com)
+- Community: [Discord](https://discord.gg/H6DUtNSfUf)
 
 Current stage: free tier, with dual subtitles, the Lookup Panel, and the Settings Panel.
 
