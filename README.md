@@ -1,6 +1,9 @@
-# dual-subtitles
+# Couplet
 
 A Chrome extension that shows dual-language subtitles on YouTube, with word lookup.
+
+- Install: [Chrome Web Store](https://chromewebstore.google.com/detail/pnjdidlglcbbnfhcnhmhndoakdphhckj)
+- Website: [coupletapp.com](https://coupletapp.com)
 
 Current stage: free tier, with dual subtitles, the Lookup Panel, and the Settings Panel.
 
@@ -43,3 +46,11 @@ See [`docs/RELEASING.md`](docs/RELEASING.md). User-facing changes go in [`CHANGE
 3. Click the extension icon and choose 「匯出 JSON」.
 
 Record with a browser a person is operating. In browsers launched by automation tools such as Playwright, videos fail after about 50 seconds and captions are empty.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). Report security problems as [`SECURITY.md`](SECURITY.md) describes.
+
+## License
+
+The code is under the [MIT License](LICENSE). The word frequency lists in [`public/frequency`](public/frequency) are under CC BY-SA 4.0, as their [README](public/frequency/README.md) explains.

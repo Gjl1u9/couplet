@@ -7,6 +7,10 @@ GitHub release. See [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## [Unreleased]
 
+### Added
+
+- Couplet is open source under the MIT License, and the website footer links to its GitHub repository, changelog, and bug reports.
+
 ## [0.4.1] - 2026-11-11
 
 ### Changed
