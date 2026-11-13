@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Subtitle Strip 外框提案</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      /* Proposals for the Subtitle Strip's frame and its Strip Controls; the text stays as it is. */
+      body {
+        margin: 0;
+        padding: var(--space-6) var(--space-4) 64px;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      header,
+      .controls-bar,
+      .notes,
+      .stage,
+      .states {
+        max-width: 1100px;
+        margin-right: auto;
+        margin-left: auto;
+      }
+
+      h1 {
+        margin: 0 0 var(--space-2);
+        font-size: 20px;
+        line-height: 28px;
+        font-weight: 600;
+      }
+
+      header p,
+      .notes p {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .controls-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        margin-top: var(--space-5);
+      }
+
+      .segmented {
+        display: inline-flex;
+        padding: 3px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+      }
+
+      .segmented button {
+        min-height: 32px;
+        padding: 0 var(--space-3);
+        border: 0;
+        border-radius: 5px;
+        background: none;
+        color: var(--ink-muted);
+        font: 500 13px/16px var(--font-sans);
+        cursor: pointer;
+      }
+
+      .segmented button[aria-pressed='true'] {
+        background: var(--ink);
+        color: var(--ground);
+      }
+
+      .notes {
+        margin-top: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .notes strong {
+        display: block;
+        font-weight: 600;
+      }
+
+      .section-name {
+        margin: var(--space-6) auto var(--space-2);
+        max-width: 1100px;
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 500;
+      }
+
+      .states {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-4);
+      }
+
+      @media (max-width: 520px) {
+        .states {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .state h2 {
+        margin: 0 0 var(--space-2);
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 500;
+      }
+
+      /* ---------- Stand-in footage ---------- */
+
+      .player {
+        position: relative;
+        isolation: isolate;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border-radius: var(--radius-md);
+        container-type: inline-size;
+        background:
+          radial-gradient(45% 55% at 70% 30%, #8a6a4c 0%, transparent 70%),
+          radial-gradient(40% 50% at 18% 75%, #3a4a5a 0%, transparent 70%),
+          radial-gradient(30% 30% at 50% 90%, #d8cbb4 0%, transparent 70%),
+          linear-gradient(#2f2a25, #17191d);
+        --original-size: clamp(14px, 2.6cqw, 30px);
+        --translation-size: clamp(13px, 2.25cqw, 26px);
+      }
+
+      /* Small players: the type reads like a full-size player. */
+      .states .player {
+        --original-size: clamp(11px, 3.6cqw, 24px);
+        --translation-size: clamp(10px, 3.1cqw, 21px);
+      }
+
+      .box {
+        position: absolute;
+        left: var(--x, 50%);
+        bottom: var(--y, 7%);
+        display: flex;
+        justify-content: center;
+        width: max-content;
+        max-width: 80%;
+        transform: translateX(-50%);
+      }
+
+      /* ---------- Text (unchanged from today) ---------- */
+
+      .strip {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        max-width: 100%;
+        padding: 0.25em 0.55em;
+        background: var(--subtitle-scrim);
+        font-size: var(--translation-size);
+        line-height: 1.4;
+        text-align: center;
+        user-select: none;
+        transition:
+          border-radius 0.12s,
+          box-shadow 0.15s,
+          transform 0.15s;
+      }
+
+      .original {
+        color: var(--subtitle-original);
+        font-size: var(--original-size);
+        font-weight: 500;
+        line-height: 1.35;
+        text-wrap: balance;
+      }
+
+      .translation {
+        color: var(--subtitle-translation);
+        text-wrap: balance;
+      }
+
+      .context {
+        display: none;
+        color: var(--subtitle-context);
+        font-size: 0.88em;
+      }
+
+      .context-previous {
+        margin-bottom: 0.3em;
+      }
+
+      .context-next {
+        margin-top: 0.3em;
+      }
+
+      .has-context .context {
+        display: block;
+      }
+
+      .marked {
+        box-shadow: inset 0 -2px 0 var(--subtitle-mark);
+        background: rgba(255, 122, 89, 0.16);
+        border-radius: var(--radius-sm);
+      }
+
+      /* ---------- Strip Controls, shared ---------- */
+
+      .strip-controls {
+        display: contents;
+      }
+
+      .grip,
+      .context-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--subtitle-translation);
+        cursor: pointer;
+        opacity: 0;
+        transition:
+          opacity 0.12s,
+          background 0.12s,
+          color 0.12s;
+      }
+
+      .grip {
+        cursor: grab;
+        touch-action: none;
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .grip .icon {
+        stroke-width: 3;
+      }
+
+      .context-toggle .icon-on {
+        display: none;
+      }
+
+      .has-context .context-toggle .icon-on {
+        display: block;
+      }
+
+      .has-context .context-toggle .icon-off {
+        display: none;
+      }
+
+      .has-context .context-toggle {
+        color: var(--subtitle-original);
+      }
+
+      .strip:hover .grip,
+      .strip:hover .context-toggle,
+      .strip:focus-within .grip,
+      .strip:focus-within .context-toggle,
+      .is-hover .grip,
+      .is-hover .context-toggle,
+      .is-moving .grip,
+      .is-moving .context-toggle {
+        opacity: 1;
+      }
+
+      .is-moving .grip {
+        cursor: grabbing;
+      }
+
+      .grip:focus-visible,
+      .context-toggle:focus-visible {
+        outline: 2px solid var(--subtitle-mark);
+        outline-offset: -4px;
+      }
+
+      /* ---------- Today: two half-tabs outside the edges ---------- */
+
+      [data-variant='current'] .strip {
+        border-radius: var(--radius-md);
+      }
+
+      [data-variant='current'] .grip,
+      [data-variant='current'] .context-toggle {
+        position: absolute;
+        top: 50%;
+        width: 44px;
+        height: 44px;
+        transform: translateY(-50%);
+      }
+
+      [data-variant='current'] .grip {
+        right: 100%;
+        justify-content: flex-end;
+      }
+
+      [data-variant='current'] .context-toggle {
+        left: 100%;
+        justify-content: flex-start;
+      }
+
+      [data-variant='current'] .grip::before,
+      [data-variant='current'] .context-toggle::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        top: 50%;
+        width: 24px;
+        height: 32px;
+        background: var(--subtitle-scrim);
+        transform: translateY(-50%);
+      }
+
+      [data-variant='current'] .grip::before {
+        right: 0;
+        border-radius: var(--radius-md) 0 0 var(--radius-md);
+      }
+
+      [data-variant='current'] .context-toggle::before {
+        left: 0;
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      }
+
+      [data-variant='current'] .icon {
+        margin: 0 2px;
+      }
+
+      /* ---------- A · Wings: the strip grows full-height ears ---------- */
+
+      [data-variant='wings'] .strip {
+        border-radius: 10px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+      }
+
+      [data-variant='wings'] .grip,
+      [data-variant='wings'] .context-toggle {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 30px;
+        background: var(--subtitle-scrim);
+      }
+
+      [data-variant='wings'] .grip {
+        right: 100%;
+        border-radius: 10px 0 0 10px;
+        box-shadow:
+          inset 1px 0 0 rgba(255, 255, 255, 0.07),
+          inset 0 1px 0 rgba(255, 255, 255, 0.07),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+      }
+
+      [data-variant='wings'] .context-toggle {
+        left: 100%;
+        border-radius: 0 10px 10px 0;
+        box-shadow:
+          inset -1px 0 0 rgba(255, 255, 255, 0.07),
+          inset 0 1px 0 rgba(255, 255, 255, 0.07),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+      }
+
+      /* A hairline seam where each wing meets the text. */
+      [data-variant='wings'] .grip::after,
+      [data-variant='wings'] .context-toggle::after {
+        content: '';
+        position: absolute;
+        top: 22%;
+        bottom: 22%;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      [data-variant='wings'] .grip::after {
+        right: 0;
+      }
+
+      [data-variant='wings'] .context-toggle::after {
+        left: 0;
+      }
+
+      [data-variant='wings'] .strip:hover,
+      [data-variant='wings'] .strip:focus-within,
+      [data-variant='wings'] .is-hover,
+      [data-variant='wings'] .is-moving {
+        border-radius: 0;
+      }
+
+      [data-variant='wings'] .grip:hover,
+      [data-variant='wings'] .context-toggle:hover {
+        color: var(--subtitle-original);
+        background: rgba(30, 33, 40, 0.9);
+      }
+
+      [data-variant='wings'] .has-context .context-toggle {
+        background: rgba(40, 44, 52, 0.92);
+      }
+
+      [data-variant='wings'] .is-moving {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+          0 10px 28px rgba(0, 0, 0, 0.5);
+      }
+
+      [data-variant='wings'] .is-moving .grip,
+      [data-variant='wings'] .is-moving .context-toggle {
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ---------- B · Tab: both controls in one tab on the top edge ---------- */
+
+      [data-variant='tab'] .strip {
+        border-radius: var(--radius-md);
+      }
+
+      [data-variant='tab'] .strip-controls {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        display: flex;
+        padding: 2px 2px 0;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        background: var(--subtitle-scrim);
+        opacity: 0;
+        transition: opacity 0.12s;
+      }
+
+      [data-variant='tab'] .grip,
+      [data-variant='tab'] .context-toggle {
+        width: 32px;
+        height: 28px;
+        border-radius: 6px;
+        opacity: 1;
+      }
+
+      [data-variant='tab'] .icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      [data-variant='tab'] .grip .icon {
+        transform: rotate(90deg);
+      }
+
+      [data-variant='tab'] .grip:hover,
+      [data-variant='tab'] .context-toggle:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: var(--subtitle-original);
+      }
+
+      [data-variant='tab'] .has-context .context-toggle {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      [data-variant='tab'] .strip:hover .strip-controls,
+      [data-variant='tab'] .strip:focus-within .strip-controls,
+      [data-variant='tab'] .is-hover .strip-controls,
+      [data-variant='tab'] .is-moving .strip-controls {
+        opacity: 1;
+      }
+
+      /* The tab joins the frame: the corner under it goes square. */
+      [data-variant='tab'] .strip:hover,
+      [data-variant='tab'] .strip:focus-within,
+      [data-variant='tab'] .is-hover,
+      [data-variant='tab'] .is-moving {
+        border-top-left-radius: 0;
+      }
+
+      [data-variant='tab'] .is-moving {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      @media (hover: none) {
+        .grip,
+        .context-toggle,
+        [data-variant='tab'] .strip-controls {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .strip,
+        .grip,
+        .context-toggle,
+        .strip-controls {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body data-variant="current">
+    <header>
+      <h1>Subtitle Strip 外框提案</h1>
+      <p>
+        只改外框和兩側的 Strip Controls（Grip、Context
+        Toggle），字本身不動。上面的大畫面可以實際操作：滑鼠移上字幕、拖
+        Grip、按 Context Toggle；下面四格固定顯示各個狀態。
+      </p>
+    </header>
+
+    <div class="controls-bar">
+      <div class="segmented" role="group" aria-label="版本">
+        <button type="button" data-value="current" aria-pressed="true">
+          現行
+        </button>
+        <button type="button" data-value="wings" aria-pressed="false">
+          A · 雙翼
+        </button>
+        <button type="button" data-value="tab" aria-pressed="false">
+          B · 頂籤
+        </button>
+      </div>
+    </div>
+
+    <div class="notes" aria-live="polite">
+      <div data-note="current">
+        <strong>現行</strong>
+        <p>
+          兩顆按鈕是貼在左右兩側、比字幕矮的半截小片。會動、能用，但它們和外框高度不同，看起來像額外黏上去的；上下文打開後字幕變高，兩個小片還是一樣小。
+        </p>
+      </div>
+      <div data-note="wings" hidden>
+        <strong>A · 雙翼</strong>
+        <p>
+          指著字幕時，外框左右長出和字幕一樣高的兩翼，接縫是一條細線，整體變成一個完整的長條：左翼拖曳、右翼開關上下文。外框加一圈很淡的亮邊，讓它在暗畫面也有邊界。拖曳時整條浮起來。按鈕跟著字幕變高，上下文打開時更好按。
+        </p>
+      </div>
+      <div data-note="tab" hidden>
+        <strong>B · 頂籤</strong>
+        <p>
+          兩顆按鈕收進外框左上角的一個小籤，像資料夾的標籤，和外框接在一起。左右兩側完全空出來，字幕再寬也不會被兩側按鈕擠出畫面；按鈕集中在同一處，比較好找。拖曳時整條浮起來。代價是小籤在字幕上方，會多擋一點點畫面。
+        </p>
+      </div>
+    </div>
+
+    <p class="section-name">可操作</p>
+    <div class="stage">
+      <div class="player" id="live">
+        <div class="box">
+          <div class="strip">
+            <div class="strip-controls">
+              <button
+                class="grip"
+                type="button"
+                aria-label="Move subtitles"
+                title="Drag to move the subtitles. Double-click to reset."
+              >
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M9 6v.01M9 12v.01M9 18v.01M15 6v.01M15 12v.01M15 18v.01"
+                  />
+                </svg>
+              </button>
+              <button
+                class="context-toggle"
+                type="button"
+                aria-pressed="false"
+                aria-label="Show previous and next lines"
+              >
+                <svg
+                  class="icon icon-off"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M4 12h16M12 5v.01M12 19v.01" />
+                </svg>
+                <svg
+                  class="icon icon-on"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M8 6h8M4 12h16M8 18h8" />
+                </svg>
+              </button>
+            </div>
+            <div class="context context-previous" dir="auto">
+              So we started with a simple question.
+            </div>
+            <div class="original" dir="auto">
+              The equations describe how
+              <span class="marked">fluids</span> move.
+            </div>
+            <div class="translation" dir="auto">這些方程描述流體如何運動。</div>
+            <div class="context context-next" dir="auto">
+              But nobody can solve them in general.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-name">固定狀態</p>
+    <div class="states" id="states"></div>
+
+    <script>
+      const body = document.body;
+      const live = document.getElementById('live');
+      const template = live.querySelector('.box');
+
+      // The four fixed states are copies of the live strip with a state class.
+      const STATES = [
+        ['平常', ''],
+        ['指著', 'is-hover'],
+        ['拖曳中', 'is-moving'],
+        ['上下文打開', 'is-hover has-context'],
+      ];
+      const states = document.getElementById('states');
+      for (const [name, classes] of STATES) {
+        const section = document.createElement('section');
+        section.className = 'state';
+        const title = document.createElement('h2');
+        title.textContent = name;
+        const player = document.createElement('div');
+        player.className = 'player';
+        const box = template.cloneNode(true);
+        const strip = box.querySelector('.strip');
+        if (classes) strip.classList.add(...classes.split(' '));
+        if (classes.includes('is-moving')) {
+          box.style.setProperty('--x', '44%');
+          box.style.setProperty('--y', '24%');
+        }
+        for (const button of box.querySelectorAll('button'))
+          button.tabIndex = -1;
+        box.inert = true;
+        player.append(box);
+        section.append(title, player);
+        states.append(section);
+      }
+
+      for (const button of document.querySelectorAll('.segmented button')) {
+        button.addEventListener('click', () => {
+          body.dataset.variant = button.dataset.value;
+          for (const sibling of button.parentElement.children) {
+            sibling.setAttribute('aria-pressed', String(sibling === button));
+          }
+          for (const note of document.querySelectorAll('[data-note]')) {
+            note.hidden = note.dataset.note !== button.dataset.value;
+          }
+        });
+      }
+
+      // Live strip: the toggle and the grip work.
+      const liveBox = live.querySelector('.box');
+      const liveStrip = live.querySelector('.strip');
+      const toggle = live.querySelector('.context-toggle');
+      toggle.addEventListener('click', () => {
+        const on = liveStrip.classList.toggle('has-context');
+        toggle.setAttribute('aria-pressed', String(on));
+        toggle.setAttribute(
+          'aria-label',
+          on ? 'Hide previous and next lines' : 'Show previous and next lines',
+        );
+      });
+
+      const grip = live.querySelector('.grip');
+      let start = null;
+      grip.addEventListener('pointerdown', (event) => {
+        grip.setPointerCapture(event.pointerId);
+        const rect = live.getBoundingClientRect();
+        const style = getComputedStyle(liveBox);
+        start = {
+          x: event.clientX,
+          y: event.clientY,
+          left: parseFloat(style.getPropertyValue('--x')) || 50,
+          bottom: parseFloat(style.getPropertyValue('--y')) || 7,
+          width: rect.width,
+          height: rect.height,
+        };
+        liveStrip.classList.add('is-moving');
+      });
+      grip.addEventListener('pointermove', (event) => {
+        if (!start) return;
+        const x = start.left + ((event.clientX - start.x) / start.width) * 100;
+        const y =
+          start.bottom - ((event.clientY - start.y) / start.height) * 100;
+        liveBox.style.setProperty('--x', `${Math.min(80, Math.max(20, x))}%`);
+        liveBox.style.setProperty('--y', `${Math.min(70, Math.max(3, y))}%`);
+      });
+      const stop = () => {
+        start = null;
+        liveStrip.classList.remove('is-moving');
+      };
+      grip.addEventListener('pointerup', stop);
+      grip.addEventListener('pointercancel', stop);
+      grip.addEventListener('dblclick', () => {
+        liveBox.style.removeProperty('--x');
+        liveBox.style.removeProperty('--y');
+      });
+    </script>
+  </body>
+</html>

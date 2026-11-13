@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard: Soft</title>
+    <style>
+      /* Prototype only: the real Dashboard pages, as shipped and in a softer style. */
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #f1f0ed;
+        color: #2b2b2a;
+        font:
+          13px/20px -apple-system,
+          'Helvetica Neue',
+          sans-serif;
+      }
+
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .bar b {
+        font-weight: 600;
+      }
+
+      .bar .gap {
+        width: 12px;
+      }
+
+      .bar button {
+        padding: 4px 10px;
+        border: 1px solid #d6d3cc;
+        border-radius: 8px;
+        background: #fff;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .bar button[aria-pressed='true'] {
+        border-color: #2b2b2a;
+        font-weight: 600;
+      }
+
+      .pair {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+        gap: 16px;
+      }
+
+      figure {
+        margin: 0;
+      }
+
+      figcaption {
+        margin-bottom: 6px;
+        color: #77756f;
+        font-weight: 600;
+      }
+
+      .frame {
+        position: relative;
+        overflow: hidden;
+        height: 640px;
+        border: 1px solid #d6d3cc;
+        border-radius: 10px;
+      }
+
+      .frame iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1100px;
+        height: 1000px;
+        border: 0;
+        transform-origin: 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <b>Prototype</b>
+      <span>Page:</span>
+      <button type="button" data-scene="home" aria-pressed="true">Home</button>
+      <button type="button" data-scene="review" aria-pressed="false">
+        Review
+      </button>
+      <button type="button" data-scene="words-open" aria-pressed="false">
+        Words
+      </button>
+      <button type="button" data-scene="progress" aria-pressed="false">
+        Progress
+      </button>
+      <span class="gap"></span>
+      <span>Theme:</span>
+      <button type="button" data-theme-pick="light" aria-pressed="true">
+        Light
+      </button>
+      <button type="button" data-theme-pick="dark" aria-pressed="false">
+        Dark
+      </button>
+    </div>
+    <div class="pair">
+      <figure>
+        <figcaption>Now: Paper</figcaption>
+        <div class="frame"><iframe id="now" title="Now"></iframe></div>
+      </figure>
+      <figure>
+        <figcaption>Soft: quieter colours, a ring for Known words</figcaption>
+        <div class="frame"><iframe id="soft" title="Soft"></iframe></div>
+      </figure>
+    </div>
+
+    <script>
+      /* The soft style: the same layout and components, with the colour taken down.
+         Warm greys instead of khaki, a clay accent instead of vermilion, no grain,
+         rounder corners, and hairline cards with a faint lift. */
+      const SOFT_CSS = `
+        :root, [data-theme='light'] {
+          --ground: #efeee9;
+          --surface: #fdfdfb;
+          --ink: #2f2e2b;
+          --ink-muted: #7a7770;
+          --line: #e6e4de;
+          --line-strong: #cfccc4;
+          --chip: #f0efea;
+          --skeleton: #e6e4de;
+          --stage-new: #c2bdb2;
+          --stage-learning: #cfb17a;
+          --stage-known: #8aa58f;
+          --accent: #a8705c;
+          --on-accent: #ffffff;
+          --accent-soft: #f4ece8;
+          --shadow: 0 1px 2px rgba(40, 36, 30, 0.04), 0 4px 16px rgba(40, 36, 30, 0.04);
+          --pop-shadow: 0 6px 24px rgba(40, 36, 30, 0.10);
+        }
+        [data-theme='dark'] {
+          --ground: #1a1a19;
+          --surface: #232321;
+          --ink: #e9e7e2;
+          --ink-muted: #9b988f;
+          --line: #302f2c;
+          --line-strong: #4a4843;
+          --chip: #2c2b29;
+          --skeleton: #302f2c;
+          --stage-new: #6f6c65;
+          --stage-learning: #b99a62;
+          --stage-known: #86a68c;
+          --accent: #d39a84;
+          --on-accent: #1a1a19;
+          --accent-soft: #33281f;
+          --shadow: none;
+          --pop-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+        }
+        html, body { background-image: none !important; }
+        .card, .grade, .dict { border-color: var(--line) !important; border-radius: 16px !important; }
+        .button, .action, .search, .sentence, .rail-item, .pill { border-radius: 10px !important; }
+        .sentence { border-style: solid !important; border-color: var(--line) !important; }
+        .rail-item[aria-current='page'] { background: var(--surface) !important; box-shadow: var(--shadow); color: var(--ink) !important; }
+        .button.is-primary { border-color: var(--ink) !important; background: var(--ink) !important; color: var(--surface) !important; }
+        h1, .hero-count, .big-number, .stat-value, .review-word, .dict-word { font-weight: 500 !important; }
+        mark { color: var(--accent) !important; text-decoration-thickness: 1px !important; }
+        .review-card:focus { outline-color: var(--line-strong) !important; }
+
+        /* Known words: a ring with the count small inside it. */
+        .known-ring { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+        .known-ring svg { width: 64px; height: 64px; flex: none; transform: rotate(-90deg); }
+        .known-ring circle { fill: none; stroke-width: 6; }
+        .known-ring .track { stroke: var(--line); }
+        .known-ring .done { stroke: var(--stage-known); stroke-linecap: round; }
+        .known-ring .ring-wrap { position: relative; width: 64px; height: 64px; }
+        .known-ring .ring-number { position: absolute; inset: 0; display: grid; place-items: center;
+          font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink); }
+        .known-ring .ring-note { color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+        .known-ring .ring-note strong { display: block; color: var(--ink); font-size: 15px; font-weight: 600; }
+      `;
+
+      let scene = 'home';
+      let theme = 'light';
+
+      function load(frame, soft) {
+        return new Promise((resolve) => {
+          frame.onload = () => {
+            frame.contentWindow.ready.then(() => {
+              const doc = frame.contentDocument;
+              doc.documentElement.dataset.theme = theme;
+              if (soft) {
+                const style = doc.createElement('style');
+                style.textContent = SOFT_CSS;
+                doc.head.append(style);
+                ringKnown(doc);
+              }
+              resolve();
+            });
+          };
+          frame.src = `../brand/video/short-ui.html?scene=${scene}&v=${Date.now()}`;
+        });
+      }
+
+      /** Turns "12 of 40 saved" into a ring, with the count small in its middle. */
+      function ringKnown(doc) {
+        const label = [...doc.querySelectorAll('.stats dt')].find((dt) =>
+          dt.textContent.includes('Known words'),
+        );
+        const value = label?.nextElementSibling;
+        if (!value) return;
+        const [known, saved] = value.textContent.match(/\d+/g).map(Number);
+        const share = saved ? known / saved : 0;
+        const r = 26;
+        const length = 2 * Math.PI * r;
+        value.className = 'known-ring';
+        value.innerHTML = `
+          <span class="ring-wrap">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle class="track" cx="32" cy="32" r="${r}" />
+              <circle class="done" cx="32" cy="32" r="${r}"
+                stroke-dasharray="${length * share} ${length}" />
+            </svg>
+            <span class="ring-number">${Math.round(share * 100)}%</span>
+          </span>
+          <span class="ring-note"><strong>${known} known</strong>of ${saved} saved</span>`;
+        value.setAttribute(
+          'aria-label',
+          `${known} of ${saved} saved words known`,
+        );
+      }
+
+      function fit() {
+        document.querySelectorAll('.frame').forEach((box) => {
+          const iframe = box.querySelector('iframe');
+          const scale = box.clientWidth / 1100;
+          iframe.style.transform = `scale(${scale})`;
+          box.style.height = `${Math.round(1000 * scale)}px`;
+        });
+      }
+
+      function show() {
+        load(document.getElementById('now'), false);
+        load(document.getElementById('soft'), true);
+      }
+
+      document.querySelectorAll('[data-scene]').forEach((button) => {
+        button.addEventListener('click', () => {
+          scene = button.dataset.scene;
+          document
+            .querySelectorAll('[data-scene]')
+            .forEach((b) =>
+              b.setAttribute('aria-pressed', String(b === button)),
+            );
+          show();
+        });
+      });
+      document.querySelectorAll('[data-theme-pick]').forEach((button) => {
+        button.addEventListener('click', () => {
+          theme = button.dataset.themePick;
+          document
+            .querySelectorAll('[data-theme-pick]')
+            .forEach((b) =>
+              b.setAttribute('aria-pressed', String(b === button)),
+            );
+          for (const id of ['now', 'soft']) {
+            document.getElementById(
+              id,
+            ).contentDocument.documentElement.dataset.theme = theme;
+          }
+        });
+      });
+      addEventListener('resize', fit);
+      fit();
+      show();
+    </script>
+  </body>
+</html>
