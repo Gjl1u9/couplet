@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>字幕 Overlay 提案</title>
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      /* Two proposals for the Subtitle Strip, next to today's, over the same scenes. */
+      body {
+        margin: 0;
+        padding: var(--space-6) var(--space-4) 64px;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--font-sans);
+      }
+
+      header,
+      .controls,
+      .scenes,
+      .notes {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 var(--space-2);
+        font-size: 20px;
+        line-height: 28px;
+        font-weight: 600;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-4);
+        margin-top: var(--space-5);
+      }
+
+      .segmented {
+        display: inline-flex;
+        padding: 3px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+      }
+
+      .segmented button {
+        min-height: 32px;
+        padding: 0 var(--space-3);
+        border: 0;
+        border-radius: 5px;
+        background: none;
+        color: var(--ink-muted);
+        font: 500 13px/16px var(--font-sans);
+        cursor: pointer;
+      }
+
+      .segmented button[aria-pressed='true'] {
+        background: var(--ink);
+        color: var(--ground);
+      }
+
+      .controls .label {
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 500;
+      }
+
+      .notes {
+        margin-top: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        line-height: 21px;
+      }
+
+      .notes strong {
+        font-weight: 600;
+      }
+
+      .notes p {
+        margin: 0;
+        color: var(--ink-muted);
+      }
+
+      .scenes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-5);
+        margin-top: var(--space-5);
+      }
+
+      @media (max-width: 760px) {
+        .scenes {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .scene h2 {
+        margin: 0 0 var(--space-2);
+        color: var(--ink-muted);
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 500;
+      }
+
+      /* ---------- Stand-in footage ---------- */
+
+      .player {
+        position: relative;
+        isolation: isolate;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border-radius: var(--radius-md);
+        container-type: inline-size;
+        --subtitle-scale: 0.8;
+        /* Scaled up from the real clamp, so a half-width player reads like a full one. */
+        --original-size: calc(
+          clamp(14px, 4.2cqw, 34px) * var(--subtitle-scale)
+        );
+        --translation-size: calc(
+          clamp(13px, 3.7cqw, 30px) * var(--subtitle-scale)
+        );
+      }
+
+      body[data-size='small'] .player {
+        --subtitle-scale: 0.68;
+      }
+
+      body[data-size='large'] .player {
+        --subtitle-scale: 0.96;
+      }
+
+      .footage-room {
+        background:
+          radial-gradient(60% 70% at 70% 30%, #6b5440 0%, transparent 70%),
+          radial-gradient(40% 50% at 20% 70%, #2d3a48 0%, transparent 70%),
+          linear-gradient(#2a2622, #15171b);
+      }
+
+      .footage-snow {
+        background:
+          radial-gradient(50% 40% at 30% 20%, #ffffff 0%, transparent 70%),
+          linear-gradient(170deg, #cfe0ee 0%, #eef2f4 45%, #fbfbf8 70%, #e6e4dc);
+      }
+
+      .footage-street {
+        background:
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.08) 0 2px,
+            transparent 2px 46px
+          ),
+          radial-gradient(30% 30% at 75% 75%, #f2c46b 0%, transparent 70%),
+          radial-gradient(40% 40% at 25% 85%, #e9e3d6 0%, transparent 70%),
+          linear-gradient(#5d6b78, #8a8f88 60%, #b9b4a6);
+      }
+
+      .footage-kitchen {
+        background:
+          radial-gradient(45% 45% at 65% 40%, #f4e2c8 0%, transparent 70%),
+          radial-gradient(35% 40% at 25% 75%, #b87a4b 0%, transparent 70%),
+          linear-gradient(#a9a196, #6e655b);
+      }
+
+      .tag {
+        position: absolute;
+        top: 3cqw;
+        left: 3.5cqw;
+        padding: 2px 8px;
+        border-radius: var(--radius-sm);
+        background: rgba(0, 0, 0, 0.45);
+        color: #e9ecef;
+        font-size: 11px;
+        line-height: 16px;
+      }
+
+      .box {
+        position: absolute;
+        right: 7%;
+        bottom: 7%;
+        left: 7%;
+        display: flex;
+        justify-content: center;
+      }
+
+      /* ---------- Shared parts ---------- */
+
+      .original,
+      .translation {
+        max-width: 100%;
+        text-align: center;
+        text-wrap: balance;
+      }
+
+      .original {
+        font-size: var(--original-size);
+        line-height: 1.35;
+      }
+
+      .translation {
+        font-size: var(--translation-size);
+        line-height: 1.4;
+      }
+
+      .token {
+        --token-inset: 0.2em;
+        position: relative;
+        isolation: isolate;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        line-height: inherit;
+        cursor: pointer;
+      }
+
+      .token::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        inset: var(--token-inset) -0.04em;
+        border-radius: var(--radius-sm);
+      }
+
+      .token:hover::before {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .token.is-selected::before {
+        background: rgba(255, 122, 89, 0.16);
+        box-shadow: inset 0 -2px 0 var(--subtitle-mark);
+      }
+
+      .token.is-selected::after {
+        content: '';
+        position: absolute;
+        left: calc(50% - 1px);
+        bottom: calc(100% - var(--token-inset));
+        width: 2px;
+        height: calc(14px + var(--token-inset));
+        background: var(--subtitle-mark);
+      }
+
+      .token.is-saved {
+        text-decoration: underline dotted var(--subtitle-saved) 0.1em;
+        text-underline-offset: 0.2em;
+      }
+
+      .plain-note {
+        position: absolute;
+        top: 3cqw;
+        right: 3.5cqw;
+        padding: 2px 8px;
+        border-radius: var(--radius-sm);
+        background: rgba(0, 0, 0, 0.45);
+        color: #e9ecef;
+        font-size: 11px;
+        line-height: 16px;
+      }
+
+      /* ---------- Today: one box fitted to the longest line ---------- */
+
+      [data-variant='current'] .strip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        max-width: 100%;
+        padding: 0.25em 0.55em;
+        border-radius: var(--radius-md);
+        background: var(--subtitle-scrim);
+        font-size: var(--translation-size);
+      }
+
+      [data-variant='current'] .original {
+        color: var(--subtitle-original);
+        font-weight: 500;
+      }
+
+      [data-variant='current'] .translation {
+        color: var(--subtitle-translation);
+      }
+
+      /* ---------- A · Two tiers: each line on its own paper ---------- */
+
+      [data-variant='tiers'] .strip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        max-width: 100%;
+        font-size: var(--translation-size);
+      }
+
+      [data-variant='tiers'] .original,
+      [data-variant='tiers'] .translation {
+        width: fit-content;
+        box-decoration-break: clone;
+      }
+
+      [data-variant='tiers'] .original {
+        padding: 0.12em 0.5em;
+        border-radius: var(--radius-md);
+        background: rgba(12, 14, 18, 0.86);
+        color: var(--subtitle-original);
+        font-weight: 600;
+      }
+
+      [data-variant='tiers'] .translation {
+        padding: 0.1em 0.55em;
+        border-radius: var(--radius-sm) var(--radius-sm) var(--radius-md)
+          var(--radius-md);
+        background: rgba(12, 14, 18, 0.64);
+        backdrop-filter: blur(10px) saturate(1.1);
+        -webkit-backdrop-filter: blur(10px) saturate(1.1);
+        color: #e4e7eb;
+        font-weight: 400;
+      }
+
+      /* ---------- B · Open: no box, the text carries its own shadow ---------- */
+
+      [data-variant='open'] .box::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        right: -8%;
+        bottom: -8cqw;
+        left: -8%;
+        height: calc(100% + 18cqw);
+        background: linear-gradient(
+          transparent,
+          rgba(8, 9, 12, 0.4) 35%,
+          rgba(8, 9, 12, 0.72)
+        );
+        pointer-events: none;
+      }
+
+      [data-variant='open'] .strip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        font-size: var(--translation-size);
+        text-shadow:
+          0 0 2px rgba(0, 0, 0, 0.85),
+          0 1px 3px rgba(0, 0, 0, 0.7),
+          0 0 12px rgba(0, 0, 0, 0.45);
+      }
+
+      [data-variant='open'] .original {
+        color: #ffffff;
+        font-weight: 600;
+        letter-spacing: 0.005em;
+      }
+
+      /* A short rule between the two lines, like the gap in a hanging couplet. */
+      [data-variant='open'] .translation::before {
+        content: '';
+        display: block;
+        width: 1.6em;
+        height: 1px;
+        margin: 0.32em auto 0.28em;
+        background: rgba(255, 255, 255, 0.45);
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+      }
+
+      [data-variant='open'] .translation {
+        color: #dfe3e8;
+        font-weight: 400;
+      }
+
+      [data-variant='open'] .token.is-selected::before {
+        background: rgba(12, 14, 18, 0.55);
+      }
+    </style>
+  </head>
+  <body data-variant="current" data-size="medium">
+    <header>
+      <h1>字幕 Overlay 提案</h1>
+      <p>
+        同樣的四個畫面，切換現行與兩個提案。點任何英文或日文字可選中它；亮場和街景用來測可讀性。
+      </p>
+    </header>
+
+    <div class="controls">
+      <div class="segmented" role="group" aria-label="版本">
+        <button
+          type="button"
+          data-set="variant"
+          data-value="current"
+          aria-pressed="true"
+        >
+          現行
+        </button>
+        <button
+          type="button"
+          data-set="variant"
+          data-value="tiers"
+          aria-pressed="false"
+        >
+          A · 雙層
+        </button>
+        <button
+          type="button"
+          data-set="variant"
+          data-value="open"
+          aria-pressed="false"
+        >
+          B · 無框
+        </button>
+      </div>
+      <span class="label">字幕大小</span>
+      <div class="segmented" role="group" aria-label="字幕大小">
+        <button
+          type="button"
+          data-set="size"
+          data-value="small"
+          aria-pressed="false"
+        >
+          小
+        </button>
+        <button
+          type="button"
+          data-set="size"
+          data-value="medium"
+          aria-pressed="true"
+        >
+          中
+        </button>
+        <button
+          type="button"
+          data-set="size"
+          data-value="large"
+          aria-pressed="false"
+        >
+          大
+        </button>
+      </div>
+    </div>
+
+    <div class="notes" aria-live="polite">
+      <div data-note="current">
+        <strong>現行：</strong>
+        <p>
+          一個深色底框包住原文和譯文，寬度跟最長那行走。穩、在任何畫面都清楚，但兩行看起來是同一塊，譯文短時框會留一大片空白。
+        </p>
+      </div>
+      <div data-note="tiers" hidden>
+        <strong>A · 雙層：</strong>
+        <p>
+          原文和譯文各有自己的底，各自貼合文字寬度。原文是實心深底、字重
+          600；譯文是半透明毛玻璃，比較輕。上下兩層就是
+          Couplet「原文在上、譯文在下」的結構，遮擋面積也比現行小。
+        </p>
+      </div>
+      <div data-note="open" hidden>
+        <strong>B · 無框：</strong>
+        <p>
+          完全拿掉底框，只靠字的陰影和畫面底部一層淡淡的漸層撐住可讀性，中間用一條短細線把原文和譯文分開，像對聯中間的留白。最不擋畫面，但在很亮的畫面會比較吃力。
+        </p>
+      </div>
+    </div>
+
+    <main class="scenes">
+      <section class="scene">
+        <h2>暗場 · 已選中一個字</h2>
+        <div class="player footage-room">
+          <span class="tag">室內暗場</span>
+          <div class="box">
+            <div class="strip">
+              <div class="original" dir="auto">
+                <button class="token">The</button>
+                <button class="token">equations</button>
+                <button class="token">describe</button>
+                <button class="token">how</button>
+                <button class="token is-selected">fluids</button>
+                <button class="token">move</button>.
+              </div>
+              <div class="translation" dir="auto">
+                這些方程描述流體如何運動。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene">
+        <h2>亮場 · 長句換行 · 收藏過的字</h2>
+        <div class="player footage-snow">
+          <span class="tag">雪地亮場</span>
+          <div class="box">
+            <div class="strip">
+              <div class="original" dir="auto">
+                <button class="token">Even</button>
+                <button class="token">after</button>
+                <button class="token">two</button>
+                <button class="token is-saved">centuries</button>,
+                <button class="token">nobody</button>
+                <button class="token">has</button>
+                <button class="token">proved</button>
+                <button class="token">that</button>
+                <button class="token">smooth</button>
+                <button class="token">solutions</button>
+                <button class="token">always</button>
+                <button class="token">exist</button>.
+              </div>
+              <div class="translation" dir="auto">
+                即使過了兩個世紀，仍沒有人證明平滑解一定存在。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene">
+        <h2>雜訊中場 · 日文</h2>
+        <div class="player footage-street">
+          <span class="tag">街景</span>
+          <div class="box">
+            <div class="strip">
+              <div class="original" dir="auto" lang="ja">
+                <button class="token">昨日</button>は<button class="token">
+                  友達</button
+                >と<button class="token is-selected">一緒</button>に<button
+                  class="token"
+                >
+                  映画</button
+                >を<button class="token">見</button>に<button class="token">
+                  行きました</button
+                >。
+              </div>
+              <div class="translation" dir="auto">
+                昨天和朋友一起去看了電影。
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene">
+        <h2>只看翻譯（不能點字）· 短譯文</h2>
+        <div class="player footage-kitchen">
+          <span class="tag">廚房</span>
+          <span class="plain-note">Translation 模式</span>
+          <div class="box">
+            <div class="strip">
+              <div class="original" dir="auto" lang="ko">
+                오늘은 김치찌개를 만들어 볼게요.
+              </div>
+              <div class="translation" dir="auto">今天來做泡菜鍋。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const body = document.body;
+      for (const button of document.querySelectorAll('[data-set]')) {
+        button.addEventListener('click', () => {
+          const key = button.dataset.set;
+          body.dataset[key] = button.dataset.value;
+          for (const sibling of button.parentElement.children) {
+            sibling.setAttribute('aria-pressed', String(sibling === button));
+          }
+          if (key === 'variant') {
+            for (const note of document.querySelectorAll('[data-note]')) {
+              note.hidden = note.dataset.note !== button.dataset.value;
+            }
+          }
+        });
+      }
+      for (const token of document.querySelectorAll('.token')) {
+        token.addEventListener('click', () => {
+          const strip = token.closest('.strip');
+          const wasSelected = token.classList.contains('is-selected');
+          for (const other of strip.querySelectorAll('.token.is-selected')) {
+            other.classList.remove('is-selected');
+          }
+          if (!wasSelected) token.classList.add('is-selected');
+        });
+      }
+    </script>
+  </body>
+</html>

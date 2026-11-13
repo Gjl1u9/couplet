@@ -1,5 +1,5 @@
 // Renders a film in brand/video into a video, one exact frame at a time.
-// Run with: node scripts/build-video.mjs [--film teaser|short|short-free] [--stills out-dir]
+// Run with: node scripts/build-video.mjs [--film teaser|short|short-free|short-fast] [--stills out-dir]
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
@@ -39,6 +39,16 @@ const FILMS = {
     stills: [
       0.3, 1.5, 2.0, 2.6, 3.2, 3.8, 4.3, 5.0, 6.0, 8.0, 10.6, 11.6, 14.2, 15.5,
       16.3, 17.9, 19.4, 20.8, 22.4, 23.6, 25.5, 28.6, 30.5,
+    ],
+  },
+  // The third upright film: its own night look, a word and its AI explanation, then a fast review.
+  'short-fast': {
+    page: 'brand/video/short-fast.html',
+    output: 'brand/video/couplet-short-fast.mp4',
+    size: { width: 1080, height: 1920 },
+    stills: [
+      0.3, 1.2, 3.0, 4.4, 4.7, 5.3, 6.4, 8.0, 8.6, 9.6, 11.5, 12.8, 13.8, 15.0,
+      16.5, 17.8, 18.5, 19.5, 21.0, 22.5, 24.5,
     ],
   },
 };
