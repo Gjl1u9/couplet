@@ -14,3 +14,4 @@ test-results/
 stats.html
 web-ext.config.ts
 docs/research/
+*.mp3
